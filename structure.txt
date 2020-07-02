@@ -1,0 +1,167 @@
+Was ist alles zu implementieren? 
+
+ 
+
+Klasse Biofilm 
+
+Parameter: Zellmasse 
+
+Parameter: Teilungslänge 
+
+Parameter: Volumen 
+
+Parameter:  Alter(?) 
+
+Parameter: maxWachstumsrate (konst), alle Instanzen erben  
+
+Parameter: maxBiofilmdichte (konst) --> Wachstums Stop 
+
+Parameter: SubstratA_initial (evtl. Mehrere hinzufügen)  
+
+Parameter: SubstratA_state 
+
+Parameter: Diffusionsstop (Keine Flächenvergrößerung mehr)   
+
+Parameter: Anfangszahl an Zellen 
+
+Funktion: wachsen() höhe 
+
+Funktion: wachsen() breite 
+
+Funktion: abtrieb? 
+
+Funktion: teilen() # vielleicht ist es auch eine Option, das Wachstum global zu modellieren und über den Biofilm die Zellzahl zu bestimmen  
+
+Funktion: Entwicklung(Klasse Raster, Klasse Bakterien): 
+
+Teile N Baktieren zufällige orte zu 
+
+Lege Gitter 
+
+Gucke für jeden Gitterpunkt, was in den benachbarten Rastern abgeht 
+
+ 
+
+…. 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Klasse Bakterium 
+
+Parameter: Koordinaten 		-> x, y Koordinaten des Schwerpunkts 
+
+Zunächst 2D, stattdessen sphärische/ zylinder Koordinaten? Please dont 
+
+Parameter: aktuelle Geschwindigkeit 	-> Geschwindigkeit in x, y Richtung 
+
+Parameter: Ausdehnung  		-> Tupel aus Länge und Breite 
+
+Parameter: Orientierung		-> “Drehung” 
+
+Parameter: Wachstumsgeschwindigkeit 
+
+Funktion: __init__(self, Ausdehnung (Länge, Breite), Ort)): 
+
+Return self 
+
+Funktion: teilen(self): 
+
+Funktion: wachsen(self): 
+
+In die länge wachsen – checken, ob teilungslänge erreicht ist, falls ja: aufruf funktion teilen  
+
+Funktion: bewegen(self)  
+
+ gerichtete Bewegung (Paper, das David reichgeschickt hat) 
+
+Checken, dass bakterium nicht mit anderem bakterium kollidiert 
+
+Funktion: Brownsche Bewegung(self) 
+
+Zufällige Rotation / Translation 
+
+Vllt. Mit dem Git: https://github.com/bio-phys/pydiffusion 
+
+ 
+
+ 
+
+Erweiterungen für die Zukunft: 
+
+Parameter:  Alter(?)	 
+
+Parameter: lebendig (boolean) 
+
+								 
+
+ 
+
+Klasse Raster 
+
+Parameter: Koordinaten (x,y,z)  
+
+Parameter: Fläche_Raster x*y 
+
+Parameter Volumen_Rasterwürfel x*y*z 
+
+Parameter: Volumendichte (Volumen Bakterien/Rasterwürfel) 
+
+Parameter: Flächendichte (Fläche Bakterien/ Rasterfläche)  
+
+Parameter: 2/3-dim Array (Menge Indices Bakterien) 
+
+ 
+
+Funktion: spawn_inital_configuration(#Bakterien) 
+
+Funktion: spawn(Bakterium, Koordinaten):  
+
+Check enviroment 
+
+Platziere Bakterium an Koordinaten 
+
+ 
+
+Funktion: check_local_enviroment(Koordinaten): 
+
+Checke lokale Umgebung an Koordinaten, 
+
+Gebe Liste mit Bakterien zurück, die in der der Umgebung sind  
+
+Return Liste mit Distanz als Vektoren 
+
+ 
+
+ 
+
+ 
+
+Erweiterung für die Zukunft: 
+
+ 
+
+ 
+
+ 
+
+Grundlegende Idee:  
+
+in der stationären Phase kein Wachstum und keine Sterblichkeit annehmen  
+
+Synchrone Zellteilung aller Zellen  
+
+ 
+
+To do: Werte recherchieren!  

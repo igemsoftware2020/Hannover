@@ -1,1 +1,1 @@
-# biofilm_growth_modeling
+# Biofilm growth modeling

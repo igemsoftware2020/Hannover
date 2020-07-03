@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ad5c76ff-5fa2-4e17-bebd-29e99e8f8ac9" name="Default Changelist" comment="" />
+    <list default="true" id="ad5c76ff-5fa2-4e17-bebd-29e99e8f8ac9" name="Default Changelist" comment="First commit was messed up, second one should do it.&#10;&#10;I created a class Bacteria in bacteria.py , which is able to generate bacteria with parameters position, length, height, angle, growth_rate, velocity, and index. Also some functions are implemented which move the bacteria in direction of velocity and add some random movement and random rotation. The bacteria is able to split and evolve into two new bacteria with different parameters. The print_info function with prints the current parameters of a bacteria and the evolution function, which combines growth, movement and splitting.&#10;&#10;The test_run.py script loads the bacteria class and tests its function.">
+      <change afterPath="$PROJECT_DIR$/test_run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bacteria.py" beforeDir="false" afterPath="$PROJECT_DIR$/bacteria.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -28,6 +32,11 @@
         </map>
       </branch-storage>
     </favorite-branches>
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="David &lt;47631890+studdavid@users.noreply.github.com&gt;" />
+      </list>
+    </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
         <entry key="$PROJECT_DIR$" value="master" />
@@ -45,6 +54,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SONARLINT_PRECOMMIT_ANALYSIS" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/bacteria.py" />
     <property name="settings.editor.selected.configurable" value="preferences.externalResources" />
   </component>
@@ -84,6 +94,10 @@
     </task>
     <servers />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="First commit was messed up, second one should do it.&#10;&#10;I created a class Bacteria in bacteria.py , which is able to generate bacteria with parameters position, length, height, angle, growth_rate, velocity, and index. Also some functions are implemented which move the bacteria in direction of velocity and add some random movement and random rotation. The bacteria is able to split and evolve into two new bacteria with different parameters. The print_info function with prints the current parameters of a bacteria and the evolution function, which combines growth, movement and splitting.&#10;&#10;The test_run.py script loads the bacteria class and tests its function." />
+    <option name="LAST_COMMIT_MESSAGE" value="First commit was messed up, second one should do it.&#10;&#10;I created a class Bacteria in bacteria.py , which is able to generate bacteria with parameters position, length, height, angle, growth_rate, velocity, and index. Also some functions are implemented which move the bacteria in direction of velocity and add some random movement and random rotation. The bacteria is able to split and evolve into two new bacteria with different parameters. The print_info function with prints the current parameters of a bacteria and the evolution function, which combines growth, movement and splitting.&#10;&#10;The test_run.py script loads the bacteria class and tests its function." />
+  </component>
   <component name="WindowStateProjectService">
     <state x="414" y="175" width="1092" height="712" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1593707778179">
       <screen x="0" y="0" width="1920" height="1040" />
@@ -97,6 +111,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="640" y="256" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593706981082" />
+    <state x="582" y="2" width="1066" height="1038" key="CommitChangelistDialog2" timestamp="1593788213116">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="582" y="2" width="1066" height="1038" key="CommitChangelistDialog2/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593788213116" />
     <state x="740" y="261" key="FileChooserDialogImpl" timestamp="1593707767237">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -137,6 +155,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="461" y="165" key="SettingsEditor/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593708742845" />
+    <state x="-255" y="429" key="VCS.ChangelistChooser" timestamp="1593788228631">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="-255" y="429" key="VCS.ChangelistChooser/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593788228631" />
     <state x="767" y="430" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1593717577530">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

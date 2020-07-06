@@ -1,10 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="BRANCH:origin/bacteria" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </select>
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="ad5c76ff-5fa2-4e17-bebd-29e99e8f8ac9" name="Default Changelist" comment="First commit was messed up, second one should do it.&#10;&#10;I created a class Bacteria in bacteria.py , which is able to generate bacteria with parameters position, length, height, angle, growth_rate, velocity, and index. Also some functions are implemented which move the bacteria in direction of velocity and add some random movement and random rotation. The bacteria is able to split and evolve into two new bacteria with different parameters. The print_info function with prints the current parameters of a bacteria and the evolution function, which combines growth, movement and splitting.&#10;&#10;The test_run.py script loads the bacteria class and tests its function.">
-      <change afterPath="$PROJECT_DIR$/test_run.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/David.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/biofilm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bacteria.py" beforeDir="false" afterPath="$PROJECT_DIR$/bacteria.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_run.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_run.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,10 +70,11 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="ProjectId" id="1e8bLna9obyuPztr9sji9zcYxgr" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -54,11 +82,12 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="SONARLINT_PRECOMMIT_ANALYSIS" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/bacteria.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/biofilm.py" />
     <property name="settings.editor.selected.configurable" value="preferences.externalResources" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.test_run">
     <configuration name="bacteria" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="biofilm_growth_modeling" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -80,6 +109,53 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="biofilm" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="biofilm_growth_modeling" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\David\anaconda3\envs\scientific\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/biofilm.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test_run" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="biofilm_growth_modeling" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\David\anaconda3\envs\scientific\python.exe" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_run.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.bacteria" />
+      <item itemvalue="Python.test_run" />
+      <item itemvalue="Python.biofilm" />
+    </list>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -92,17 +168,49 @@
       <option name="presentableId" value="Default" />
       <updated>1593706113786</updated>
     </task>
+    <task id="LOCAL-00001" summary="First commit was messed up, second one should do it.&#10;&#10;I created a class Bacteria in bacteria.py , which is able to generate bacteria with parameters position, length, height, angle, growth_rate, velocity, and index. Also some functions are implemented which move the bacteria in direction of velocity and add some random movement and random rotation. The bacteria is able to split and evolve into two new bacteria with different parameters. The print_info function with prints the current parameters of a bacteria and the evolution function, which combines growth, movement and splitting.&#10;&#10;The test_run.py script loads the bacteria class and tests its function.">
+      <created>1593788316742</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1593788316742</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/bacteria" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First commit was messed up, second one should do it.&#10;&#10;I created a class Bacteria in bacteria.py , which is able to generate bacteria with parameters position, length, height, angle, growth_rate, velocity, and index. Also some functions are implemented which move the bacteria in direction of velocity and add some random movement and random rotation. The bacteria is able to split and evolve into two new bacteria with different parameters. The print_info function with prints the current parameters of a bacteria and the evolution function, which combines growth, movement and splitting.&#10;&#10;The test_run.py script loads the bacteria class and tests its function." />
     <option name="LAST_COMMIT_MESSAGE" value="First commit was messed up, second one should do it.&#10;&#10;I created a class Bacteria in bacteria.py , which is able to generate bacteria with parameters position, length, height, angle, growth_rate, velocity, and index. Also some functions are implemented which move the bacteria in direction of velocity and add some random movement and random rotation. The bacteria is able to split and evolve into two new bacteria with different parameters. The print_info function with prints the current parameters of a bacteria and the evolution function, which combines growth, movement and splitting.&#10;&#10;The test_run.py script loads the bacteria class and tests its function." />
   </component>
   <component name="WindowStateProjectService">
-    <state x="414" y="175" width="1092" height="712" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1593707778179">
+    <state x="414" y="175" width="1092" height="712" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1594057189535">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="414" y="175" width="1092" height="712" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593707778179" />
+    <state x="414" y="175" width="1092" height="712" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1594057189535" />
     <state x="714" y="389" key="#com.intellij.ide.actions.ChooseComponentsToExportDialog" timestamp="1593706917342">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -111,46 +219,46 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="640" y="256" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593706981082" />
-    <state x="582" y="2" width="1066" height="1038" key="CommitChangelistDialog2" timestamp="1593788213116">
+    <state x="582" y="2" width="1066" height="1038" key="CommitChangelistDialog2" timestamp="1593960954055">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="582" y="2" width="1066" height="1038" key="CommitChangelistDialog2/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593788213116" />
-    <state x="740" y="261" key="FileChooserDialogImpl" timestamp="1593707767237">
+    <state x="582" y="2" width="1066" height="1038" key="CommitChangelistDialog2/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593960954055" />
+    <state x="740" y="261" key="FileChooserDialogImpl" timestamp="1594057150825">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="740" y="261" key="FileChooserDialogImpl/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593707767237" />
-    <state width="1877" height="340" key="GridCell.Tab.0.bottom" timestamp="1593719120536">
+    <state x="740" y="261" key="FileChooserDialogImpl/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1594057150825" />
+    <state width="450" height="892" key="GridCell.Tab.0.bottom" timestamp="1594058712148">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="340" key="GridCell.Tab.0.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593719120536" />
-    <state width="1877" height="340" key="GridCell.Tab.0.center" timestamp="1593719120536">
+    <state width="450" height="892" key="GridCell.Tab.0.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1594058712148" />
+    <state width="450" height="892" key="GridCell.Tab.0.center" timestamp="1594058712148">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="340" key="GridCell.Tab.0.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593719120536" />
-    <state width="1877" height="340" key="GridCell.Tab.0.left" timestamp="1593719120536">
+    <state width="450" height="892" key="GridCell.Tab.0.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1594058712148" />
+    <state width="450" height="892" key="GridCell.Tab.0.left" timestamp="1594058712148">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="340" key="GridCell.Tab.0.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593719120536" />
-    <state width="1877" height="340" key="GridCell.Tab.0.right" timestamp="1593719120536">
+    <state width="450" height="892" key="GridCell.Tab.0.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1594058712148" />
+    <state width="450" height="892" key="GridCell.Tab.0.right" timestamp="1594058712148">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="340" key="GridCell.Tab.0.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593719120536" />
-    <state width="1877" height="340" key="GridCell.Tab.1.bottom" timestamp="1593719120536">
+    <state width="450" height="892" key="GridCell.Tab.0.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1594058712148" />
+    <state width="1877" height="340" key="GridCell.Tab.1.bottom" timestamp="1593970792841">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="340" key="GridCell.Tab.1.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593719120536" />
-    <state width="1877" height="340" key="GridCell.Tab.1.center" timestamp="1593719120536">
+    <state width="1877" height="340" key="GridCell.Tab.1.bottom/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593970792841" />
+    <state width="1877" height="340" key="GridCell.Tab.1.center" timestamp="1593970792841">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="340" key="GridCell.Tab.1.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593719120536" />
-    <state width="1877" height="340" key="GridCell.Tab.1.left" timestamp="1593719120536">
+    <state width="1877" height="340" key="GridCell.Tab.1.center/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593970792841" />
+    <state width="1877" height="340" key="GridCell.Tab.1.left" timestamp="1593970792841">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="340" key="GridCell.Tab.1.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593719120536" />
-    <state width="1877" height="340" key="GridCell.Tab.1.right" timestamp="1593719120536">
+    <state width="1877" height="340" key="GridCell.Tab.1.left/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593970792841" />
+    <state width="1877" height="340" key="GridCell.Tab.1.right" timestamp="1593970792841">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="340" key="GridCell.Tab.1.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593719120536" />
+    <state width="1877" height="340" key="GridCell.Tab.1.right/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593970792841" />
     <state x="461" y="165" key="SettingsEditor" timestamp="1593708742845">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -159,9 +267,13 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="-255" y="429" key="VCS.ChangelistChooser/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593788228631" />
-    <state x="767" y="430" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1593717577530">
+    <state x="767" y="430" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1593959688968">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="767" y="430" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593717577530" />
+    <state x="767" y="430" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593959688968" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1593962737155">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1593962737155" />
   </component>
 </project>

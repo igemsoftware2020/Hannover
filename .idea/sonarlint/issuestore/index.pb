@@ -1,3 +1,0 @@
-
-;
-bacteria.py,6\c\6ce61fad669536c9833cb44f9184e368c51299a1

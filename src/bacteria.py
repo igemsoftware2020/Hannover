@@ -1,24 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-This is a awesome
-        python script!
-"""
+
 # ********************************************************************************************
 # imports
 import random
 import math
 import numpy as np
-
-
-# ********************************************************************************************
-# general dependency functions
-def absolute(value):
-    if (value >= 0):
-        return value
-    else:
-        return -value
+from src.constants import MORTALITY_RATE, SPLITTING_RATE, GROWTH_FACTOR, gr_factor_inv, gr_pr_i, motion_activation, motion_deactivation
 
 
 # ********************************************************************************************
@@ -136,7 +125,7 @@ class Bacterium(object):
         :return:
         """
         # Active motion
-        if (self.moving == True) and (self.living == True):
+        if self.moving and self.living:
             self.velocity[0] = self.velocity[0] + 1.0 * math.sin(self.angle[0]) * dt
             self.velocity[1] = self.velocity[1] + 1.0 * math.cos(self.angle[0]) * dt
             self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.1 * dt
@@ -157,16 +146,16 @@ class Bacterium(object):
                 xborder = frameDim[1] * 0.5
                 if position[0] < -xborder + self.width:
                     self.velocity[0] = self.velocity[0] + (-position[0] - xborder + self.width) * 0.1
-                    self.totalForce_equivalent = self.totalForce_equivalent + absolute(
+                    self.totalForce_equivalent = self.totalForce_equivalent + np.absolute(
                         -position[0] - xborder + self.width) * 0.1
                 if position[0] > xborder - self.width:
                     self.velocity[0] = self.velocity[0] + (-position[0] + xborder - self.width) * 0.1
-                    self.totalForce_equivalent = self.totalForce_equivalent + absolute(
+                    self.totalForce_equivalent = self.totalForce_equivalent + np.absolute(
                         -position[0] + xborder - self.width) * 0.1
             yborder = frameDim[0] * 0.5
             if position[1] < -yborder + self.width:
                 self.velocity[1] = self.velocity[1] + (-position[1] - yborder + self.width) * 0.1
-                self.totalForce_equivalent = self.totalForce_equivalent + absolute(
+                self.totalForce_equivalent = self.totalForce_equivalent + np.absolute(
                     -position[1] - yborder + self.width) * 0.1
             #    if(position[1]>yborder-self.width):
             #        self.velocity[1] = self.velocity[1] + (-position[1]+yborder-self.width)*0.1    
@@ -222,7 +211,7 @@ class Bacterium(object):
         # Ignore all circles of this Bacteria to improve speed
         # Do the following operation with all other Bacteria
         far_away_factor = 8
-        if (dr ** 0.5 < (self.width) * 1.05 * 5 * far_away_factor):
+        if dr ** 0.5 < self.width * 1.05 * 5 * far_away_factor:
             positions = self.getPositions()
             for index in range(lenPos - 1):
                 position = positions[index]
@@ -290,9 +279,9 @@ class Bacterium(object):
                                                                1 / 2) / lenPos * 0.0125 * interactionfactor
                             self.velocity_angular[1] = self.velocity_angular[1] + t_radius * math.sin(
                                 self.angle[1]) * repulsion_z / lenPos * 0.05 * interactionfactor
-                            self.totalForce_equivalent = self.totalForce_equivalent + absolute(
+                            self.totalForce_equivalent = self.totalForce_equivalent + np.absolute(
                                 repulsion_x / lenPos * interactionfactor)
-                            self.totalForce_equivalent = self.totalForce_equivalent + absolute(
+                            self.totalForce_equivalent = self.totalForce_equivalent + np.absolute(
                                 repulsion_y / lenPos * interactionfactor)
 
                             # Actio-Reactio
@@ -302,9 +291,9 @@ class Bacterium(object):
                                     repulsion_y / lenPos ** (1 / 2) * interactionfactor)
                             _Bacterium.velocity[2] = _Bacterium.velocity[2] - (
                                     repulsion_z / lenPos ** (1 / 2) * interactionfactor)
-                            _Bacterium.totalForce_equivalent = _Bacterium.totalForce_equivalent + absolute(
+                            _Bacterium.totalForce_equivalent = _Bacterium.totalForce_equivalent + np.absolute(
                                 repulsion_y / lenPos * interactionfactor)
-                            _Bacterium.totalForce_equivalent = _Bacterium.totalForce_equivalent + absolute(
+                            _Bacterium.totalForce_equivalent = _Bacterium.totalForce_equivalent + np.absolute(
                                 repulsion_x / lenPos * interactionfactor)
 
         return _Bacterium, self

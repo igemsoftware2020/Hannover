@@ -13,6 +13,7 @@ from src.constants import Constants as c
 # main class <<<bacterium>>>
 # the structure corresponds now to previous versions
 
+
 class Bacterium(object):
 
     def __init__(self, position: np.ndarray = None,

@@ -16,6 +16,7 @@ import math
 
 # custom libraries
 from src.biofilm import Biofilm
+from src.constants import Constants as C
 
 
 # ********************************************************************************************
@@ -121,7 +122,7 @@ def coreFunction():
 
     # Seed
     biofilm = Biofilm()
-    biofilm.spawn(startNum)
+    biofilm.spawn()
     # coreLoop
     coreLoop(biofilm, out, txt)
 
@@ -142,8 +143,7 @@ def coreLoop(biofilm, out, txt):
         #   ----correction: since this is calculated and prestored in video file with fixed framerate,
         #                   a constant preset timedifference is optimal
         frameDimBacteria = (int(frameDim[0]), int(frameDim[1]))  # Test condition field_size=*0.25
-        biofilm.evolve(gr_factor, gr_pr_i, gr_factor_inv, gr_d_factor, mortility_rate, motion_activation,
-                       motion_deactivation, frameDimBacteria, combined_friction, splitting_rate, dt)
+        biofilm.evolve()
 
         # Draw the frame
         # Dark_simmulation
@@ -235,9 +235,29 @@ def coreLoop(biofilm, out, txt):
             txt.close()
 
 
+def blind_run():
+    print(f"********************* BIOFILM MODELING *********************\n"
+          "NUMBER OF INITIAL BACTERIA\t {number_bacteria}\n"
+          "NUMBER OF ITERATIONS\t {iterations}\n\n"
+          "==================================================\n"
+          "INITIAL DIMENSIONS (LENGTH, WIDTH)\t {BSUB_LENGTH},\t{BSUB_WIDTH}\n"
+          "MASS\t {BSUB_MASS}\n"
+          "DOUBLING TIME\t {BSUB_DOUBLING_TIME}\n"
+          "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n"
+          .format(number_bacteria=C.START_NUMBER_BACTERIA, iterations=C.NUMBER_ITERATIONS,
+                  type="B. subtilius", BSUB_LENGTH=C.BSUB_LENGTH,
+                  BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
+                  BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH, BSUB_DOUBLING_TIME=C.BSUB_DOUBLING_TIME))
+
+    biofilm = Biofilm()
+    biofilm.spawn()
+    biofilm.evolve()
+    print(biofilm)
+
+
 # ********************************************************************************************
 # main-method to start the program
 # ********************************************************************************************
 if __name__ == "__main__":
-    print("started")
-    coreFunction()
+    blind_run()
+    # coreFunction()

@@ -7,7 +7,7 @@
 import random
 import math
 import numpy as np
-from src.constants import Constants as c
+from src.constants import Constants as C
 
 # ********************************************************************************************
 # main class <<<bacterium>>>
@@ -17,8 +17,8 @@ from src.constants import Constants as c
 class Bacterium(object):
 
     def __init__(self, position: np.ndarray = None,
-                 width: float = c.BSUB_WIDTH,
-                 length: float = c.BSUB_LENGTH,
+                 width: float = C.BSUB_WIDTH,
+                 length: float = C.BSUB_LENGTH,
                  velocity: np.ndarray = None,
                  angle=None, total_force: float = 0,
                  living: bool = True, moving: bool = True):
@@ -37,7 +37,7 @@ class Bacterium(object):
         else:
             self.angle = angle
         if position is None:
-            self.position = [c.WINDOW_SIZE[0] / 2, c.WINDOW_SIZE / 2, 0]
+            self.position = [C.WINDOW_SIZE[0] / 2, C.WINDOW_SIZE / 2, 0]
         else:
             self.position = position
         if velocity is None:
@@ -58,12 +58,12 @@ class Bacterium(object):
         self.total_energy = self.translation_energy + self.rotational_energy
 
     def get_rotational_energy(self):
-        moment_of_inertia = c.BSUB_MASS / 6 * (3 * self.width ** 2 + self.length) + c.BSUB_MASS / 2 * self.width ** 2
+        moment_of_inertia = C.BSUB_MASS / 6 * (3 * self.width ** 2 + self.length) + C.BSUB_MASS / 2 * self.width ** 2
         self.rotational_energy = 1/2 * moment_of_inertia * np.dot(self.velocity_angular, self.velocity_angular)
         return self.rotational_energy
 
     def get_translation_energy(self) -> float:
-        return 1/2 * c.BSUB_MASS * np.dot(self.velocity, self.velocity)
+        return 1 / 2 * C.BSUB_MASS * np.dot(self.velocity, self.velocity)
 
     def grow(self):
         """
@@ -72,11 +72,11 @@ class Bacterium(object):
         # Make the bacteria grow
         # using a constant growth rate
         if self.living:
-            self.length = self.length * (1 + c.BSUB_GROWTH_FACTOR)
+            self.length = self.length * (1 + C.BSUB_GROWTH_FACTOR)
 
     def random_cell_death(self):
         # Programmed cell death
-        if random.random() > 1.0 - c.BSUB_MORTALITY_RATE:
+        if random.random() > 1.0 - C.BSUB_MORTALITY_RATE:
             self.living = False
 
     def split(self):
@@ -140,21 +140,21 @@ class Bacterium(object):
         # Active motion : ballistic movement
         if self.moving and self.living:
             # TODO: REVIEW EQUATIONS
-            self.velocity = self.velocity * (1 + self.total_force / c.BSUB_MASS * c.TIME_STEP)
-            self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.1 * c.TIME_STEP
-            self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * c.TIME_STEP
+            self.velocity = self.velocity * (1 + self.total_force / C.BSUB_MASS * C.TIME_STEP)
+            self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.1 * C.TIME_STEP
+            self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * C.TIME_STEP
         # Passive motion : random movement
         if not self.moving and self.living:
-            self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.01 * c.TIME_STEP
-            self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * c.TIME_STEP
+            self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.01 * C.TIME_STEP
+            self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * C.TIME_STEP
 
         # slight z-brownian random drift
         if not self.at_boundary():
-            self.velocity[2] = self.velocity[2] + (0.5 - random.random()) * 0.1 * c.TIME_STEP
+            self.velocity[2] = self.velocity[2] + (0.5 - random.random()) * 0.1 * C.TIME_STEP
             # And gravity
-            self.velocity[2] = self.velocity[2] - 0.981 * 0.5 * c.TIME_STEP
-            self.position = self.position + self.velocity * c.TIME_STEP
-            self.angle = self.angle + np.sqrt(np.dot(self.velocity_angular, self.velocity_angular)) * c.TIME_STEP
+            self.velocity[2] = self.velocity[2] - 0.981 * 0.5 * C.TIME_STEP
+            self.position = self.position + self.velocity * C.TIME_STEP
+            self.angle = self.angle + np.sqrt(np.dot(self.velocity_angular, self.velocity_angular)) * C.TIME_STEP
         elif self.at_boundary() == "X":
             self.velocity[0] = - self.velocity[0]
         elif self.at_boundary() == "Y":
@@ -162,17 +162,17 @@ class Bacterium(object):
 
     def at_boundary(self):
         x, y, z = self.position
-        if x + self.length >= c.WINDOW_SIZE[0] or x - self.length <= 0:
+        if x + self.length >= C.WINDOW_SIZE[0] or x - self.length <= 0:
             # elastic scattering at boundary
             return "X"
-        elif y + self.length >= c.WINDOW_SIZE[1] or y - self.length <= 0:
+        elif y + self.length >= C.WINDOW_SIZE[1] or y - self.length <= 0:
             return "Y"
         return False
 
     def is_split_ready(self):
-        def gaussian_distribution(x, mu=c.BSUB_CRITICAL_LENGTH, sigma=c.BSUB_CRITICAL_LENGTH * 0.12):
+        def gaussian_distribution(x, mu=C.BSUB_CRITICAL_LENGTH, sigma=C.BSUB_CRITICAL_LENGTH * 0.12):
             return 1 / np.sqrt(2 * np.pi * sigma ** 2) * np.exp(- (x - mu) ** 2 / (2 * sigma ** 2))
-        splitting_lengths = np.random.normal(c.BSUB_CRITICAL_LENGTH, c.BSUB_CRITICAL_LENGTH * 0.12)
+        splitting_lengths = np.random.normal(C.BSUB_CRITICAL_LENGTH, C.BSUB_CRITICAL_LENGTH * 0.12)
         if splitting_lengths <= self.length <= splitting_lengths:
             probability_to_split = gaussian_distribution(self.length)
             return np.random.choice([True, False], p=[probability_to_split, 1-probability_to_split])

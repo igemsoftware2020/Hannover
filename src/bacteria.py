@@ -7,8 +7,7 @@
 import random
 import math
 import numpy as np
-import src.constants as c
-
+from src.constants import Constants as c
 
 # ********************************************************************************************
 # main class <<<bacterium>>>
@@ -73,7 +72,6 @@ class Bacterium(object):
         # using a constant growth rate
         if self.living:
             self.length = self.length * (1 + c.BSUB_GROWTH_FACTOR)
-            self.width = self.width * (1 + c.BSUB_GROWTH_FACTOR / 2)
 
     def random_cell_death(self):
         # Programmed cell death

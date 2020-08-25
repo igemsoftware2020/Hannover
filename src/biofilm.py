@@ -35,9 +35,13 @@ class Biofilm(object):
         if bacterium1.total_energy + bacterium2.total_energy != total_energy_before:
             raise ValueError("Energy conversation broken while splitting.")
 
-    def evolve(self):
-        for bacterium in self.bacteria:
-            bacterium.grow()
+    def evolve(self, number_iterations: int = C.NUMBER_ITERATIONS * C.TIME_STEP):
+        print("\nSTARTING MODELLING ...")
+        for _ in tqdm.tqdm(range(0, number_iterations - 1)):
+            # Iterate over time steps
+            for bacterium in self.bacteria:
+                # Iterate over bacteria in self.bacteria
+                bacterium.grow()
 
                 if not bacterium.living and bacterium.getVolume() < 3300:
                     self.bacteria.remove(bacterium)
@@ -56,15 +60,93 @@ class Biofilm(object):
                     self.check_energy_conservation(bacterium, daughter, energy_before)
                     self.bacteria.append(daughter)
 
-            # Manage Bacterial Motion-Mode
-            # Enable/Disable motion mode
-            if bacterium.living:
-                if random.random() > 1.0 - c.MOTION_ACTIVATION_PROBABILITY:
-                    bacterium.moving = True
-                if random.random() > 1.0 - c.MOTION_DEACTIVATION_PROBABILITY:
+                # Manage Bacterial Motion-Mode
+                # Enable/Disable motion mode
+                if bacterium.living:
+                    if random.random() > 1.0 - C.MOTION_ACTIVATION_PROBABILITY:
+                        bacterium.moving = True
+                    if random.random() > 1.0 - C.MOTION_DEACTIVATION_PROBABILITY:
+                        bacterium.moving = False
+                else:
                     bacterium.moving = False
-            else:
-                bacterium.moving = False
+            self.write_to_log()
+
+    @staticmethod
+    def write_log_template(info_file_path):
+        constants = C()
+        with open(info_file_path, 'w+') as json_file:
+            data = {'BACTERIA': {}, 'CONSTANTS': {}}
+            members = [attr for attr in dir(constants) if
+                       not callable(getattr(constants, attr)) and not attr.startswith("__")]
+            constants_dic = {}
+            for constant in members:
+                constants_dic.update({constant: str(getattr(constants, constant))})
+            data['CONSTANTS'].update(constants_dic)
+            json.dump(data, json_file, indent=4)
+
+    @staticmethod
+    def read_in_log(info_file_path) -> Dict:
+        with open(info_file_path, "r") as json_file:
+            data = json.load(json_file)
+        return data
+
+    @staticmethod
+    def save_dict_as_json(data: Dict, info_file_path: Path):
+        with open(str(info_file_path), 'w') as json_file:
+            json.dump(data, json_file)
+
+    def write_to_log(self):
+        info_file_path = C.OUTPUT_PATH / 'info.json'
+
+        def bacteria_dict(bacterium: Bacterium, number: int) -> Dict:
+            """ Help function, which returns the dict entry of a bacteria """
+            return {'bacteria_%s' % str(number):
+                        {'position': [bacterium.position.tolist()],
+                         'velocity': [bacterium.velocity.tolist()],
+                         'angle': [bacterium.angle],
+                         'total_force': [bacterium.total_force],
+                         'total_energy': [bacterium.total_energy],
+                         'living': [bacterium.living],
+                         'moving': [bacterium.moving],
+                         'length': [bacterium.length],
+                         'width': [bacterium.width]
+                         }
+                    }
+
+        if not info_file_path.is_file():
+            # create json template and save
+            self.write_log_template(info_file_path)
+
+        # read in current log
+        data = self.read_in_log(info_file_path)
+        # init empty dictionary. This will overwrite the old entry.
+        bacteria_dic = {}
+        if sum(map(len, data['BACTERIA'].keys())) == 0:
+            # if no entry in BACTERIA, create the first one.
+            for bacteria, counter in zip(self.bacteria, range(0, len(self.bacteria))):
+                bacteria_dic.update(bacteria_dict(bacteria, counter))
+
+        else:
+            # copy already existing one and add to entries
+            bacteria_dic = data['BACTERIA'].copy()
+            for bacteria_name, bacteria, counter in zip(data['BACTERIA'].keys(), self.bacteria, range(0, len(self.bacteria))):
+                # iterate over all entries in BACTERIA, append next iteration step to key values
+                if 'bacteria_%s' % str(counter) not in bacteria_name:
+                    # Add bacteria to BACTERIUM keys, because it's not in there
+                    bacteria_dic.update(bacteria_dict(bacteria, counter))
+                else:
+                    for entry in data['BACTERIA'][bacteria_name].keys():
+                        # If entry already exists : Append info from next iteration step to corresponding entry
+                        for attr in dir(bacteria):
+                            if not callable(getattr(bacteria, attr)) and not attr.startswith("__") and entry == attr:
+                                attribute = getattr(bacteria, entry)
+                                if isinstance(attribute, np.ndarray):
+                                    attribute = attribute.tolist()
+                                bacteria_dic[bacteria_name][entry].append(attribute)
+
+            # Maybe for checking integrity : len(data['BACTERIA']) - sum(map(len, data['BACTERIA'].keys()))
+        data['BACTERIA'] = bacteria_dic
+        self.save_dict_as_json(data, info_file_path)
 
     @staticmethod
     def interaction(bacterium1: Bacterium, bacterium2: Bacterium):

@@ -2,10 +2,15 @@
 # -*- coding: utf-8 -*-
 
 
+import json
+import random
+from typing import Dict
+from pathlib import Path
+
 # ********************************************************************************************
 # imports
 import numpy as np
-import random
+import tqdm
 
 # custom libraries
 from src.bacteria import Bacterium
@@ -34,22 +39,22 @@ class Biofilm(object):
         for bacterium in self.bacteria:
             bacterium.grow()
 
-            if not bacterium.living and bacterium.getVolume() < 3300:
-                self.bacteria.remove(bacterium)
-            # Manage repulsion
-            # (The most expensive task)
-            for _bacterium in self.bacteria:
-                [_bacterium, bacterium] = Biofilm.interaction(bacterium, _bacterium)
+                if not bacterium.living and bacterium.getVolume() < 3300:
+                    self.bacteria.remove(bacterium)
+                # Manage repulsion
+                # (The most expensive task)
+                for _bacterium in self.bacteria:
+                    [_bacterium, bacterium] = Biofilm.interaction(bacterium, _bacterium)
 
-            bacterium.move()
+                bacterium.move()
 
-            # Manage Bacterial splitting
-            # Add a little bit of random until -----it looks good and real-----
-            if bacterium.is_split_ready() and bacterium.living:
-                energy_before = bacterium.total_energy
-                daughter = bacterium.split()
-                self.check_energy_conservation(bacterium, daughter, energy_before)
-                self.bacteria.append(daughter)
+                # Manage Bacterial splitting
+                # Add a little bit of random until -----it looks good and real-----
+                if bacterium.is_split_ready() and bacterium.living:
+                    energy_before = bacterium.total_energy
+                    daughter = bacterium.split()
+                    self.check_energy_conservation(bacterium, daughter, energy_before)
+                    self.bacteria.append(daughter)
 
             # Manage Bacterial Motion-Mode
             # Enable/Disable motion mode

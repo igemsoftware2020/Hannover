@@ -138,8 +138,8 @@ class Bacterium(object):
         # Set velocities depending on bacteria state
         # Active motion : ballistic movement
         if self.moving and self.living:
-            self.velocity = self.velocity * np.asarray([math.sin(self.angle[0]), math.cos(self.angle[0]), 0],
-                                                       dtype=np.float64) * c.TIME_STEP
+            # TODO: REVIEW EQUATIONS
+            self.velocity = self.velocity * (1 + self.total_force / c.BSUB_MASS * c.TIME_STEP)
             self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.1 * c.TIME_STEP
             self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * c.TIME_STEP
         # Passive motion : random movement

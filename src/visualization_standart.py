@@ -124,13 +124,13 @@ def coreLoop(frame_data):  # biofilm, out, txt):
 
         # Sort bacteria by depth
         # Redundant later in OpenGL
-        bacteria = sorted(bacteria, key=lambda x: x.pos[2], reverse=True)
+        bacteria = sorted(bacteria, key=lambda x: x.position[2], reverse=True)
 
         bacterium_index = 0
         for Bacterium in bacteria:
             bacterium_index = bacterium_index + 1
             # Color coding of the overall-force-sum
-            positions = Bacterium.getPositions()
+            positions = Bacterium.get_position()
             for pos_index in range(len(positions)):
                 if (pos_index < len(positions)):
                     pos = positions[pos_index]
@@ -149,12 +149,12 @@ def coreLoop(frame_data):  # biofilm, out, txt):
                     rotated = False
 
                 if (Bacterium.living == True):
-                    b = norm(255 * (1.0 - 1.0 * 750.0 / (750.0 + Bacterium.totalForce_equivalent)))
+                    b = norm(255 * (1.0 - 1.0 * 750.0 / (750.0 + Bacterium.total_force)))
                     frame = cv2.circle(frame, (int(frameDim[1] * 0.5 + pos_0), int(frameDim[0] * 0.5 + pos_1)),
                                        int((Bacterium.width * 2)),
                                        (1.0, norm((0.4 + b * 0.4 + 0.1 * z_coding)), norm(0.2 + 0.2 * z_coding)), -1)
                 else:
-                    b = 1 * (1.0 - 1.0 * 250.0 / (250.0 + Bacterium.totalForce_equivalent))
+                    b = 1 * (1.0 - 1.0 * 250.0 / (250.0 + Bacterium.total_force))
                     frame = cv2.circle(frame, (int(frameDim[1] * 0.5 + pos_0), int(frameDim[0] * 0.5 + pos_1)),
                                        int((Bacterium.width * 2)), (0.3, (0.25 + b), (0.25 + b)), -1)
 

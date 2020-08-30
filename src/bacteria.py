@@ -161,7 +161,7 @@ class Bacterium:
             self.velocity[2] = self.velocity[2] - 0.981 * 0.5 * C.TIME_STEP
 
             self.position = self.position + self.velocity * C.TIME_STEP
-            self.angle = self.angle + self.velocity_angular * C.TIME_STEP
+            self.angle = list(np.asarray(self.angle) + np.asarray(self.velocity_angular) * C.TIME_STEP)
         # Passive motion : random movement
         if not self.moving and self.living:
             self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.01 * C.TIME_STEP

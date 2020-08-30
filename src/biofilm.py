@@ -6,6 +6,7 @@ import json
 import random
 from typing import Dict
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 # ********************************************************************************************
 # imports
@@ -176,3 +177,27 @@ class Biofilm(object):
         sorted_bacteria = self.bacteria
         # To return a new list, use the sorted() built-in function...
         return sorted(sorted_bacteria, key=lambda x: x.position[axis], reverse=_reverse)
+
+    @staticmethod
+    def plot_velocities(data):
+        def euclid_norm(vector: np.ndarray):
+            norm = np.sqrt(np.dot(vector, vector))
+            return norm
+
+        plot_data = []
+        for index in data['BACTERIA'].keys():
+            entry = []
+            for velocities in data['BACTERIA'][index]['velocity']:
+                entry.append(euclid_norm(velocities))
+            plot_data.append(entry)
+
+        # Plotting
+
+        fig, ax = plt.subplots()
+        for entry in plot_data:
+            ax.plot(entry)
+
+        # ax.set_yscale('log')
+        ax.invert_xaxis()
+
+        plt.show()

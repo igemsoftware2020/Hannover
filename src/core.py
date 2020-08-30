@@ -15,6 +15,8 @@ import os
 import math
 
 # custom libraries
+import tqdm
+
 from src.biofilm import Biofilm
 from src.constants import Constants as C
 
@@ -59,9 +61,9 @@ def video_init():
     # get path to python code to retrieve parent folder
     # save to output directory
     path = os.path.dirname(os.path.realpath(__file__))
-    #parentDir = "\\".join(path.split("\\")[:-1])
+    # parentDir = "\\".join(path.split("\\")[:-1])
     ROOT_PATH = os.getcwd()
-    #outputDir = parentDir + "\\output\\"
+    # outputDir = parentDir + "\\output\\"
     outputDir = os.path.join(ROOT_PATH, "output\\")
     print("outputDir" + outputDir)
     # Add filename
@@ -104,10 +106,10 @@ def storage_file_append_frame(txt, num_frame):
 
 def storage_file_append_bacterium(txt, bacterium, index):
     # txt.write("#index; totalForce_equivalent; living; moving; width; length;\n")
-    txt.write(str(index) + "; " + str(bacterium.totalForce_equivalent) + "; " + str(bacterium.living) + "; ")
+    txt.write(str(index) + "; " + str(bacterium.total_force) + "; " + str(bacterium.living) + "; ")
     txt.write(str(bacterium.moving) + "; " + str(bacterium.width) + "; " + str(bacterium.length) + "; ")
     # txt.write("#[pos[0]; pos[1]; pos[2]]; [velocity[0]; velocity[1]; velocity[2]];\n")
-    txt.write(str([bacterium.pos[0], bacterium.pos[1], bacterium.pos[2]]) + "; ")
+    txt.write(str([bacterium.position[0], bacterium.position[1], bacterium.position[2]]) + "; ")
     txt.write(str([bacterium.velocity[0], bacterium.velocity[1], bacterium.velocity[2]]) + "; ")
     # txt.write("#[angle[0]; angle[1]]; [velocity_angular[0]; velocity_angular[1]];\n")
     txt.write(str([bacterium.angle[0], bacterium.angle[1]]) + "; ")
@@ -152,12 +154,12 @@ def coreLoop(biofilm, out, txt):
 
         # Sort bacteria by depth
         # Has to be done right now for correct depth visualization
-        bacteria = biofilm.sortbydepth(2, False)
+        bacteria = biofilm.sort_by_depth(2, False)
         bacterium_index = 0
         for Bacterium in bacteria:
             bacterium_index = bacterium_index + 1
             # Color coding of the overall-force-sum
-            positions = Bacterium.getPositions()
+            positions = Bacterium.get_position()
             for pos_index in range(len(positions)):
                 if (pos_index < len(positions)):
                     pos = positions[pos_index]
@@ -176,14 +178,16 @@ def coreLoop(biofilm, out, txt):
                     rotated = False
 
                 if (Bacterium.living == True):
-                    b = norm(255 * (1.0 - 1.0 * 750.0 / (750.0 + Bacterium.totalForce_equivalent)))
-                    frame = cv2.circle(frame, (int(frameDim[1] * 0.5 + pos_0), int(frameDim[0] * 0.5 + pos_1)),
-                                       int((Bacterium.width * 2)),
-                                       (1.0, norm((0.4 + b * 0.4 + 0.1 * z_coding)), norm(0.2 + 0.2 * z_coding)), -1)
+                    # b = norm(255 * (1.0 - 1.0 * 750.0 / (750.0 + Bacterium.total_force)))
+                    b = 1E-5
+                    # frame = cv2.circle(frame, (int(frameDim[1] * 0.5 + pos_0), int(frameDim[0] * 0.5 + pos_1)),
+                    # int((Bacterium.width * 2)),
+                    # (1.0, norm((0.4 + b * 0.4 + 0.1 * z_coding)), norm(0.2 + 0.2 * z_coding)), -1)
                 else:
-                    b = 1 * (1.0 - 1.0 * 250.0 / (250.0 + Bacterium.totalForce_equivalent))
-                    frame = cv2.circle(frame, (int(frameDim[1] * 0.5 + pos_0), int(frameDim[0] * 0.5 + pos_1)),
-                                       int((Bacterium.width * 2)), (0.3, (0.25 + b), (0.25 + b)), -1)
+                    # b = 1 * (1.0 - 1.0 * 250.0 / (250.0 + Bacterium.total_force))
+                    b = 1E-5
+                    # frame = cv2.circle(frame, (int(frameDim[1] * 0.5 + pos_0), int(frameDim[0] * 0.5 + pos_1)),
+                    # int((Bacterium.width * 2)), (0.3, (0.25 + b), (0.25 + b)), -1)
 
                 contour_color = (0.5, 0.4, 0.2)
                 frame = cv2.ellipse(frame, (int(frameDim[1] * 0.5 + pos_0), int(frameDim[0] * 0.5 + pos_1)),
@@ -192,8 +196,8 @@ def coreLoop(biofilm, out, txt):
                 frame = cv2.ellipse(frame, (int(frameDim[1] * 0.5 + pos_0), int(frameDim[0] * 0.5 + pos_1)),
                                     (int((Bacterium.width * 2)), int((Bacterium.width * 2))),
                                     0, 180 - 20 - _angle, 180 + 20 - _angle, contour_color, 2)
-                if ((pos_index == len(positions) - 1)):
-                    if ((rotated == False)):
+                if pos_index == len(positions) - 1:
+                    if rotated == False:
                         frame = cv2.ellipse(frame, (int(frameDim[1] * 0.5 + pos_0), int(frameDim[0] * 0.5 + pos_1)),
                                             (int((Bacterium.width * 2)), int((Bacterium.width * 2))),
                                             0, 20 - _angle, -180 + 20 - _angle, contour_color, 2)
@@ -202,8 +206,8 @@ def coreLoop(biofilm, out, txt):
                                             (int((Bacterium.width * 2)), int((Bacterium.width * 2))),
                                             0, 180 - 20 - _angle, 20 - _angle, contour_color, 2)
 
-                if ((pos_index == 0)):
-                    if ((rotated == False)):
+                if pos_index == 0:
+                    if rotated == False:
                         frame = cv2.ellipse(frame, (int(frameDim[1] * 0.5 + pos_0), int(frameDim[0] * 0.5 + pos_1)),
                                             (int((Bacterium.width * 2)), int((Bacterium.width * 2))),
                                             0, 180 - 20 - _angle, 20 - _angle, contour_color, 2)
@@ -251,7 +255,11 @@ def blind_run():
 
     biofilm = Biofilm()
     biofilm.spawn()
-    biofilm.evolve()
+    print("\nSTARTING MODELLING ...")
+    for _ in tqdm.tqdm(range(0, C.NUMBER_ITERATIONS - 1)):
+        biofilm.evolve()
+        if _ % 2 == 0:
+            biofilm.write_to_log
     print(biofilm)
 
 

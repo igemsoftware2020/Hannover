@@ -35,45 +35,44 @@ class Biofilm(object):
         if bacterium1.total_energy + bacterium2.total_energy != total_energy_before:
             raise ValueError("Energy conversation broken while splitting.")
 
-    def evolve(self, number_iterations: int = C.NUMBER_ITERATIONS * C.TIME_STEP):
-        print("\nSTARTING MODELLING ...")
-        for _ in tqdm.tqdm(range(0, number_iterations - 1)):
-            # Iterate over time steps
-            for bacterium in self.bacteria:
-                # Iterate over bacteria in self.bacteria
-                bacterium.grow()
+    def evolve(self):
+        # Iterate over time steps
+        print("iterating over bacteria in biofilm ...")
+        for bacterium in tqdm.tqdm(self.bacteria):
+            # Iterate over bacteria in self.bacteria
+            bacterium.grow()
 
-                if not bacterium.living and bacterium.get_volume() < 3300:
-                    self.bacteria.remove(bacterium)
-                # Manage repulsion
-                # (The most expensive task)
-                for _bacterium in self.bacteria:
-                    if bacterium.position != _bacterium.position:
-                        [_bacterium, bacterium] = Biofilm.interaction(bacterium, _bacterium)
+            if not bacterium.living and bacterium.get_volume() < 3300:
+                self.bacteria.remove(bacterium)
+            # Manage repulsion
+            # (The most expensive task)
+            for _bacterium in self.bacteria:
+                if bacterium.position != _bacterium.position:
+                    [_bacterium, bacterium] = Biofilm.interaction(bacterium, _bacterium)
 
-                bacterium.move()
+            bacterium.move()
 
-                # Manage Bacterial splitting
-                # Add a little bit of random until -----it looks good and real-----
-                if bacterium.is_split_ready() and bacterium.living:
-                    energy_before = bacterium.total_energy
-                    daughter = bacterium.split()
-                    self.check_energy_conservation(bacterium, daughter, energy_before)
-                    self.bacteria.append(daughter)
+            # Manage Bacterial splitting
+            # Add a little bit of random until -----it looks good and real-----
+            if bacterium.is_split_ready() and bacterium.living:
+                energy_before = bacterium.total_energy
+                daughter = bacterium.split()
+                self.check_energy_conservation(bacterium, daughter, energy_before)
+                self.bacteria.append(daughter)
 
-                # Manage Bacterial Motion-Mode
-                # Enable/Disable motion mode
-                if bacterium.living:
-                    if random.random() > 1.0 - C.MOTION_ACTIVATION_PROBABILITY:
-                        bacterium.moving = True
-                    if random.random() > 1.0 - C.MOTION_DEACTIVATION_PROBABILITY:
-                        bacterium.moving = False
-                else:
+            # Manage Bacterial Motion-Mode
+            # Enable/Disable motion mode
+            if bacterium.living:
+                if random.random() > 1.0 - C.MOTION_ACTIVATION_PROBABILITY:
+                    bacterium.moving = True
+                if random.random() > 1.0 - C.MOTION_DEACTIVATION_PROBABILITY:
                     bacterium.moving = False
-            self.write_to_log()
+            else:
+                bacterium.moving = False
 
     @staticmethod
     def write_log_template(info_file_path):
+        print("writing log template.")
         constants = C()
         with open(info_file_path, 'w+') as json_file:
             data = {'BACTERIA': {}, 'CONSTANTS': {}}
@@ -97,6 +96,7 @@ class Biofilm(object):
             json.dump(data, json_file)
 
     def write_to_log(self):
+        print("writing current biofilm state to log.")
         info_file_path = C.OUTPUT_PATH / 'info.json'
 
         def bacteria_dict(bacterium: Bacterium, number: int) -> Dict:
@@ -130,7 +130,8 @@ class Biofilm(object):
         else:
             # copy already existing one and add to entries
             bacteria_dic = data['BACTERIA'].copy()
-            for bacteria_name, bacteria, counter in zip(data['BACTERIA'].keys(), self.bacteria, range(0, len(self.bacteria))):
+            for bacteria_name, bacteria, counter in zip(data['BACTERIA'].keys(), self.bacteria,
+                                                        range(0, len(self.bacteria))):
                 # iterate over all entries in BACTERIA, append next iteration step to key values
                 if 'bacteria_%s' % str(counter) not in bacteria_name:
                     # Add bacteria to BACTERIUM keys, because it's not in there

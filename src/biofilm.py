@@ -126,10 +126,10 @@ class Biofilm(object):
         else:
             # copy already existing one and add to entries
             bacteria_dic = data['BACTERIA'].copy()
-            for bacteria_name, bacteria, counter in zip(data['BACTERIA'].keys(), self.bacteria,
-                                                        range(0, len(self.bacteria))):
+            for bacteria, counter in zip(self.bacteria, range(0, len(self.bacteria))):
+                bacteria_name = 'bacteria_%s' % str(counter)
                 # iterate over all entries in BACTERIA, append next iteration step to key values
-                if 'bacteria_%s' % str(counter) not in bacteria_name:
+                if bacteria_name not in bacteria_dic.keys():
                     # Add bacteria to BACTERIUM keys, because it's not in there
                     bacteria_dic.update(bacteria_dict(bacteria, counter))
                 else:

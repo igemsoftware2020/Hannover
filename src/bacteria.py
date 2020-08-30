@@ -9,12 +9,12 @@ import math
 import numpy as np
 from src.constants import Constants as C
 
+
 # ********************************************************************************************
 # main class <<<bacterium>>>
-# the structure corresponds now to previous versions
 
 
-class Bacterium(object):
+class Bacterium:
 
     def __init__(self, position: np.ndarray = None,
                  width: float = C.BSUB_WIDTH,
@@ -59,11 +59,15 @@ class Bacterium(object):
 
     def get_rotational_energy(self):
         moment_of_inertia = C.BSUB_MASS / 6 * (3 * self.width ** 2 + self.length) + C.BSUB_MASS / 2 * self.width ** 2
-        self.rotational_energy = 1/2 * moment_of_inertia * np.dot(self.velocity_angular, self.velocity_angular)
+        self.rotational_energy = 1 / 2 * moment_of_inertia * np.dot(self.velocity_angular, self.velocity_angular)
         return self.rotational_energy
 
     def get_translation_energy(self) -> float:
         return 1 / 2 * C.BSUB_MASS * np.dot(self.velocity, self.velocity)
+
+    def get_volume(self):
+        """ gives out the cubic volume equivalent """
+        return self.width * self.width * self.length
 
     def grow(self):
         """
@@ -71,8 +75,20 @@ class Bacterium(object):
         """
         # Make the bacteria grow
         # using a constant growth rate
-        if self.living:
-            self.length = self.length * (1 + C.BSUB_GROWTH_FACTOR)
+
+        if self.living and not self.moving:
+            growth_suppressor = C.BSUB_GROWTH_FACTOR * C.gr_pr_i / (C.gr_pr_i + self.total_force * 0.5) \
+                                - C.gr_factor_inv
+            volume = self.get_volume()
+            growth_factor = (volume + volume ** (1 / 3) * 5.0 * growth_suppressor * growth_suppressor) / volume
+            # self.width  = self.width *growth_factor
+            self.length = self.length * growth_factor
+        else:
+            # self.width  = self.width *gr_d_factor
+            # size constant if cell is dead
+            self.length = self.length
+
+        self.random_cell_death()
 
     def random_cell_death(self):
         # Programmed cell death
@@ -103,7 +119,7 @@ class Bacterium(object):
         # Update parameters of daughter and mother bacterium
         daughter_bac_length = volume_ratio * self.length
         daughter_bac_angle = update_angle(self.angle)
-        daughter_bac_position = get_daughter_position(position=self.position, split_distance=self.length*0.2,
+        daughter_bac_position = get_daughter_position(position=self.position, split_distance=self.length * 0.2,
                                                       angle=daughter_bac_angle)
         daughter_bac = Bacterium(daughter_bac_position, self.width, daughter_bac_length,
                                  self.velocity, self.angle, 0, True, False)
@@ -127,10 +143,6 @@ class Bacterium(object):
                           self.position[2] + int(0.1 * dz_length)))
         return np.asarray(positions)
 
-    def get_volume(self):
-        """ gives out the cubic volume equivalent """
-        return self.width * self.width * self.length
-
     def move(self):
         """
         Move Bacteria for 1 time unit and add random movement and rotation
@@ -138,11 +150,18 @@ class Bacterium(object):
         """
         # Set velocities depending on bacteria state
         # Active motion : ballistic movement
-        if self.moving and self.living:
+        if self.moving and self.living and not self.at_boundary():
             # TODO: REVIEW EQUATIONS
-            self.velocity = self.velocity * (1 + self.total_force / C.BSUB_MASS * C.TIME_STEP)
+            self.velocity = self.velocity + math.sin(self.angle[0]) * C.TIME_STEP
             self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.1 * C.TIME_STEP
             self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * C.TIME_STEP
+            # slight z-brownian random drift
+            self.velocity[2] = self.velocity[2] + (0.5 - random.random()) * 0.1 * C.TIME_STEP
+            # And gravity
+            self.velocity[2] = self.velocity[2] - 0.981 * 0.5 * C.TIME_STEP
+
+            self.position = self.position + self.velocity * C.TIME_STEP
+            self.angle = self.angle + self.velocity_angular * C.TIME_STEP
         # Passive motion : random movement
         if not self.moving and self.living:
             self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.01 * C.TIME_STEP
@@ -172,9 +191,108 @@ class Bacterium(object):
     def is_split_ready(self):
         def gaussian_distribution(x, mu=C.BSUB_CRITICAL_LENGTH, sigma=C.BSUB_CRITICAL_LENGTH * 0.12):
             return 1 / np.sqrt(2 * np.pi * sigma ** 2) * np.exp(- (x - mu) ** 2 / (2 * sigma ** 2))
+
         splitting_lengths = np.random.normal(C.BSUB_CRITICAL_LENGTH, C.BSUB_CRITICAL_LENGTH * 0.12)
         if splitting_lengths <= self.length <= splitting_lengths:
             probability_to_split = gaussian_distribution(self.length)
-            return np.random.choice([True, False], p=[probability_to_split, 1-probability_to_split])
+            return np.random.choice([True, False], p=[probability_to_split, 1 - probability_to_split])
         else:
             return False
+
+    def interaction(self, _bacterium):
+        """ return interaction term with bacteria in local environment"""
+        lenPos = len(self.getPositions())
+
+        dx = _bacterium.pos[0] - self.position[0]
+        dy = _bacterium.pos[1] - self.position[1]
+        dz = _bacterium.pos[2] - self.position[2]
+        dr = dx * dx + dy * dy + dz * dz
+        interactionfactor = 0.5
+        # If the bacterium is "far away"
+        # Ignore all circles of this Bacteria to improve speed
+        # Do the following operation with all other Bacteria
+        far_away_factor = 8
+        if (dr ** 0.5 < (self.width) * 1.05 * 5 * far_away_factor):
+            positions = self.getPositions()
+            for index in range(lenPos - 1):
+                position = positions[index]
+
+                dx = _bacterium.pos[0] - position[0]  # self.pos[0]
+                dy = _bacterium.pos[1] - position[1]  # self.pos[1]
+                dz = _bacterium.pos[2] - position[2]  # self.pos[2]
+                dr = dx * dx + dy * dy + dz * dz
+                interactionfactor = 0.5
+                # If the bacterium is "far away"
+                # Ignore all circles of this one to improve speed
+                far_away_factor = 4
+                if (dr ** 0.5 < (self.width) * 1.05 * 5 * far_away_factor):
+
+                    # Each not only with the center of _Bacterium, instead also every sphere of this
+                    _positions = _bacterium.getPositions()
+                    _lenPos = len(_positions)
+                    for _index in range(_lenPos - 1):
+                        _position = _positions[_index]
+
+                        dx = _position[0] - position[0]  # self.pos[0]
+                        dy = _position[1] - position[1]  # self.pos[1]
+                        dz = _position[2] - position[2]  # self.pos[2]
+                        dr = dx * dx + dy * dy + dz * dz
+                        interactionfactor = 0.25
+                        # if True:
+
+                        if (dx != 0) or (dy != 0) or (dz != 0):
+
+                            repulsion_x = 0
+                            repulsion_y = 0
+                            repulsion_z = 0
+
+                            # if(dr**0.5<(Bacterium.getVolume())**(1/3)*1.25*1.65):
+                            #    repulsion_x = -dx*150    /dr**(1.5)
+                            #    repulsion_y = -dy*150    /dr**(1.5)
+                            if dr ** 0.5 < (self.width) * 1.05 * 5:
+                                repulsion_x = -dx * 40 / dr  # (1.5)
+                                repulsion_y = -dy * 40 / dr  # (1.5)
+                                repulsion_z = -dz * 40 / dr  # (1.5)
+
+                            # New repulsion-function design
+                            # if(dr**0.5<(Bacterium.getVolume())**(1/3)*1.25*1.7):
+                            #    repulsion_x = -dx*40    /dr**(0.5)*repulsion_function(Bacterium.getVolume(), dr)
+                            #    repulsion_y = -dy*40    /dr**(0.5)*repulsion_function(Bacterium.getVolume(), dr)
+
+                            #
+                            self.velocity[0] = self.velocity[0] + int(
+                                repulsion_x / lenPos ** (1 / 2) * interactionfactor)
+                            self.velocity[1] = self.velocity[1] + int(
+                                repulsion_y / lenPos ** (1 / 2) * interactionfactor)
+                            self.velocity[2] = self.velocity[2] + int(
+                                repulsion_z / lenPos ** (1 / 2) * interactionfactor)
+                            # add torque
+                            t_radius = (index - lenPos * 0.5)
+                            self.velocity_angular[0] = self.velocity_angular[0] + t_radius * math.cos(
+                                self.angle[0]) * math.cos(
+                                self.angle[1]) * repulsion_x / lenPos * 0.05 * interactionfactor
+                            self.velocity_angular[0] = self.velocity_angular[0] - t_radius * math.sin(
+                                self.angle[0]) * math.cos(
+                                self.angle[1]) * repulsion_y / lenPos * 0.05 * interactionfactor
+                            # Torque on second angle
+                            self.velocity_angular[1] = self.velocity_angular[1] + t_radius * math.cos(self.angle[1]) * (
+                                        repulsion_x ** 2 + repulsion_y ** 2) ** (
+                                                                   1 / 2) / lenPos * 0.0125 * interactionfactor
+                            self.velocity_angular[1] = self.velocity_angular[1] + t_radius * math.sin(
+                                self.angle[1]) * repulsion_z / lenPos * 0.05 * interactionfactor
+                            self.totalForce_equivalent = self.totalForce_equivalent + np.abs(
+                                repulsion_x / lenPos * interactionfactor)
+                            self.totalForce_equivalent = self.totalForce_equivalent + np.abs(
+                                repulsion_y / lenPos * interactionfactor)
+
+                            # Actio-Reactio
+                            _bacterium.velocity[0] = _bacterium.velocity[0] - (
+                                        repulsion_x / lenPos ** (1 / 2) * interactionfactor)
+                            _bacterium.velocity[1] = _bacterium.velocity[1] - (
+                                        repulsion_y / lenPos ** (1 / 2) * interactionfactor)
+                            _bacterium.velocity[2] = _bacterium.velocity[2] - (
+                                        repulsion_z / lenPos ** (1 / 2) * interactionfactor)
+                            _bacterium.totalForce_equivalent = _bacterium.totalForce_equivalent + np.abs(
+                                repulsion_y / lenPos * interactionfactor)
+                            _bacterium.totalForce_equivalent = _bacterium.totalForce_equivalent + np.abs(
+                                repulsion_x / lenPos * interactionfactor)

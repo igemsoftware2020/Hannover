@@ -43,12 +43,13 @@ class Biofilm(object):
                 # Iterate over bacteria in self.bacteria
                 bacterium.grow()
 
-                if not bacterium.living and bacterium.getVolume() < 3300:
+                if not bacterium.living and bacterium.get_volume() < 3300:
                     self.bacteria.remove(bacterium)
                 # Manage repulsion
                 # (The most expensive task)
                 for _bacterium in self.bacteria:
-                    [_bacterium, bacterium] = Biofilm.interaction(bacterium, _bacterium)
+                    if bacterium.position != _bacterium.position:
+                        [_bacterium, bacterium] = Biofilm.interaction(bacterium, _bacterium)
 
                 bacterium.move()
 

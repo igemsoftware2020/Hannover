@@ -201,3 +201,17 @@ class Biofilm(object):
         ax.invert_xaxis()
 
         plt.show()
+
+    @staticmethod
+    def plot_xy_trajectories(data):
+        fig, ax = plt.subplots()
+        x_data, y_data = [], []
+        for bacteria in data['BACTERIA'].keys():
+            x, y = data['BACTERIA'][bacteria]['position'][0], data['BACTERIA'][bacteria]['position'][1]
+            x_data.append(x)
+            y_data.append(y)
+
+        for i in range(0, len(x_data)):
+            ax.plot(x_data[i], y_data[i], '.')
+            
+        plt.show()

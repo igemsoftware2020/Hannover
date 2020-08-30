@@ -13,6 +13,7 @@ import numpy as np
 import random
 import os
 import math
+import matplotlib.pyplot as plt
 
 # custom libraries
 import tqdm
@@ -259,10 +260,16 @@ def blind_run():
     print("\nSTARTING MODELLING ...")
     for _ in tqdm.tqdm(range(0, C.NUMBER_ITERATIONS - 1)):
         biofilm.evolve()
-        print("#BACTERIA : ", len(biofilm.bacteria))
-        if _ % 2 == 0:
-            biofilm.write_to_log()
-    print(biofilm)
+        biofilm.write_to_log()
+
+    biofilm.write_to_log()
+    data = biofilm.read_in_log(C.OUTPUT_PATH / 'info.json')
+    print(f"Finished run with {len(biofilm.bacteria)} bacteria.")
+    print("Number entries in log: ", len(data['BACTERIA'].keys()))
+
+    biofilm.plot_velocities(data)
+    biofilm.plot_xy_trajectories(data)
+
 
 
 # ********************************************************************************************

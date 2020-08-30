@@ -255,11 +255,13 @@ def blind_run():
 
     biofilm = Biofilm()
     biofilm.spawn()
+    print(biofilm)
     print("\nSTARTING MODELLING ...")
     for _ in tqdm.tqdm(range(0, C.NUMBER_ITERATIONS - 1)):
         biofilm.evolve()
+        print("#BACTERIA : ", len(biofilm.bacteria))
         if _ % 2 == 0:
-            biofilm.write_to_log
+            biofilm.write_to_log()
     print(biofilm)
 
 

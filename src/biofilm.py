@@ -37,8 +37,7 @@ class Biofilm(object):
 
     def evolve(self):
         # Iterate over time steps
-        print("iterating over bacteria in biofilm ...")
-        for bacterium in tqdm.tqdm(self.bacteria):
+        for bacterium in self.bacteria:
             # Iterate over bacteria in self.bacteria
             bacterium.grow()
 
@@ -47,7 +46,7 @@ class Biofilm(object):
             # Manage repulsion
             # (The most expensive task)
             for _bacterium in self.bacteria:
-                if bacterium.position != _bacterium.position:
+                if not np.array_equal(bacterium.position, _bacterium.position):
                     [_bacterium, bacterium] = Biofilm.interaction(bacterium, _bacterium)
 
             bacterium.move()
@@ -57,7 +56,7 @@ class Biofilm(object):
             if bacterium.is_split_ready() and bacterium.living:
                 energy_before = bacterium.total_energy
                 daughter = bacterium.split()
-                self.check_energy_conservation(bacterium, daughter, energy_before)
+                # self.check_energy_conservation(bacterium, daughter, energy_before)
                 self.bacteria.append(daughter)
 
             # Manage Bacterial Motion-Mode
@@ -72,7 +71,6 @@ class Biofilm(object):
 
     @staticmethod
     def write_log_template(info_file_path):
-        print("writing log template.")
         constants = C()
         with open(info_file_path, 'w+') as json_file:
             data = {'BACTERIA': {}, 'CONSTANTS': {}}
@@ -96,22 +94,20 @@ class Biofilm(object):
             json.dump(data, json_file)
 
     def write_to_log(self):
-        print("writing current biofilm state to log.")
         info_file_path = C.OUTPUT_PATH / 'info.json'
 
         def bacteria_dict(bacterium: Bacterium, number: int) -> Dict:
             """ Help function, which returns the dict entry of a bacteria """
-            return {'bacteria_%s' % str(number):
-                        {'position': [bacterium.position.tolist()],
-                         'velocity': [bacterium.velocity.tolist()],
-                         'angle': [bacterium.angle],
-                         'total_force': [bacterium.total_force],
-                         'total_energy': [bacterium.total_energy],
-                         'living': [bacterium.living],
-                         'moving': [bacterium.moving],
-                         'length': [bacterium.length],
-                         'width': [bacterium.width]
-                         }
+            return {'bacteria_%s' % str(number): dict(
+                                                position=[bacterium.position.tolist()],
+                                                velocity=[bacterium.velocity.tolist()],
+                                                angle=[bacterium.angle],
+                                                total_force=[bacterium.total_force],
+                                                total_energy=[bacterium.total_energy],
+                                                living=[bacterium.living],
+                                                moving=[bacterium.moving],
+                                                length=[bacterium.length],
+                                                width=[bacterium.width])
                     }
 
         if not info_file_path.is_file():

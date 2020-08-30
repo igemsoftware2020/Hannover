@@ -76,19 +76,19 @@ class Bacterium:
         # Make the bacteria grow
         # using a constant growth rate
 
-        if self.living and not self.moving:
+        if self.living and self.moving:
             growth_suppressor = C.BSUB_GROWTH_FACTOR * C.gr_pr_i / (C.gr_pr_i + self.total_force * 0.5) \
                                 - C.gr_factor_inv
             volume = self.get_volume()
             growth_factor = (volume + volume ** (1 / 3) * 5.0 * growth_suppressor * growth_suppressor) / volume
             # self.width  = self.width *growth_factor
-            self.length = self.length * growth_factor
+            self.length = self.length * (1 + growth_factor)
         else:
             # self.width  = self.width *gr_d_factor
             # size decreasing if cell is dead
             self.length = self.length * (1 - 0.05)
 
-        self.random_cell_death()
+        # self.random_cell_death()
 
     def random_cell_death(self):
         # Programmed cell death
@@ -104,13 +104,13 @@ class Bacterium:
         # Advanced new position: random angular component,
         #                       radial component sum of two radii*0.8
         def update_angle(angle):
-            return angle + (0.5 - random.random()) * np.pi * 0.5
+            return np.array(angle) + (0.5 - random.random()) * np.pi * 0.5
 
         def get_daughter_position(position, split_distance, angle):
             offset = (split_distance * math.sin(angle[0]) * math.cos(angle[1]),
                       split_distance * math.cos(angle[0]) * math.cos(angle[1]),
                       split_distance * math.sin(angle[1]))
-            position = position + offset * volume_ratio
+            position = position + np.asarray(offset) * volume_ratio
             return position
 
         volume_ratio = 0.4 + 0.2 * random.random()
@@ -193,9 +193,10 @@ class Bacterium:
             return 1 / np.sqrt(2 * np.pi * sigma ** 2) * np.exp(- (x - mu) ** 2 / (2 * sigma ** 2))
 
         splitting_lengths = np.random.normal(C.BSUB_CRITICAL_LENGTH, C.BSUB_CRITICAL_LENGTH * 0.12)
-        if splitting_lengths <= self.length <= splitting_lengths:
-            probability_to_split = gaussian_distribution(self.length)
-            return np.random.choice([True, False], p=[probability_to_split, 1 - probability_to_split])
+        if splitting_lengths <= self.length:
+            # probability_to_split = gaussian_distribution(self.length)
+            # return np.random.choice([True, False], p=[probability_to_split, 1 - probability_to_split])
+            return True
         else:
             return False
 

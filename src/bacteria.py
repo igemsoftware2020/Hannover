@@ -149,7 +149,6 @@ class Bacterium:
         :return:
         """
         # Set velocities depending on bacteria state
-        # Active motion : ballistic movement
         if self.moving and self.living:
             self.velocity[0] = (np.linalg.norm(self.velocity) * math.cos(self.angle[0]) * math.cos(self.angle[1])) * (
                     1 + C.TIME_STEP)  # calculates x-vel before turning again

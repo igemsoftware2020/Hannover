@@ -33,7 +33,7 @@ class Bacterium:
         """
 
         if angle is None:
-            angle = [0, 0]
+            angle = [random.randint(0,360), random.randint(0,360)]
         else:
             self.angle = angle
         if position is None:
@@ -41,9 +41,9 @@ class Bacterium:
         else:
             self.position = position
         if velocity is None:
-            self.velocity = np.asarray([0, 0, 0], dtype=np.int64)
+            self.velocity = np.asarray([0, 0, 0], dtype=np.float)
         else:
-            self.velocity = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.int64)
+            self.velocity = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.float)
 
         self.width = width
         self.length = length
@@ -150,34 +150,30 @@ class Bacterium:
         """
         # Set velocities depending on bacteria state
         # Active motion : ballistic movement
-        if self.moving and self.living and not self.at_boundary():
-            # TODO: REVIEW EQUATIONS
-            self.velocity = self.velocity + math.sin(self.angle[0]) * C.TIME_STEP
+        if self.moving and self.living:
+            self.velocity[0] = (np.linalg.norm(self.velocity) * math.cos(self.angle[0]) * math.cos(self.angle[1])) * (
+                    1 + C.TIME_STEP)  # calculates x-vel before turning again
+            self.velocity[1] = (np.linalg.norm(self.velocity) * math.sin(self.angle[0]) * math.cos(self.angle[1])) * (
+                    1 + C.TIME_STEP)  # calculates x-vel before turning again
+
+            # Davids Code for turning goes here
             self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.1 * C.TIME_STEP
             self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * C.TIME_STEP
             # slight z-brownian random drift
             self.velocity[2] = self.velocity[2] + (0.5 - random.random()) * 0.1 * C.TIME_STEP
             # And gravity
-            self.velocity[2] = self.velocity[2] - 0.981 * 0.5 * C.TIME_STEP
+            self.velocity[2] = self.velocity[2] - 9.81 * 0.5 * C.TIME_STEP
 
-            self.position = self.position + self.velocity * C.TIME_STEP
-            self.angle = list(np.asarray(self.angle) + np.asarray(self.velocity_angular) * C.TIME_STEP)
-        # Passive motion : random movement
         if not self.moving and self.living:
             self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.01 * C.TIME_STEP
             self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * C.TIME_STEP
 
-        # slight z-brownian random drift
-        if not self.at_boundary():
-            self.velocity[2] = self.velocity[2] + (0.5 - random.random()) * 0.1 * C.TIME_STEP
-            # And gravity
-            self.velocity[2] = self.velocity[2] - 0.981 * 0.5 * C.TIME_STEP
-            self.position = self.position + self.velocity * C.TIME_STEP
-            self.angle = self.angle + np.sqrt(np.dot(self.velocity_angular, self.velocity_angular)) * C.TIME_STEP
-        elif self.at_boundary() == "X":
+        if self.at_boundary() == "X":
             self.velocity[0] = - self.velocity[0]
-        elif self.at_boundary() == "Y":
+        if self.at_boundary() == "Y":
             self.velocity[1] = - self.velocity[1]
+
+        self.position = self.position + self.velocity
 
     def at_boundary(self):
         x, y, z = self.position

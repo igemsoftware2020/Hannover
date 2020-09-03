@@ -172,7 +172,9 @@ class Bacterium:
         if self.at_boundary() == "Y":
             self.velocity[1] = - self.velocity[1]
 
+        #either add C.Timestep here or in the other functions not in both
         self.position = self.position + self.velocity
+        self.angle = self.angle + np.sqrt(np.dot(self.velocity_angular, self.velocity_angular))
 
     def at_boundary(self):
         x, y, z = self.position

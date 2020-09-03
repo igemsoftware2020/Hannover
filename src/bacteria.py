@@ -41,9 +41,9 @@ class Bacterium:
         else:
             self.position = position
         if velocity is None:
-            self.velocity = np.asarray([0, 0, 0], dtype=np.float)
+            self.velocity = np.asarray([0, 0, 0], dtype=np.int64)
         else:
-            self.velocity = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.float)
+            self.velocity = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.int64)
 
         self.width = width
         self.length = length

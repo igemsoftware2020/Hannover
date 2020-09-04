@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 # imports
 import numpy as np
 import tqdm
+import glob
+import pandas as pd
 
 # custom libraries
 from src.bacteria import Bacterium
@@ -90,12 +92,23 @@ class Biofilm(object):
         return data
 
     @staticmethod
+    def bacteria_as_pandas(info_file_path) -> pd.DataFrame:
+        data = Biofilm.read_in_log(info_file_path)
+        return pd.DataFrame(data['BACTERIA']).transpose()
+
+    @staticmethod
+    def constants_as_pandas(info_file_path):
+        data = Biofilm.read_in_log(info_file_path)
+        return pd.DataFrame(data['CONSTANTS']).transpose()
+
+    @staticmethod
     def save_dict_as_json(data: Dict, info_file_path: Path):
         with open(str(info_file_path), 'w') as json_file:
             json.dump(data, json_file)
 
-    def write_to_log(self):
-        info_file_path = C.OUTPUT_PATH / 'info.json'
+
+    def write_to_log(self, log_name):
+        info_file_path = C.OUTPUT_PATH / log_name
 
         def bacteria_dict(bacterium: Bacterium, number: int) -> Dict:
             """ Help function, which returns the dict entry of a bacteria """
@@ -179,28 +192,22 @@ class Biofilm(object):
         return sorted(sorted_bacteria, key=lambda x: x.position[axis], reverse=_reverse)
 
     @staticmethod
-    def plot_velocities(data):
-        def euclid_norm(vector: np.ndarray):
-            norm = np.sqrt(np.dot(vector, vector))
-            return norm
-
+    def plot_velocities(data: pd.DataFrame):
         plot_data = []
-        for index in data['BACTERIA'].keys():
-            entry = []
-            for velocities in data['BACTERIA'][index]['velocity']:
-                entry.append(euclid_norm(velocities))
-            plot_data.append(entry)
+        for index, bacteria in data.iterrows():
+            velocities = pd.DataFrame(bacteria).loc['velocity',:]
+            velocities = velocities.transform(lambda x: sorted(x, key=pd.isnull, reverse=True))
+            for vectors in velocities:
+                vectors = (pd.Series(vectors).apply(np.array)).apply(np.linalg.norm)
+                plot_data.append(vectors)
 
-        # Plotting
-
-        fig, ax = plt.subplots()
-        for entry in plot_data:
-            ax.plot(entry)
-
-        # ax.set_yscale('log')
-        ax.invert_xaxis()
-
+        for data in plot_data:
+            plt.plot(data)
+        # plt.plot(, label='mean')  # plot means for each iteration
+        plt.title(' VELOCITIES')
+        plt.legend()
         plt.show()
+
 
     @staticmethod
     def plot_xy_trajectories(data):

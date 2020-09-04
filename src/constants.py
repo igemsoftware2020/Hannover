@@ -31,7 +31,7 @@ class Constants:
     MOTION_DEACTIVATION_PROBABILITY = 0.01
 
     # constants regarding biofilm
-    START_NUMBER_BACTERIA = 3
+    START_NUMBER_BACTERIA = 9
 
     # constants regarding visualisation
     WINDOW_SIZE = (500, 750)

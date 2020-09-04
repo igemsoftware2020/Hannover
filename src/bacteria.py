@@ -33,7 +33,7 @@ class Bacterium:
         """
 
         if angle is None:
-            angle = [random.randint(0,360), random.randint(0,360)]
+            angle = [random.randint(0, 360), random.randint(0, 360)]
         else:
             self.angle = angle
         if position is None:
@@ -100,6 +100,7 @@ class Bacterium:
         split bacteria  create new daughter bacteria with new values and update the mother bacterium
         :return: daughter bacteria
         """
+
         # Calculate new position and angle
         # Advanced new position: random angular component,
         #                       radial component sum of two radii*0.8
@@ -143,41 +144,84 @@ class Bacterium:
                           self.position[2] + int(0.1 * dz_length)))
         return np.asarray(positions)
 
-    def move(self):
+    def move(self, frameDim=C.WINDOW_SIZE, dt=C.TIME_STEP, friction=0.1):
         """
         Move Bacteria for 1 time unit and add random movement and rotation
         :return:
         """
-        # Set velocities depending on bacteria state
-        if self.moving and self.living:
-            try:
-                self.velocity[0] = (np.linalg.norm(self.velocity) * math.cos(self.angle[0]) * math.cos(self.angle[1])) * (
-                    1 + C.TIME_STEP)  # calculates x-vel before turning again
+        # Active motion
+        if (self.moving == True) and (self.living == True):
+            self.velocity[0] = self.velocity[0] + 1.0 * math.sin(self.angle[0]) * dt
+            self.velocity[1] = self.velocity[1] + 1.0 * math.cos(self.angle[0]) * dt
+            self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.1 * dt
+            self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * dt
+        # Passive motion
+        if (self.moving == False) and (self.living == True):
+            self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.01 * dt
+            self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * dt
 
-                self.velocity[1] = (np.linalg.norm(self.velocity) * math.sin(self.angle[0]) * math.cos(self.angle[1]))* (
-                        1 + C.TIME_STEP)  # calculates x-vel before turning again
-            except OverflowError:
-                print("Overflow error",self.velocity[1])
-            # Davids Code for turning goes here
-            self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.1 * C.TIME_STEP
-            self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * C.TIME_STEP
-            # slight z-brownian random drift
-            self.velocity[2] = self.velocity[2] + (0.5 - random.random()) * 0.1 * C.TIME_STEP
-            # And gravity
-            self.velocity[2] = self.velocity[2] - 9.81 * 0.5 * C.TIME_STEP
+        # slight z-brownian random drift
+        self.velocity[2] = self.velocity[2] + (0.5 - random.random()) * 0.1 * dt
+        # And gravity
+        self.velocity[2] = self.velocity[2] - 0.981 * 0.5 * dt
 
-        if not self.moving and self.living:
-            self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.01 * C.TIME_STEP
-            self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * C.TIME_STEP
+        # Boundary collision
+        for position in self.get_position():
+            if (False):
+                xborder = frameDim[1] * 0.5
+                if (position[0] < -xborder + self.width):
+                    self.velocity[0] = self.velocity[0] + (-position[0] - xborder + self.width) * 0.1
+                    self.total_force = self.total_force + np.linalg.norm(
+                        -position[0] - xborder + self.width) * 0.1
+                if (position[0] > xborder - self.width):
+                    self.velocity[0] = self.velocity[0] + (-position[0] + xborder - self.width) * 0.1
+                    self.total_force = self.total_force + np.linalg.norm(
+                        -position[0] + xborder - self.width) * 0.1
+            yborder = frameDim[0] * 0.5
+            if (position[1] < -yborder + self.width):
+                self.velocity[1] = self.velocity[1] + (-position[1] - yborder + self.width) * 0.1
+                self.total_force = self.total_force + np.linalg.norm(
+                    -position[1] - yborder + self.width) * 0.1
+            #    if(position[1]>yborder-self.width):
+            #        self.velocity[1] = self.velocity[1] + (-position[1]+yborder-self.width)*0.1
+            #        self.totalForce_equivalent = self.totalForce_equivalent + absolute(-position[1]+yborder-self.width)*0.1
+            # Bottom-boundary (z<=0)
+            if (position[2] < -0 + self.width):
+                self.velocity[2] = self.velocity[2] + (-position[2] + self.width) * 0.1
+                # self.totalForce_equivalent = self.totalForce_equivalent + absolute(-position[2]+self.width)*0.1
 
-        if self.at_boundary() == "X":
-            self.velocity[0] = - self.velocity[0]
-        if self.at_boundary() == "Y":
-            self.velocity[1] = - self.velocity[1]
+                # Bounding-box torque
+                positions = self.get_position()
+                lenPos = len(positions)
+                for index in range(lenPos - 1):
+                    position = positions[index]
+                    t_radius = (index - lenPos * 0.5)
+                    # dx = _Bacterium.pos[0] - position[0]#self.pos[0]
+                    # dy = _Bacterium.pos[1] - position[1]#self.pos[1]
+                    dz = -position[2] + self.width  # self.pos[2]
+                    repulsion_z = -dz  #
+                    # dr = dx*dx+dy*dy+dz*dz
+                    interactionfactor = 0.005
+                    self.velocity_angular[1] = self.velocity_angular[1] - t_radius * math.cos(
+                        self.angle[1]) * repulsion_z / lenPos * 0.05 * interactionfactor * dt
 
-        #either add C.Timestep here or in the other functions not in both
-        self.position = self.position + self.velocity
-        self.angle = list(self.angle + np.sqrt(np.dot(self.velocity_angular, self.velocity_angular)))
+        self.position[0] = self.position[0] + self.velocity[0] * dt
+        self.position[1] = self.position[1] + self.velocity[1] * dt
+        self.position[2] = self.position[2] + self.velocity[2] * dt
+        self.angle[0] = self.angle[0] + self.velocity_angular[0] * dt
+        self.angle[1] = self.angle[1] + self.velocity_angular[1] * dt
+
+        self.velocity[0] = self.velocity[0] * friction
+        self.velocity[1] = self.velocity[1] * friction
+        self.velocity[2] = self.velocity[2] * friction
+        self.velocity_angular[0] = self.velocity_angular[0] * friction
+        self.velocity_angular[1] = self.velocity_angular[1] * friction
+
+        # self.velocity_angular[1] = self.velocity_angular[1]+0.1
+        # Total Force sum
+        # kind of proportional to biofilm pressure
+        # decays over time
+        self.total_force = self.total_energy * 0.9
 
     def at_boundary(self):
         x, y, z = self.position
@@ -275,8 +319,8 @@ class Bacterium:
                                 self.angle[1]) * repulsion_y / len_pos * 0.05 * interaction_factor
                             # Torque on second angle
                             self.velocity_angular[1] = self.velocity_angular[1] + t_radius * math.cos(self.angle[1]) * (
-                                        repulsion_x ** 2 + repulsion_y ** 2) ** (
-                                                                   1 / 2) / len_pos * 0.0125 * interaction_factor
+                                    repulsion_x ** 2 + repulsion_y ** 2) ** (
+                                                               1 / 2) / len_pos * 0.0125 * interaction_factor
                             self.velocity_angular[1] = self.velocity_angular[1] + t_radius * math.sin(
                                 self.angle[1]) * repulsion_z / len_pos * 0.05 * interaction_factor
                             self.total_force = self.total_force + np.abs(
@@ -286,11 +330,11 @@ class Bacterium:
 
                             # Actio-Reactio
                             _bacterium.velocity[0] = _bacterium.velocity[0] - (
-                                        repulsion_x / len_pos ** (1 / 2) * interaction_factor)
+                                    repulsion_x / len_pos ** (1 / 2) * interaction_factor)
                             _bacterium.velocity[1] = _bacterium.velocity[1] - (
-                                        repulsion_y / len_pos ** (1 / 2) * interaction_factor)
+                                    repulsion_y / len_pos ** (1 / 2) * interaction_factor)
                             _bacterium.velocity[2] = _bacterium.velocity[2] - (
-                                        repulsion_z / len_pos ** (1 / 2) * interaction_factor)
+                                    repulsion_z / len_pos ** (1 / 2) * interaction_factor)
                             _bacterium.total_force = _bacterium.total_force + np.abs(
                                 repulsion_y / len_pos * interaction_factor)
                             _bacterium.total_force = _bacterium.total_force + np.abs(

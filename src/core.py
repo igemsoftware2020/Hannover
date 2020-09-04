@@ -16,6 +16,7 @@ import math
 import matplotlib.pyplot as plt
 import glob
 import pandas as pd
+import threading
 from datetime import datetime
 
 # custom libraries
@@ -257,28 +258,31 @@ def blind_run():
                   BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
                   BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH, BSUB_DOUBLING_TIME=C.BSUB_DOUBLING_TIME))
 
-
-    dateTime = str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min_' +\
+    date_time = str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min_' +\
                str(datetime.now().day) + str(datetime.now().month) +\
                str(datetime.now().year)
 
-    info_file_name = C.OUTPUT_PATH / f'log_{dateTime}.json'
+    info_file_name = C.OUTPUT_PATH / f'log_{date_time}.json'
     biofilm = Biofilm()
     biofilm.spawn()
     print(biofilm)
     print("\nSTARTING MODELLING ...")
+    t1 = threading.Thread(target=biofilm.evolve, name='t1')
+    t2 = threading.Thread(target=biofilm.write_to_log(), name='t2')
+    t1.start()
+    t2.start()
     for _ in tqdm.tqdm(range(0, C.NUMBER_ITERATIONS - 1)):
         biofilm.evolve()
+        t1.join()
         biofilm.write_to_log(log_name=info_file_name)
+        t2.join()
 
+    t1.join()
     biofilm.write_to_log(log_name=info_file_name)
     print(f"Finished run with {len(biofilm.bacteria)} bacteria.")
 
-    #data = pd.read_json(info_file_name)
     data = biofilm.bacteria_as_pandas(info_file_name)
-    # print(data)
     biofilm.plot_velocities(data)
-    # biofilm.plot_xy_trajectories(data)
 
 
 

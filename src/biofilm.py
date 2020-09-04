@@ -14,7 +14,7 @@ import numpy as np
 import tqdm
 import glob
 import pandas as pd
-
+import threading
 # custom libraries
 from src.bacteria import Bacterium
 from src.constants import Constants as C
@@ -40,6 +40,12 @@ class Biofilm(object):
 
     def evolve(self):
         # Iterate over time steps
+        t3 = threading.Thread(target=Biofilm.interaction, name='t3')
+        t4 = threading.Thread(target=Bacterium.move, name='t4')
+        t5 = threading.Thread(target=Bacterium.split, name='t5')
+        t3.start()
+        t4.start()
+        t5.start()
         for bacterium in self.bacteria:
             # Iterate over bacteria in self.bacteria
             bacterium.grow()
@@ -51,8 +57,9 @@ class Biofilm(object):
             for _bacterium in self.bacteria:
                 if not np.array_equal(bacterium.position, _bacterium.position):
                     [_bacterium, bacterium] = Biofilm.interaction(bacterium, _bacterium)
-
+            t3.join()
             bacterium.move()
+            t4.join()
 
             # Manage Bacterial splitting
             # Add a little bit of random until -----it looks good and real-----
@@ -61,6 +68,7 @@ class Biofilm(object):
                 daughter = bacterium.split()
                 # self.check_energy_conservation(bacterium, daughter, energy_before)
                 self.bacteria.append(daughter)
+            t5.join()
 
             # Manage Bacterial Motion-Mode
             # Enable/Disable motion mode
@@ -161,7 +169,7 @@ class Biofilm(object):
         self.save_dict_as_json(data, info_file_path)
 
     @staticmethod
-    def interaction(bacterium1: Bacterium, bacterium2: Bacterium):
+    def interaction_jones(bacterium1: Bacterium, bacterium2: Bacterium):
         """ return interaction term with bacteria in local environment"""
 
         # TODO: update velocities accordingly
@@ -180,8 +188,111 @@ class Biofilm(object):
 
             bacterium1.position = new_position(acceleration, bacterium1.velocity, C.TIME_STEP, bacterium1.position)
             bacterium2.position = new_position(acceleration, bacterium2.velocity, C.TIME_STEP, bacterium2.position)
+            print("Bac2 interaction position ", bacterium2.position)
 
         return bacterium1, bacterium2
+
+
+    @staticmethod
+    def interaction(bacterium1, bacterium2):
+        """ return interaction term with bacteria in local environment"""
+        lenPos = len(bacterium1.get_position())
+
+        dx = bacterium2.position[0] - bacterium1.position[0]
+        dy = bacterium2.position[1] - bacterium1.position[1]
+        dz = bacterium2.position[2] - bacterium1.position[2]
+        dr = dx * dx + dy * dy + dz * dz
+        interactionfactor = 0.5
+        # If the bacterium is "far away"
+        # Ignore all circles of this Bacteria to improve speed
+        # Do the following operation with all other Bacteria
+        far_away_factor = 8
+        if (dr ** 0.5 < (bacterium1.width) * 1.05 * 5 * far_away_factor):
+            positions = bacterium1.get_position()
+            for index in range(lenPos - 1):
+                position = positions[index]
+
+                dx = bacterium2.position[0] - position[0]  # self.pos[0]
+                dy = bacterium2.position[1] - position[1]  # self.pos[1]
+                dz = bacterium2.position[2] - position[2]  # self.pos[2]
+                dr = dx * dx + dy * dy + dz * dz
+                interactionfactor = 0.5
+                # If the bacterium is "far away"
+                # Ignore all circles of this one to improve speed
+                far_away_factor = 4
+                if (dr ** 0.5 < (bacterium1.width) * 1.05 * 5 * far_away_factor):
+
+                    # Each not only with the center of _Bacterium, instead also every sphere of this
+                    _positions = bacterium2.get_position()
+                    _lenPos = len(_positions)
+                    for _index in range(_lenPos - 1):
+                        _position = _positions[_index]
+
+                        dx = _position[0] - position[0]  # self.pos[0]
+                        dy = _position[1] - position[1]  # self.pos[1]
+                        dz = _position[2] - position[2]  # self.pos[2]
+                        dr = dx * dx + dy * dy + dz * dz
+                        interactionfactor = 0.25
+                        # if True:
+
+                        if (dx != 0) or (dy != 0) or (dz != 0):
+
+                            repulsion_x = 0
+                            repulsion_y = 0
+                            repulsion_z = 0
+
+                            # if(dr**0.5<(Bacterium.getVolume())**(1/3)*1.25*1.65):
+                            #    repulsion_x = -dx*150    /dr**(1.5)
+                            #    repulsion_y = -dy*150    /dr**(1.5)
+                            if (dr ** 0.5 < (bacterium1.width) * 1.05 * 5):
+                                repulsion_x = -dx * 40 / dr  # (1.5)
+                                repulsion_y = -dy * 40 / dr  # (1.5)
+                                repulsion_z = -dz * 40 / dr  # (1.5)
+
+                            # New repulsion-function design
+                            # if(dr**0.5<(Bacterium.getVolume())**(1/3)*1.25*1.7):
+                            #    repulsion_x = -dx*40    /dr**(0.5)*repulsion_function(Bacterium.getVolume(), dr)
+                            #    repulsion_y = -dy*40    /dr**(0.5)*repulsion_function(Bacterium.getVolume(), dr)
+
+                            #
+                            bacterium1.velocity[0] = bacterium1.velocity[0] + int(
+                                repulsion_x / lenPos ** (1 / 2) * interactionfactor)
+                            bacterium1.velocity[1] = bacterium1.velocity[1] + int(
+                                repulsion_y / lenPos ** (1 / 2) * interactionfactor)
+                            bacterium1.velocity[2] = bacterium1.velocity[2] + int(
+                                repulsion_z / lenPos ** (1 / 2) * interactionfactor)
+                            # add torque
+                            t_radius = (index - lenPos * 0.5)
+                            bacterium1.velocity_angular[0] = bacterium1.velocity_angular[0] + t_radius * np.cos(
+                                bacterium1.angle[0]) * np.cos(
+                                bacterium1.angle[1]) * repulsion_x / lenPos * 0.05 * interactionfactor
+                            bacterium1.velocity_angular[0] = bacterium1.velocity_angular[0] - t_radius * np.sin(
+                                bacterium1.angle[0]) * np.cos(
+                                bacterium1.angle[1]) * repulsion_y / lenPos * 0.05 * interactionfactor
+                            # Torque on second angle
+                            bacterium1.velocity_angular[1] = bacterium1.velocity_angular[1] + t_radius * np.cos(bacterium1.angle[1]) * (
+                                        repulsion_x ** 2 + repulsion_y ** 2) ** (
+                                                                   1 / 2) / lenPos * 0.0125 * interactionfactor
+                            bacterium1.velocity_angular[1] = bacterium1.velocity_angular[1] + t_radius * np.sin(
+                                bacterium1.angle[1]) * repulsion_z / lenPos * 0.05 * interactionfactor
+                            bacterium1.total_force = bacterium1.total_force + np.linalg.norm(
+                                repulsion_x / lenPos * interactionfactor)
+                            bacterium1.total_force = bacterium1.total_force + np.linalg.norm(
+                                repulsion_y / lenPos * interactionfactor)
+
+                            # Actio-Reactio
+                            bacterium2.velocity[0] = bacterium2.velocity[0] - (
+                                        repulsion_x / lenPos ** (1 / 2) * interactionfactor)
+                            bacterium2.velocity[1] = bacterium2.velocity[1] - (
+                                        repulsion_y / lenPos ** (1 / 2) * interactionfactor)
+                            bacterium2.velocity[2] = bacterium2.velocity[2] - (
+                                        repulsion_z / lenPos ** (1 / 2) * interactionfactor)
+                            bacterium2.total_force = bacterium2.total_force + np.linalg.norm(
+                                repulsion_y / lenPos * interactionfactor)
+                            bacterium2.total_force = bacterium2.total_force + np.linalg.norm(
+                                repulsion_x / lenPos * interactionfactor)
+
+        return bacterium2, bacterium1
 
     def __repr__(self):
         return f'Biofilm currently consisting of {len(self.bacteria)} bacteria'
@@ -204,8 +315,8 @@ class Biofilm(object):
         for data in plot_data:
             plt.plot(data)
         # plt.plot(, label='mean')  # plot means for each iteration
-        plt.title(' VELOCITIES')
-        plt.legend()
+        plt.title(' VELOCITIES ')
+        plt.gca().invert_xaxis()
         plt.show()
 
 

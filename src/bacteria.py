@@ -150,11 +150,14 @@ class Bacterium:
         """
         # Set velocities depending on bacteria state
         if self.moving and self.living:
-            self.velocity[0] = (np.linalg.norm(self.velocity) * math.cos(self.angle[0]) * math.cos(self.angle[1])) * (
-                    1 + C.TIME_STEP)  # calculates x-vel before turning again
-            self.velocity[1] = (np.linalg.norm(self.velocity) * math.sin(self.angle[0]) * math.cos(self.angle[1])) * (
+            try:
+                self.velocity[0] = (np.linalg.norm(self.velocity) * math.cos(self.angle[0]) * math.cos(self.angle[1])) * (
                     1 + C.TIME_STEP)  # calculates x-vel before turning again
 
+                self.velocity[1] = (np.linalg.norm(self.velocity) * math.sin(self.angle[0]) * math.cos(self.angle[1]))* (
+                        1 + C.TIME_STEP)  # calculates x-vel before turning again
+            except OverflowError:
+                print("Overflow error",self.velocity[1])
             # Davids Code for turning goes here
             self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.1 * C.TIME_STEP
             self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * C.TIME_STEP
@@ -174,7 +177,7 @@ class Bacterium:
 
         #either add C.Timestep here or in the other functions not in both
         self.position = self.position + self.velocity
-        self.angle = self.angle + np.sqrt(np.dot(self.velocity_angular, self.velocity_angular))
+        self.angle = list(self.angle + np.sqrt(np.dot(self.velocity_angular, self.velocity_angular)))
 
     def at_boundary(self):
         x, y, z = self.position

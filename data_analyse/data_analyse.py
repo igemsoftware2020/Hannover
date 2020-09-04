@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 '''Get the data from a file'''
-data=pd.read_json('C:/Users/jonas/Python Projekte/data/10start 75steps.json')#reades the data 
+data = pd.read_json('C:/Users/jonas/Python Projekte/data/10start 75steps.json')#reades the data
 print(data['BACTERIA'])
 #print(len(data.index))
 

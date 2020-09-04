@@ -40,3 +40,12 @@ plt.show()
 print(clean_data['length'].unstack(level=0).transform(lambda x: sorted(x,key=pd.isnull,reverse=True)))#dataframe of length
 print(clean_data['length'].unstack(level=0).transform(lambda x: sorted(x,key=pd.isnull,reverse=True)).mean(axis=1))#means for each row 
 
+'''Bacteria growth'''
+living=clean_data['living'].unstack(level=0).transform(lambda x: sorted(x,key=pd.isnull,reverse=True))
+grow=[]#number of bacteria in iteration steps
+for i in range(len(living.index)):
+    a=living.iloc[i,:].count()#count True values in i'th row 
+    print(a)
+    grow.append(a)
+plt.plot(range(len(living.index)),grow)#plot number of bacteria as a function of iteration steps  
+plt.show()

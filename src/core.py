@@ -14,6 +14,8 @@ import random
 import os
 import math
 import matplotlib.pyplot as plt
+import glob
+import pandas as pd
 
 # custom libraries
 import tqdm
@@ -254,21 +256,24 @@ def blind_run():
                   BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
                   BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH, BSUB_DOUBLING_TIME=C.BSUB_DOUBLING_TIME))
 
+    num_json = len(glob.glob1(C.OUTPUT_PATH, '*.json'))
+    info_file_name = C.OUTPUT_PATH / f'info_{num_json + 1}.json'
     biofilm = Biofilm()
     biofilm.spawn()
     print(biofilm)
     print("\nSTARTING MODELLING ...")
     for _ in tqdm.tqdm(range(0, C.NUMBER_ITERATIONS - 1)):
         biofilm.evolve()
-        biofilm.write_to_log()
+        biofilm.write_to_log(log_name=info_file_name)
 
-    biofilm.write_to_log()
-    data = biofilm.read_in_log(C.OUTPUT_PATH / 'info.json')
+    biofilm.write_to_log(log_name=info_file_name)
     print(f"Finished run with {len(biofilm.bacteria)} bacteria.")
-    print("Number entries in log: ", len(data['BACTERIA'].keys()))
 
-    biofilm.plot_velocities(data)
-    biofilm.plot_xy_trajectories(data)
+    #data = pd.read_json(info_file_name)
+    data = biofilm.bacteria_as_pandas(info_file_name)
+    # print(data)
+    biofilm.plot_mean_velocities(data)
+    # biofilm.plot_xy_trajectories(data)
 
 
 

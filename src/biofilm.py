@@ -14,7 +14,6 @@ import numpy as np
 import tqdm
 import glob
 import pandas as pd
-import threading
 # custom libraries
 from src.bacteria import Bacterium
 from src.constants import Constants as C
@@ -40,12 +39,6 @@ class Biofilm(object):
 
     def evolve(self):
         # Iterate over time steps
-        t3 = threading.Thread(target=Biofilm.interaction, name='t3')
-        t4 = threading.Thread(target=Bacterium.move, name='t4')
-        t5 = threading.Thread(target=Bacterium.split, name='t5')
-        t3.start()
-        t4.start()
-        t5.start()
         for bacterium in self.bacteria:
             # Iterate over bacteria in self.bacteria
             bacterium.grow()
@@ -57,9 +50,7 @@ class Biofilm(object):
             for _bacterium in self.bacteria:
                 if not np.array_equal(bacterium.position, _bacterium.position):
                     [_bacterium, bacterium] = Biofilm.interaction(bacterium, _bacterium)
-            t3.join()
             bacterium.move()
-            t4.join()
 
             # Manage Bacterial splitting
             # Add a little bit of random until -----it looks good and real-----
@@ -68,7 +59,6 @@ class Biofilm(object):
                 daughter = bacterium.split()
                 # self.check_energy_conservation(bacterium, daughter, energy_before)
                 self.bacteria.append(daughter)
-            t5.join()
 
             # Manage Bacterial Motion-Mode
             # Enable/Disable motion mode

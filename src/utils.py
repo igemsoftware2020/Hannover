@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
@@ -81,7 +82,7 @@ def get_euclid_norm(array):
     return array
 
 
-def plot_velocities(data: pd.DataFrame):
+def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     """
     Plots velocities of each bacteria and the mean velocity of all bacteria
     over the iteration step.
@@ -101,8 +102,11 @@ def plot_velocities(data: pd.DataFrame):
     ax2.set_ylabel('velocity')
     plt.show()
 
+    if save_fig:
+        fig.savefig(save_path / 'velocity_plot.jpeg')
 
-def plot_positions(data: pd.DataFrame):
+
+def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     """
     Plots positions (as lengths of location vectors) of each bacteria and the mean position of all bacteria
     over the iteration step.
@@ -122,8 +126,11 @@ def plot_positions(data: pd.DataFrame):
     ax2.set_ylabel('distance')
     plt.show()
 
+    if save_fig:
+        fig.savefig(save_path / 'positions_plot.jpeg')
 
-def plot_force(data: pd.DataFrame):
+
+def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     """
     Plots force acting on each bacteria and the mean force acting on all bacteria
     over the iteration step.
@@ -143,8 +150,11 @@ def plot_force(data: pd.DataFrame):
     ax2.set_ylabel('force')
     plt.show()
 
+    if save_fig:
+        fig.savefig(save_path / 'force_plot.jpeg')
 
-def plot_size(data: pd.DataFrame):
+
+def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     """
     Plots force acting on each bacteria and the mean force acting on all bacteria
     over the iteration step.
@@ -172,3 +182,17 @@ def plot_size(data: pd.DataFrame):
     ax4.set_xlabel('Step')
     ax4.set_ylabel('length')
     plt.show()
+
+    if save_fig:
+        fig.savefig(save_path / 'size_plot.jpeg')
+
+
+def get_info_file_path():
+    date_time = str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min_' + \
+                str(datetime.now().day) + str(datetime.now().month) + \
+                str(datetime.now().year)
+
+    path_out = C.OUTPUT_PATH / f'log_{date_time}'
+    path_out.mkdir()
+    info_file_name = path_out / f'log_{date_time}.json'
+    return info_file_name

@@ -10,7 +10,6 @@
 
 import math
 import os
-from datetime import datetime
 
 import cv2
 import numpy as np
@@ -19,7 +18,7 @@ import tqdm
 
 from src.biofilm import Biofilm
 from src.constants import Constants as C
-from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas
+from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path
 
 
 # ********************************************************************************************
@@ -254,11 +253,8 @@ def blind_run():
                   BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
                   BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH, BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR))
 
-    date_time = str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min_' + \
-                str(datetime.now().day) + str(datetime.now().month) + \
-                str(datetime.now().year)
-
-    info_file_name = C.OUTPUT_PATH / f'log_{date_time}.json'
+    info_file_name = get_info_file_path()
+    info_file_path = info_file_name.parent
     biofilm = Biofilm()
     biofilm.spawn()
     print(biofilm)
@@ -271,20 +267,20 @@ def blind_run():
     print(f"Finished run with {len(biofilm.bacteria)} bacteria.")
 
     data = bacteria_as_pandas(info_file_name)
-    plot_velocities(data)
-    plot_positions(data)
-    plot_force(data)
-    plot_size(data)
+    plot_velocities(data, info_file_path, save_fig=True)
+    plot_positions(data, info_file_path, save_fig=True)
+    plot_force(data, info_file_path, save_fig=True)
+    plot_size(data, info_file_path, save_fig=True)
 
 
 def plot_testing(info_file_name):
     info_file_path = C.OUTPUT_PATH / info_file_name
 
     data = bacteria_as_pandas(info_file_path)
-    plot_velocities(data)
-    plot_positions(data)
-    plot_force(data)
-    plot_size(data)
+    plot_velocities(data, info_file_path)
+    plot_positions(data, info_file_path)
+    plot_force(data, info_file_path)
+    plot_size(data, info_file_path)
 
 
 # ********************************************************************************************

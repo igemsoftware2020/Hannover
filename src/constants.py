@@ -13,7 +13,7 @@ class Constants:
 
     # SIMULATION PARAMETERS
     TIME_STEP = 1  # in seconds
-    NUMBER_ITERATIONS = 250
+    NUMBER_ITERATIONS = 50
     # constants B. subtilius
 
     BSUB_WIDTH = 1  # MICROMETERS https://en.wikipedia.org/wiki/Bacillus_subtilis
@@ -25,7 +25,7 @@ class Constants:
 
     BSUB_DOUBLING_TIME = 720  # SECONDS DOI: 10.1128/jb.167.1.219-230.1986
     # BSUB_GROWTH_FACTOR = np.log(2) / BSUB_DOUBLING_TIME  # MICROMETERS / s
-    BSUB_GROWTH_FACTOR = 0.3
+    BSUB_GROWTH_FACTOR = 0.09
     gr_factor_inv = 0.05  # 0.2
     gr_pr_i = 10.1  # 1.1
     gr_d_factor = 0.05

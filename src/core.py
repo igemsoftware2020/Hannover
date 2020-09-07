@@ -8,17 +8,12 @@
 # ********************************************************************************************
 # imports
 
-import cv2
-import numpy as np
-import random
-import os
 import math
-import matplotlib.pyplot as plt
-import glob
-import pandas as pd
-import threading
+import os
 from datetime import datetime
 
+import cv2
+import numpy as np
 # custom libraries
 import tqdm
 
@@ -258,9 +253,9 @@ def blind_run():
                   BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
                   BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH, BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR))
 
-    date_time = str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min_' +\
-               str(datetime.now().day) + str(datetime.now().month) +\
-               str(datetime.now().year)
+    date_time = str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min_' + \
+                str(datetime.now().day) + str(datetime.now().month) + \
+                str(datetime.now().year)
 
     info_file_name = C.OUTPUT_PATH / f'log_{date_time}.json'
     biofilm = Biofilm()
@@ -270,8 +265,6 @@ def blind_run():
     for _ in tqdm.tqdm(range(0, C.NUMBER_ITERATIONS - 1)):
         biofilm.evolve()
         biofilm.write_to_log(log_name=info_file_name)
-        print("STEP ", _)
-        print(biofilm)
 
     biofilm.write_to_log(log_name=info_file_name)
     print(f"Finished run with {len(biofilm.bacteria)} bacteria.")
@@ -280,10 +273,18 @@ def blind_run():
     biofilm.plot_velocities(data)
 
 
+def plot_testing(info_file_name):
+    biofilm = Biofilm()
+    info_file_path = C.OUTPUT_PATH / info_file_name
+
+    data = biofilm.bacteria_as_pandas(info_file_path)
+    biofilm.plot_velocities(data)
+
 
 # ********************************************************************************************
 # main-method to start the program
 # ********************************************************************************************
 if __name__ == "__main__":
-    blind_run()
+    # blind_run()
     # coreFunction()
+    plot_testing("log_13h6min_792020.json")

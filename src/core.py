@@ -18,7 +18,8 @@ import tqdm
 
 from src.biofilm import Biofilm
 from src.constants import Constants as C
-from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path
+from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
+    prompt_log_at_start
 
 
 # ********************************************************************************************
@@ -240,18 +241,7 @@ def coreLoop(biofilm, out, txt):
 
 
 def blind_run():
-    print(f"********************* BIOFILM MODELING *********************\n"
-          "NUMBER OF INITIAL BACTERIA\t {number_bacteria}\n"
-          "NUMBER OF ITERATIONS\t {iterations}\n\n"
-          "==================================================\n"
-          "INITIAL DIMENSIONS (LENGTH, WIDTH)\t {BSUB_LENGTH},\t{BSUB_WIDTH}\n"
-          "MASS\t {BSUB_MASS}\n"
-          "GROWTH FACTOR\t {BSUB_GROWTH_FACTOR}\n"
-          "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n"
-          .format(number_bacteria=C.START_NUMBER_BACTERIA, iterations=C.NUMBER_ITERATIONS,
-                  type="B. subtilius", BSUB_LENGTH=C.BSUB_LENGTH,
-                  BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
-                  BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH, BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR))
+    print(prompt_log_at_start())
 
     info_file_name = get_info_file_path()
     info_file_path = info_file_name.parent

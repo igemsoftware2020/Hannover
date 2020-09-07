@@ -196,3 +196,18 @@ def get_info_file_path():
     path_out.mkdir()
     info_file_name = path_out / f'log_{date_time}.json'
     return info_file_name
+
+
+def prompt_log_at_start():
+    return (f"********************* BIOFILM MODELING *********************\n"
+            "NUMBER OF INITIAL BACTERIA\t {number_bacteria}\n"
+            "NUMBER OF ITERATIONS\t {iterations}\n\n"
+            "==================================================\n"
+            "INITIAL DIMENSIONS (LENGTH, WIDTH)\t {BSUB_LENGTH},\t{BSUB_WIDTH}\n"
+            "MASS\t {BSUB_MASS}\n"
+            "GROWTH FACTOR\t {BSUB_GROWTH_FACTOR}\n"
+            "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n"
+            .format(number_bacteria=C.START_NUMBER_BACTERIA, iterations=C.NUMBER_ITERATIONS,
+                    type="B. subtilius", BSUB_LENGTH=C.BSUB_LENGTH,
+                    BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
+                    BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH, BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR))

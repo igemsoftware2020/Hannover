@@ -337,24 +337,82 @@ class Biofilm(object):
             ax1.plot(plot_data.loc[:, bacteria])
 
         ax1.set_title('Velocities')
-        ax1.set_xlabel('Step');
+        ax1.set_xlabel('Step')
         ax1.set_ylabel('velocity')
         ax2.plot(means)
         ax2.set_title('Mean Velocity')
-        ax2.set_xlabel('Step');
+        ax2.set_xlabel('Step')
         ax2.set_ylabel('velocity')
         plt.show()
 
     @staticmethod
-    def plot_xy_trajectories(data):
-        fig, ax = plt.subplots()
-        x_data, y_data = [], []
-        for bacteria in data['BACTERIA'].keys():
-            x, y = data['BACTERIA'][bacteria]['position'][0], data['BACTERIA'][bacteria]['position'][1]
-            x_data.append(x)
-            y_data.append(y)
+    def plot_positions(data: pd.DataFrame):
+        """
+        Plots positions (as lengths of location vectors) of each bacteria and the mean position of all bacteria
+        over the iteration step.
+        """
+        plot_data = Biofilm.get_data_to_parameter(data, 'position')
+        means = plot_data.mean(axis=1, skipna=True)
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        for bacteria in plot_data:
+            ax1.plot(plot_data.loc[:, bacteria])
 
-        for i in range(0, len(x_data)):
-            ax.plot(x_data[i], y_data[i], '.')
-            
+        ax1.set_title('Position')
+        ax1.set_xlabel('Step')
+        ax1.set_ylabel('distance')
+        ax2.plot(means)
+        ax2.set_title('Mean position')
+        ax2.set_xlabel('Step')
+        ax2.set_ylabel('distance')
+        plt.show()
+
+    @staticmethod
+    def plot_force(data: pd.DataFrame):
+        """
+        Plots force acting on each bacteria and the mean force acting on all bacteria
+        over the iteration step.
+        """
+        plot_data = Biofilm.get_data_to_parameter(data, 'total_force')
+        means = plot_data.mean(axis=1, skipna=True)
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        for bacteria in plot_data:
+            ax1.plot(plot_data.loc[:, bacteria])
+
+        ax1.set_title('Total force')
+        ax1.set_xlabel('Step')
+        ax1.set_ylabel('force')
+        ax2.plot(means)
+        ax2.set_title('Mean force')
+        ax2.set_xlabel('Step')
+        ax2.set_ylabel('force')
+        plt.show()
+
+    @staticmethod
+    def plot_size(data: pd.DataFrame):
+        """
+        Plots force acting on each bacteria and the mean force acting on all bacteria
+        over the iteration step.
+        """
+        width_data = Biofilm.get_data_to_parameter(data, 'width')
+        length_data = Biofilm.get_data_to_parameter(data, 'length')
+        width_means = width_data.mean(axis=1, skipna=True)
+        length_means = length_data.mean(axis=1, skipna=True)
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+        for bacteria in width_data:
+            ax1.plot(width_data.loc[:, bacteria])
+            ax2.plot(length_data.loc[:, bacteria.replace('width', 'length')])
+        ax1.set_title('width')
+        ax1.set_xlabel('Step')
+        ax1.set_ylabel('width')
+        ax2.set_title('length')
+        ax2.set_xlabel('Step')
+        ax2.set_ylabel('length')
+        ax3.plot(width_means)
+        ax4.plot(length_means)
+        ax3.set_title('width mean')
+        ax3.set_xlabel('Step')
+        ax3.set_ylabel('width')
+        ax4.set_title('length mean')
+        ax4.set_xlabel('Step')
+        ax4.set_ylabel('length')
         plt.show()

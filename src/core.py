@@ -278,7 +278,11 @@ def plot_testing(info_file_name):
     info_file_path = C.OUTPUT_PATH / info_file_name
 
     data = biofilm.bacteria_as_pandas(info_file_path)
-    biofilm.plot_velocities(data)
+    # biofilm.plot_velocities(data)
+    # biofilm.plot_positions(data)
+    # biofilm.plot_force(data)
+    # biofilm.plot_area(data)
+    biofilm.plot_size(data)
 
 
 # ********************************************************************************************

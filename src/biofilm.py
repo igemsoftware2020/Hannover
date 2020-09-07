@@ -4,16 +4,15 @@
 
 import json
 import random
-from typing import Dict
 from pathlib import Path
-import matplotlib.pyplot as plt
+from typing import Dict
 
+import matplotlib.pyplot as plt
 # ********************************************************************************************
 # imports
 import numpy as np
-import tqdm
-import glob
 import pandas as pd
+
 # custom libraries
 from src.bacteria import Bacterium
 from src.constants import Constants as C
@@ -104,7 +103,6 @@ class Biofilm(object):
         with open(str(info_file_path), 'w') as json_file:
             json.dump(data, json_file)
 
-
     def write_to_log(self, log_name):
         info_file_path = C.OUTPUT_PATH / log_name
 
@@ -181,7 +179,6 @@ class Biofilm(object):
             print("Bac2 interaction position ", bacterium2.position)
 
         return bacterium1, bacterium2
-
 
     @staticmethod
     def interaction(bacterium1, bacterium2):
@@ -293,22 +290,60 @@ class Biofilm(object):
         return sorted(sorted_bacteria, key=lambda x: x.position[axis], reverse=_reverse)
 
     @staticmethod
-    def plot_velocities(data: pd.DataFrame):
-        plot_data = []
+    def get_data_to_parameter(data: pd.DataFrame, key: str):
+        """
+        Gets complete bacteria data as a DataFrame.
+        Resorts data to parameters 'key' into another DataFrame:
+            bacteria_0_parameter    ... bacteria_N_parameter
+        0       100                         NaN
+        1       12                          NaN
+        2       13                          10
+        .
+        .
+        .
+
+        If the key is position or velocity, calculates the absolute value first.
+        Returned Data is sorted according to the iteration step.
+        """
+        dic = {}
         for index, bacteria in data.iterrows():
-            velocities = pd.DataFrame(bacteria).loc['velocity',:]
-            velocities = velocities.transform(lambda x: sorted(x, key=pd.isnull, reverse=True))
-            for vectors in velocities:
-                vectors = (pd.Series(vectors).apply(np.array)).apply(np.linalg.norm)
-                plot_data.append(vectors)
+            df_bac = pd.DataFrame(bacteria).loc[key, :]
+            for vectors in df_bac:
+                if key == 'velocity' or key == 'position':
+                    # calculate norm for velocity and position
+                    vectors = Biofilm.get_euclid_norm(vectors)
+                dic.update({str(index) + '_' + key: vectors})
+        df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in dic.items()]))
+        df = df.transform(lambda x: sorted(x, key=pd.isnull, reverse=True))
+        return df
 
-        for data in plot_data:
-            plt.plot(data)
-        # plt.plot(, label='mean')  # plot means for each iteration
-        plt.title(' VELOCITIES ')
-        plt.gca().invert_xaxis()
+    @staticmethod
+    def get_euclid_norm(array):
+        """ returns the norm of each vector in parameter array"""
+        for i in range(len(array)):
+            array[i] = np.linalg.norm(array[i])
+        return array
+
+    @staticmethod
+    def plot_velocities(data: pd.DataFrame):
+        """
+        Plots velocities of each bacteria and the mean velocity of all bacteria
+        over the iteration step.
+        """
+        plot_data = Biofilm.get_data_to_parameter(data, 'velocity')
+        means = plot_data.mean(axis=1, skipna=True)
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        for bacteria in plot_data:
+            ax1.plot(plot_data.loc[:, bacteria])
+
+        ax1.set_title('Velocities')
+        ax1.set_xlabel('Step');
+        ax1.set_ylabel('velocity')
+        ax2.plot(means)
+        ax2.set_title('Mean Velocity')
+        ax2.set_xlabel('Step');
+        ax2.set_ylabel('velocity')
         plt.show()
-
 
     @staticmethod
     def plot_xy_trajectories(data):

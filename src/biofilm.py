@@ -2,20 +2,17 @@
 # -*- coding: utf-8 -*-
 
 
-import json
 import random
-from pathlib import Path
 from typing import Dict
 
-import matplotlib.pyplot as plt
 # ********************************************************************************************
 # imports
 import numpy as np
-import pandas as pd
 
 # custom libraries
 from src.bacteria import Bacterium
 from src.constants import Constants as C
+from src.utils import write_log_template, read_in_log, save_dict_as_json
 
 
 class Biofilm(object):
@@ -31,10 +28,58 @@ class Biofilm(object):
             bac = Bacterium(position=pos, velocity=velocity)
             self.bacteria.append(bac)
 
-    @staticmethod
-    def check_energy_conservation(bacterium1: Bacterium, bacterium2: Bacterium, total_energy_before):
-        if bacterium1.total_energy + bacterium2.total_energy != total_energy_before:
-            raise ValueError("Energy conversation broken while splitting.")
+    def write_to_log(self, log_name):
+        info_file_path = C.OUTPUT_PATH / log_name
+
+        def bacteria_dict(bacterium: Bacterium, number: int) -> Dict:
+            """ Help function, which returns the dict entry of a bacteria """
+            return {'bacteria_%s' % str(number): dict(
+                position=[bacterium.position.tolist()],
+                velocity=[bacterium.velocity.tolist()],
+                angle=[bacterium.angle],
+                total_force=[bacterium.total_force],
+                total_energy=[bacterium.total_energy],
+                living=[bacterium.living],
+                moving=[bacterium.moving],
+                length=[bacterium.length],
+                width=[bacterium.width])
+            }
+
+        if not info_file_path.is_file():
+            # create json template and save
+            write_log_template(info_file_path)
+
+        # read in current log
+        data = read_in_log(info_file_path)
+        # init empty dictionary. This will overwrite the old entry.
+        bacteria_dic = {}
+        if sum(map(len, data['BACTERIA'].keys())) == 0:
+            # if no entry in BACTERIA, create the first one.
+            for bacteria, counter in zip(self.bacteria, range(0, len(self.bacteria))):
+                bacteria_dic.update(bacteria_dict(bacteria, counter))
+
+        else:
+            # copy already existing one and add to entries
+            bacteria_dic = data['BACTERIA'].copy()
+            for bacteria, counter in zip(self.bacteria, range(0, len(self.bacteria))):
+                bacteria_name = 'bacteria_%s' % str(counter)
+                # iterate over all entries in BACTERIA, append next iteration step to key values
+                if bacteria_name not in bacteria_dic.keys():
+                    # Add bacteria to BACTERIUM keys, because it's not in there
+                    bacteria_dic.update(bacteria_dict(bacteria, counter))
+                else:
+                    for entry in data['BACTERIA'][bacteria_name].keys():
+                        # If entry already exists : Append info from next iteration step to corresponding entry
+                        for attr in dir(bacteria):
+                            if not callable(getattr(bacteria, attr)) and not attr.startswith("__") and entry == attr:
+                                attribute = getattr(bacteria, entry)
+                                if isinstance(attribute, np.ndarray):
+                                    attribute = attribute.tolist()
+                                bacteria_dic[bacteria_name][entry].append(attribute)
+
+            # Maybe for checking integrity : len(data['BACTERIA']) - sum(map(len, data['BACTERIA'].keys()))
+        data['BACTERIA'] = bacteria_dic
+        save_dict_as_json(data, info_file_path)
 
     def evolve(self):
         # Iterate over time steps
@@ -69,92 +114,13 @@ class Biofilm(object):
             else:
                 bacterium.moving = False
 
-    @staticmethod
-    def write_log_template(info_file_path):
-        constants = C()
-        with open(info_file_path, 'w+') as json_file:
-            data = {'BACTERIA': {}, 'CONSTANTS': {}}
-            members = [attr for attr in dir(constants) if
-                       not callable(getattr(constants, attr)) and not attr.startswith("__")]
-            constants_dic = {}
-            for constant in members:
-                constants_dic.update({constant: str(getattr(constants, constant))})
-            data['CONSTANTS'].update(constants_dic)
-            json.dump(data, json_file, indent=4)
+    def __repr__(self):
+        return f'Biofilm currently consisting of {len(self.bacteria)} bacteria'
 
-    @staticmethod
-    def read_in_log(info_file_path) -> Dict:
-        with open(info_file_path, "r") as json_file:
-            data = json.load(json_file)
-        return data
-
-    @staticmethod
-    def bacteria_as_pandas(info_file_path) -> pd.DataFrame:
-        data = Biofilm.read_in_log(info_file_path)
-        return pd.DataFrame(data['BACTERIA']).transpose()
-
-    @staticmethod
-    def constants_as_pandas(info_file_path):
-        data = Biofilm.read_in_log(info_file_path)
-        return pd.DataFrame(data['CONSTANTS']).transpose()
-
-    @staticmethod
-    def save_dict_as_json(data: Dict, info_file_path: Path):
-        with open(str(info_file_path), 'w') as json_file:
-            json.dump(data, json_file)
-
-    def write_to_log(self, log_name):
-        info_file_path = C.OUTPUT_PATH / log_name
-
-        def bacteria_dict(bacterium: Bacterium, number: int) -> Dict:
-            """ Help function, which returns the dict entry of a bacteria """
-            return {'bacteria_%s' % str(number): dict(
-                                                position=[bacterium.position.tolist()],
-                                                velocity=[bacterium.velocity.tolist()],
-                                                angle=[bacterium.angle],
-                                                total_force=[bacterium.total_force],
-                                                total_energy=[bacterium.total_energy],
-                                                living=[bacterium.living],
-                                                moving=[bacterium.moving],
-                                                length=[bacterium.length],
-                                                width=[bacterium.width])
-                    }
-
-        if not info_file_path.is_file():
-            # create json template and save
-            self.write_log_template(info_file_path)
-
-        # read in current log
-        data = self.read_in_log(info_file_path)
-        # init empty dictionary. This will overwrite the old entry.
-        bacteria_dic = {}
-        if sum(map(len, data['BACTERIA'].keys())) == 0:
-            # if no entry in BACTERIA, create the first one.
-            for bacteria, counter in zip(self.bacteria, range(0, len(self.bacteria))):
-                bacteria_dic.update(bacteria_dict(bacteria, counter))
-
-        else:
-            # copy already existing one and add to entries
-            bacteria_dic = data['BACTERIA'].copy()
-            for bacteria, counter in zip(self.bacteria, range(0, len(self.bacteria))):
-                bacteria_name = 'bacteria_%s' % str(counter)
-                # iterate over all entries in BACTERIA, append next iteration step to key values
-                if bacteria_name not in bacteria_dic.keys():
-                    # Add bacteria to BACTERIUM keys, because it's not in there
-                    bacteria_dic.update(bacteria_dict(bacteria, counter))
-                else:
-                    for entry in data['BACTERIA'][bacteria_name].keys():
-                        # If entry already exists : Append info from next iteration step to corresponding entry
-                        for attr in dir(bacteria):
-                            if not callable(getattr(bacteria, attr)) and not attr.startswith("__") and entry == attr:
-                                attribute = getattr(bacteria, entry)
-                                if isinstance(attribute, np.ndarray):
-                                    attribute = attribute.tolist()
-                                bacteria_dic[bacteria_name][entry].append(attribute)
-
-            # Maybe for checking integrity : len(data['BACTERIA']) - sum(map(len, data['BACTERIA'].keys()))
-        data['BACTERIA'] = bacteria_dic
-        self.save_dict_as_json(data, info_file_path)
+    def sort_by_depth(self, axis, _reverse):
+        sorted_bacteria = self.bacteria
+        # To return a new list, use the sorted() built-in function...
+        return sorted(sorted_bacteria, key=lambda x: x.position[axis], reverse=_reverse)
 
     @staticmethod
     def interaction_jones(bacterium1: Bacterium, bacterium2: Bacterium):
@@ -281,138 +247,7 @@ class Biofilm(object):
 
         return bacterium2, bacterium1
 
-    def __repr__(self):
-        return f'Biofilm currently consisting of {len(self.bacteria)} bacteria'
-
-    def sort_by_depth(self, axis, _reverse):
-        sorted_bacteria = self.bacteria
-        # To return a new list, use the sorted() built-in function...
-        return sorted(sorted_bacteria, key=lambda x: x.position[axis], reverse=_reverse)
-
     @staticmethod
-    def get_data_to_parameter(data: pd.DataFrame, key: str):
-        """
-        Gets complete bacteria data as a DataFrame.
-        Resorts data to parameters 'key' into another DataFrame:
-            bacteria_0_parameter    ... bacteria_N_parameter
-        0       100                         NaN
-        1       12                          NaN
-        2       13                          10
-        .
-        .
-        .
-
-        If the key is position or velocity, calculates the absolute value first.
-        Returned Data is sorted according to the iteration step.
-        """
-        dic = {}
-        for index, bacteria in data.iterrows():
-            df_bac = pd.DataFrame(bacteria).loc[key, :]
-            for vectors in df_bac:
-                if key == 'velocity' or key == 'position':
-                    # calculate norm for velocity and position
-                    vectors = Biofilm.get_euclid_norm(vectors)
-                dic.update({str(index) + '_' + key: vectors})
-        df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in dic.items()]))
-        df = df.transform(lambda x: sorted(x, key=pd.isnull, reverse=True))
-        return df
-
-    @staticmethod
-    def get_euclid_norm(array):
-        """ returns the norm of each vector in parameter array"""
-        for i in range(len(array)):
-            array[i] = np.linalg.norm(array[i])
-        return array
-
-    @staticmethod
-    def plot_velocities(data: pd.DataFrame):
-        """
-        Plots velocities of each bacteria and the mean velocity of all bacteria
-        over the iteration step.
-        """
-        plot_data = Biofilm.get_data_to_parameter(data, 'velocity')
-        means = plot_data.mean(axis=1, skipna=True)
-        fig, (ax1, ax2) = plt.subplots(1, 2)
-        for bacteria in plot_data:
-            ax1.plot(plot_data.loc[:, bacteria])
-
-        ax1.set_title('Velocities')
-        ax1.set_xlabel('Step')
-        ax1.set_ylabel('velocity')
-        ax2.plot(means)
-        ax2.set_title('Mean Velocity')
-        ax2.set_xlabel('Step')
-        ax2.set_ylabel('velocity')
-        plt.show()
-
-    @staticmethod
-    def plot_positions(data: pd.DataFrame):
-        """
-        Plots positions (as lengths of location vectors) of each bacteria and the mean position of all bacteria
-        over the iteration step.
-        """
-        plot_data = Biofilm.get_data_to_parameter(data, 'position')
-        means = plot_data.mean(axis=1, skipna=True)
-        fig, (ax1, ax2) = plt.subplots(1, 2)
-        for bacteria in plot_data:
-            ax1.plot(plot_data.loc[:, bacteria])
-
-        ax1.set_title('Position')
-        ax1.set_xlabel('Step')
-        ax1.set_ylabel('distance')
-        ax2.plot(means)
-        ax2.set_title('Mean position')
-        ax2.set_xlabel('Step')
-        ax2.set_ylabel('distance')
-        plt.show()
-
-    @staticmethod
-    def plot_force(data: pd.DataFrame):
-        """
-        Plots force acting on each bacteria and the mean force acting on all bacteria
-        over the iteration step.
-        """
-        plot_data = Biofilm.get_data_to_parameter(data, 'total_force')
-        means = plot_data.mean(axis=1, skipna=True)
-        fig, (ax1, ax2) = plt.subplots(1, 2)
-        for bacteria in plot_data:
-            ax1.plot(plot_data.loc[:, bacteria])
-
-        ax1.set_title('Total force')
-        ax1.set_xlabel('Step')
-        ax1.set_ylabel('force')
-        ax2.plot(means)
-        ax2.set_title('Mean force')
-        ax2.set_xlabel('Step')
-        ax2.set_ylabel('force')
-        plt.show()
-
-    @staticmethod
-    def plot_size(data: pd.DataFrame):
-        """
-        Plots force acting on each bacteria and the mean force acting on all bacteria
-        over the iteration step.
-        """
-        width_data = Biofilm.get_data_to_parameter(data, 'width')
-        length_data = Biofilm.get_data_to_parameter(data, 'length')
-        width_means = width_data.mean(axis=1, skipna=True)
-        length_means = length_data.mean(axis=1, skipna=True)
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-        for bacteria in width_data:
-            ax1.plot(width_data.loc[:, bacteria])
-            ax2.plot(length_data.loc[:, bacteria.replace('width', 'length')])
-        ax1.set_title('width')
-        ax1.set_xlabel('Step')
-        ax1.set_ylabel('width')
-        ax2.set_title('length')
-        ax2.set_xlabel('Step')
-        ax2.set_ylabel('length')
-        ax3.plot(width_means)
-        ax4.plot(length_means)
-        ax3.set_title('width mean')
-        ax3.set_xlabel('Step')
-        ax3.set_ylabel('width')
-        ax4.set_title('length mean')
-        ax4.set_xlabel('Step')
-        ax4.set_ylabel('length')
-        plt.show()
+    def check_energy_conservation(bacterium1: Bacterium, bacterium2: Bacterium, total_energy_before):
+        if bacterium1.total_energy + bacterium2.total_energy != total_energy_before:
+            raise ValueError("Energy conversation broken while splitting.")

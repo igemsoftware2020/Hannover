@@ -19,6 +19,7 @@ import tqdm
 
 from src.biofilm import Biofilm
 from src.constants import Constants as C
+from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas
 
 
 # ********************************************************************************************
@@ -269,26 +270,26 @@ def blind_run():
     biofilm.write_to_log(log_name=info_file_name)
     print(f"Finished run with {len(biofilm.bacteria)} bacteria.")
 
-    data = biofilm.bacteria_as_pandas(info_file_name)
-    biofilm.plot_velocities(data)
+    data = bacteria_as_pandas(info_file_name)
+    plot_velocities(data)
+    plot_positions(data)
+    plot_force(data)
+    plot_size(data)
 
 
 def plot_testing(info_file_name):
-    biofilm = Biofilm()
     info_file_path = C.OUTPUT_PATH / info_file_name
 
-    data = biofilm.bacteria_as_pandas(info_file_path)
-    # biofilm.plot_velocities(data)
-    # biofilm.plot_positions(data)
-    # biofilm.plot_force(data)
-    # biofilm.plot_area(data)
-    biofilm.plot_size(data)
+    data = bacteria_as_pandas(info_file_path)
+    plot_velocities(data)
+    plot_positions(data)
+    plot_force(data)
+    plot_size(data)
 
 
 # ********************************************************************************************
 # main-method to start the program
 # ********************************************************************************************
 if __name__ == "__main__":
-    # blind_run()
-    # coreFunction()
-    plot_testing("log_13h6min_792020.json")
+    blind_run()
+    # coreFunction())

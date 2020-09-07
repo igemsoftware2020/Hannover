@@ -6,6 +6,7 @@ from pathlib import Path
 
 class Constants:
     # FILE PATHS
+
     ROOT_DIRECTORY = Path(os.getcwd())
     OUTPUT_PATH = ROOT_DIRECTORY / 'output'
     SOURCE_PATH = ROOT_DIRECTORY / 'src'
@@ -27,6 +28,7 @@ class Constants:
     BSUB_GROWTH_FACTOR = 0.3
     gr_factor_inv = 0.05  # 0.2
     gr_pr_i = 10.1  # 1.1
+    gr_d_factor = 0.05
     MOTION_ACTIVATION_PROBABILITY = 0.005
     MOTION_DEACTIVATION_PROBABILITY = 0.01
 

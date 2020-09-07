@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 
+import math
 # ********************************************************************************************
 # imports
 import random
-import math
+
 import numpy as np
+
 from src.constants import Constants as C
 
 
@@ -73,23 +75,23 @@ class Bacterium:
         """
         grow bacteria for 1 second with speed growth_rate
         """
-        #Make the bacteria grow
-        #using a constant growth rate ( volume per time)
-        #growths inhibition factor
+        # Make the bacteria grow
+        # using a constant growth rate ( volume per time)
+        # growths inhibition factor
         volume = self.get_volume()
-        if(self.living==True):
-            if(self.moving==False):
-               #  growth_suppressor = gr_factor*gr_pr_i/(gr_pr_i+self.totalForce_equivalent*0.5)-gr_factor_inv
-               # growth_factor = (volume+volume**(1/3)*5.0*growth_suppressor*growth_suppressor)/volume
-                #self.width  = self.width *growth_factor
-                self.length = self.length*(C.BSUB_GROWTH_FACTOR + 1)
+        if (self.living == True):
+            if (self.moving == False):
+                #  growth_suppressor = gr_factor*gr_pr_i/(gr_pr_i+self.totalForce_equivalent*0.5)-gr_factor_inv
+                # growth_factor = (volume+volume**(1/3)*5.0*growth_suppressor*growth_suppressor)/volume
+                # self.width  = self.width *growth_factor
+                self.length = self.length * (C.BSUB_GROWTH_FACTOR + 1)
         else:
-            #self.width  = self.width *gr_d_factor
+            # self.width  = self.width *gr_d_factor
             self.length = self.length * C.gr_d_factor
 
-
-        if(self.living == False):
-            growth_suppressor = C.gr_factor * C.gr_pr_i / (C.gr_pr_i + self.totalForce_equivalent * 0.5) - C.gr_factor_inv
+        if (self.living == False):
+            growth_suppressor = C.BSUB_GROWTH_FACTOR * C.gr_pr_i / (
+                    C.gr_pr_i + self.total_force * 0.5) - C.gr_factor_inv
             growth_factor = (volume + volume ** (1 / 3) * 5.0 * growth_suppressor * growth_suppressor) / volume
             # self.width  = self.width *growth_factor
             self.length = self.length * (1 + growth_factor)
@@ -98,7 +100,7 @@ class Bacterium:
             # size decreasing if cell is dead
             self.length = self.length * (1 - 0.05)
 
-        #self.random_cell_death()
+        # self.random_cell_death()
 
     def random_cell_death(self):
         # Programmed cell death

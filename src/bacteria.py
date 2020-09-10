@@ -6,6 +6,7 @@ import math
 # ********************************************************************************************
 # imports
 import random
+from typing import Dict
 
 import numpy as np
 
@@ -22,8 +23,8 @@ class Bacterium:
                  width: float = C.BSUB_WIDTH,
                  length: float = C.BSUB_LENGTH,
                  velocity: np.ndarray = None,
-                 angle=None, total_force: float = 0,
-                 living: bool = True, moving: bool = True):
+                 angle: np.ndarray = None, force: np.ndarray = None,
+                 living: bool = True, moving: bool = False):
         """
         initialize a instance of the Bacteria class
         :param position: position of bacteria center [x_pox, y_pos, z_pos]
@@ -54,7 +55,8 @@ class Bacterium:
         self.moving = moving
 
         self.velocity_angular = [0, 0]
-        self.total_force = total_force
+        self.force = force
+        self.total_force = np.linalg.norm(self.force)
         self.rotational_energy = self.get_rotational_energy()
         self.translation_energy = self.get_translation_energy()
         self.total_energy = self.translation_energy + self.rotational_energy
@@ -79,26 +81,21 @@ class Bacterium:
         # using a constant growth rate ( volume per time)
         # growths inhibition factor
         volume = self.get_volume()
-        if (self.living == True):
-            if (self.moving == False):
-                #  growth_suppressor = gr_factor*gr_pr_i/(gr_pr_i+self.totalForce_equivalent*0.5)-gr_factor_inv
-                # growth_factor = (volume+volume**(1/3)*5.0*growth_suppressor*growth_suppressor)/volume
-                # self.width  = self.width *growth_factor
-                self.length = self.length * (C.BSUB_GROWTH_FACTOR + 1)
-        else:
-            # self.width  = self.width *gr_d_factor
-            self.length = self.length * C.gr_d_factor
-
-        if (self.living == False):
-            growth_suppressor = C.BSUB_GROWTH_FACTOR * C.gr_pr_i / (
-                    C.gr_pr_i + self.total_force * 0.5) - C.gr_factor_inv
-            growth_factor = (volume + volume ** (1 / 3) * 5.0 * growth_suppressor * growth_suppressor) / volume
+        if self.living is True:
+            #  growth_suppressor = gr_factor*gr_pr_i/(gr_pr_i+self.totalForce_equivalent*0.5)-gr_factor_inv
+            # growth_factor = (volume+volume**(1/3)*5.0*growth_suppressor*growth_suppressor)/volume
             # self.width  = self.width *growth_factor
-            self.length = self.length * (1 + growth_factor)
+            self.length = self.length * (C.BSUB_GROWTH_FACTOR + 1)
         else:
             # self.width  = self.width *gr_d_factor
-            # size decreasing if cell is dead
-            self.length = self.length * (1 - 0.05)
+            self.length = self.length * (1 - C.gr_d_factor)
+
+        # if self.living is False:
+        #   growth_suppressor = C.BSUB_GROWTH_FACTOR * C.gr_pr_i / (
+        #           C.gr_pr_i + self.total_force * 0.5) - C.gr_factor_inv
+        #   growth_factor = (volume + volume ** (1 / 3) * 5.0 * growth_suppressor * growth_suppressor) / volume
+        #    # self.width  = self.width *growth_factor
+        #    self.length = self.length * (1 + growth_factor)
 
         # self.random_cell_death()
 
@@ -106,6 +103,12 @@ class Bacterium:
         # Programmed cell death
         if random.random() > 1.0 - C.BSUB_MORTALITY_RATE:
             self.living = False
+
+    def __eq__(self, other):
+
+        if bacteria_dict(self) == bacteria_dict(other):
+            return True
+        return False
 
     def split(self):
         """
@@ -155,6 +158,7 @@ class Bacterium:
         positions.append((self.position[0] + int(0.1 * dx_length), self.position[1] + int(0.1 * dy_length),
                           self.position[2] + int(0.1 * dz_length)))
         return np.asarray(positions)
+
 
     def move(self, frameDim=C.WINDOW_SIZE, dt=C.TIME_STEP, friction=0.1):
         """
@@ -255,3 +259,22 @@ class Bacterium:
             return True
         else:
             return False
+
+    def update_acting_force(self):
+        raise NotImplemented
+        pass
+
+
+def bacteria_dict(bacterium: Bacterium) -> Dict:
+    """ returns the dict entry of a bacteria """
+    return dict(
+        position=[bacterium.position.tolist()],
+        velocity=[bacterium.velocity.tolist()],
+        angle=[bacterium.angle],
+        force=[bacterium.force],
+        total_force=[bacterium.total_force],
+        total_energy=[bacterium.total_energy],
+        living=[bacterium.living],
+        moving=[bacterium.moving],
+        length=[bacterium.length],
+        width=[bacterium.width])

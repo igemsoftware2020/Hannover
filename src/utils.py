@@ -1,4 +1,5 @@
 import json
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
@@ -211,3 +212,26 @@ def prompt_log_at_start():
                     type="B. subtilius", BSUB_LENGTH=C.BSUB_LENGTH,
                     BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
                     BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH, BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR))
+
+
+def stokes_drag_force(radius: int, velocity: np.ndarray, viscosity=C.EFFECTIVE_VISCOSITY_EPS):
+    # Calculates Stokes' drag for a sphere with Reynolds number < 1.
+    return - 6 * np.pi * radius * viscosity * velocity
+
+
+def simulation_duration():
+    def calculate_time(func):
+        # added arguments inside the inner1,
+        # if function takes any arguments,
+        # can be added like this.
+        def inner1(*args, **kwargs):
+            # storing time before function execution
+            begin = time.time()
+
+            func(*args, **kwargs)
+
+            # storing time after function execution
+            end = time.time()
+            print("Duration : ", func.__name__, end - begin)
+
+        return inner1

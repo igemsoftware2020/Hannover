@@ -3,15 +3,16 @@
 
 
 import random
-from typing import Dict
 
 # ********************************************************************************************
 # imports
 import numpy as np
+import tqdm
 
 # custom libraries
 from src.bacteria import Bacterium
 from src.constants import Constants as C
+from src.utils import get_info_file_path
 from src.utils import write_log_template, read_in_log, save_dict_as_json
 
 
@@ -19,32 +20,24 @@ class Biofilm(object):
 
     def __init__(self):
         self.bacteria = []
+        self.num_bacteria = len(self.bacteria)
 
     def spawn(self):
         for _ in range(C.START_NUMBER_BACTERIA):
-            pos = np.asarray(
-                [(random.random() - 0.5) * C.WINDOW_SIZE[0], (random.random() - 0.5) * C.WINDOW_SIZE[1], 0])
-            velocity = np.asarray([random.gauss(C.BSUB_MEAN_SPEED, 10), random.gauss(C.BSUB_MEAN_SPEED, 10), 0])
-            bac = Bacterium(position=pos, velocity=velocity)
+            # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
+            rnd_position = np.asarray([random.randrange(C.WINDOW_SIZE[0] / 2 - 40, C.WINDOW_SIZE[0] / 2 + 40),
+                                       random.randrange(C.WINDOW_SIZE[1] / 2 - 40, C.WINDOW_SIZE[1] / 2 + 40), 0])
+            # set initial velocity to 0
+            velocity = np.asarray([0, 0, 0])
+            # random orientation
+            rnd_angle = np.ndarray([random.randrange(0, 2 * np.pi), random.randrange(0, 2 * np.pi)])
+            # substrate cell adhesion, in cartesian coordinates
+            adhesion_force = np.asarray([0, 0, C.MAX_CELL_SUBSTRATE_ADHESION])
+            bac = Bacterium(position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force)
             self.bacteria.append(bac)
 
     def write_to_log(self, log_name):
         info_file_path = C.OUTPUT_PATH / log_name
-
-        def bacteria_dict(bacterium: Bacterium, number: int) -> Dict:
-            """ Help function, which returns the dict entry of a bacteria """
-            return {'bacteria_%s' % str(number): dict(
-                position=[bacterium.position.tolist()],
-                velocity=[bacterium.velocity.tolist()],
-                angle=[bacterium.angle],
-                total_force=[bacterium.total_force],
-                total_energy=[bacterium.total_energy],
-                living=[bacterium.living],
-                moving=[bacterium.moving],
-                length=[bacterium.length],
-                width=[bacterium.width])
-            }
-
         if not info_file_path.is_file():
             # create json template and save
             write_log_template(info_file_path)
@@ -56,7 +49,8 @@ class Biofilm(object):
         if sum(map(len, data['BACTERIA'].keys())) == 0:
             # if no entry in BACTERIA, create the first one.
             for bacteria, counter in zip(self.bacteria, range(0, len(self.bacteria))):
-                bacteria_dic.update(bacteria_dict(bacteria, counter))
+                bacteria_dic = bacteria.get_bacteria_dict()
+                bacteria_dic.update({'bacteria_%s' % str(counter): bacteria_dic})
 
         else:
             # copy already existing one and add to entries
@@ -66,7 +60,8 @@ class Biofilm(object):
                 # iterate over all entries in BACTERIA, append next iteration step to key values
                 if bacteria_name not in bacteria_dic.keys():
                     # Add bacteria to BACTERIUM keys, because it's not in there
-                    bacteria_dic.update(bacteria_dict(bacteria, counter))
+                    bacteria_dic = bacteria.get_bacteria_dict()
+                    bacteria_dic.update({'bacteria_%s' % str(counter): bacteria_dic})
                 else:
                     for entry in data['BACTERIA'][bacteria_name].keys():
                         # If entry already exists : Append info from next iteration step to corresponding entry
@@ -80,6 +75,40 @@ class Biofilm(object):
             # Maybe for checking integrity : len(data['BACTERIA']) - sum(map(len, data['BACTERIA'].keys()))
         data['BACTERIA'] = bacteria_dic
         save_dict_as_json(data, info_file_path)
+
+    def simulate(self, duration_in_min: int):
+        """
+        SPAWNS BACTERIA
+        Iterates over all Bacteria and updates Parameters
+        Because doubling time of bacteria is high with 20 mi, time is measured in minutes.
+         All units are SI, therefore conversion in seconds with factor 60 for calculations
+        """
+        info_file_name = get_info_file_path()
+        self.spawn()
+        print(self)
+        print("\nSTARTING MODELLING")
+        print(f"SIMULATE TIME INTERVAL {duration_in_min} min in steps of {C.TIME_STEP} s.")
+        for _ in tqdm.tqdm(range(0, duration_in_min * 60 / C.TIME_STEP)):
+            for bacterium in self.bacteria:
+                bacterium.update_acting_force()
+                bacterium.move()
+                bacterium.grow()
+                if bacterium.is_split_ready() and bacterium.living:
+                    daughter = bacterium.split()
+                    self.bacteria.append(daughter)
+
+                bacterium.random_cell_death()
+
+                for _bacterium in self.bacteria:
+                    if _bacterium != bacterium:
+                        [_bacterium, bacterium] = Biofilm.cell_cell_interaction(bacterium, _bacterium)
+
+                bacterium.update_acting_forces()
+
+            self.write_to_log(log_name=info_file_name)
+
+    def cell_cell_interaction(self, other: Bacterium):
+        raise NotImplemented
 
     def evolve(self):
         # Iterate over time steps

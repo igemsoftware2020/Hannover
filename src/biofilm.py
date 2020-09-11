@@ -102,11 +102,10 @@ class Biofilm(object):
                 # Add cell- cell interaction force, based on soft-repulsive potential
                 for _bacterium in self.bacteria:
                     # check if bacterium is not itself and distance is smaller than 2 times the bacterium length
-                    if bacterium != _bacterium and (
-                            np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
+                    if bacterium != _bacterium \
+                            and (np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
                         # add interaction force
-                        # bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium)
-                        pass
+                        bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium)
 
                 if bacterium.moving is True:
                     bacterium.update_velocity()
@@ -114,9 +113,9 @@ class Biofilm(object):
                 else:
                     bacterium.moving = random.choices([True, False], weights=[0.5, 0.5])[0]
 
-                if bacterium.living:
+                if bacterium.living is True:
                     bacterium.random_cell_death()
-                if not bacterium.living:
+                else:
                     # add increase overall LPS concentration
                     pass
 

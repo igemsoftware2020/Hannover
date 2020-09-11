@@ -262,7 +262,7 @@ def blind_run():
     plot_force(data, info_file_path, save_fig=True)
     plot_size(data, info_file_path, save_fig=True)
     plot_num(data,info_file_path,save_fig=True )
-    plot_pos(data,info_file_path,save_fig=True)
+    
 
 def plot_testing(info_file_name):
     info_file_path = C.OUTPUT_PATH / info_file_name

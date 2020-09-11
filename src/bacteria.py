@@ -73,7 +73,7 @@ class Bacterium:
         moment_of_inertia = C.BSUB_MASS / 6 * (3 * self.width ** 2 + self.length) + C.BSUB_MASS / 2 * self.width ** 2
         self.rotational_energy = 1 / 2 * moment_of_inertia * np.dot(self.velocity_angular, self.velocity_angular)
 
-    def update_translation_energy(self) -> float:
+    def update_translation_energy(self):
         self.translation_energy = 1 / 2 * C.BSUB_MASS * np.dot(self.velocity, self.velocity)
 
     def get_volume(self):

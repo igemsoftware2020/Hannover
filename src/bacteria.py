@@ -11,7 +11,7 @@ from typing import Dict
 import numpy as np
 
 from src.constants import Constants as C
-from src.utils import stokes_drag_force, gravitational_force
+from src.utils import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x
 
 
 # ********************************************************************************************
@@ -37,7 +37,7 @@ class Bacterium:
         """
 
         if angle is None:
-            angle = [random.randint(0, 360), random.randint(0, 360)]
+            self.angle = [random.randint(0, 360), random.randint(0, 360)]
         else:
             self.angle = angle
         if position is None:
@@ -48,30 +48,33 @@ class Bacterium:
             self.velocity = np.asarray([0, 0, 0], dtype=np.int64)
         else:
             self.velocity = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.int64)
+            # rotate velocity in direction of orientation
+            self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
+            self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
         self.width = width
         self.length = length
-        self.angle = angle  # angle is orientation of cell measured to x- axes in degree
         self.living = living
         self.moving = moving
         self.attached_to_surface = attached_to_surface
 
         self.velocity_angular = [0, 0]
+
         self.force = force
         self.total_force = np.linalg.norm(self.force)
 
-        self.rotational_energy = self.get_rotational_energy()
-        self.translation_energy = self.get_translation_energy()
-
+        self.rotational_energy = 0
+        self.translation_energy = 0
+        self.update_rotational_energy()
+        self.update_translation_energy()
         self.total_energy = self.translation_energy + self.rotational_energy
 
-    def get_rotational_energy(self):
+    def update_rotational_energy(self):
         moment_of_inertia = C.BSUB_MASS / 6 * (3 * self.width ** 2 + self.length) + C.BSUB_MASS / 2 * self.width ** 2
         self.rotational_energy = 1 / 2 * moment_of_inertia * np.dot(self.velocity_angular, self.velocity_angular)
-        return self.rotational_energy
 
-    def get_translation_energy(self) -> float:
-        return 1 / 2 * C.BSUB_MASS * np.dot(self.velocity, self.velocity)
+    def update_translation_energy(self) -> float:
+        self.translation_energy = 1 / 2 * C.BSUB_MASS * np.dot(self.velocity, self.velocity)
 
     def get_volume(self):
         """ gives out the cubic volume equivalent """
@@ -149,98 +152,47 @@ class Bacterium:
         return np.asarray(positions)
 
     def update_velocity(self, dt=C.TIME_STEP):
-        if (self.at_boundary() == 'X') or (self.at_boundary() == 'Y'):
-            # turn velocity by 90 degree
-            return
+        """
+        Update velocity direction and value based on the acting force.
+        Add Brownian movement in x,y,z direction
+        Add random angle movement
+        """
+        if self.at_boundary() == 'X':
+            apply_rotation(self.velocity, rotation_matrix_x(theta=np.pi / 2))
+        elif self.at_boundary() == 'Y':
+            apply_rotation(self.velocity, rotation_matrix_y(theta=np.pi / 2))
 
-        # projection of forces on movement direction
+        self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
+        self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
+        acceleration = self.force / C.BSUB_MASS
         # update velocities
+        self.velocity[0] = self.velocity[0] + acceleration[0] * dt
+        self.velocity[1] = self.velocity[1] + acceleration[1] * dt
+        self.velocity[2] = self.velocity[2] + acceleration[2] * dt
 
-        # add brown
+        # add brownian movement
+        self.velocity[0] = self.velocity[0] + random.random() * 0.01 * self.velocity[0]
+        self.velocity[1] = self.velocity[1] + random.random() * 0.01 * self.velocity[1]
+        self.velocity[2] = self.velocity[2] + random.random() * 0.01 * self.velocity[2]
+
+        # update angular velocity
+        # 3D  instantaneous angular velocity vector w = r x v / |r|^2
+        self.velocity_angular = np.cross(self.position, self.velocity) / np.linalg.norm(self.position) ** 2
+        # add random rotational velocity
+        self.velocity_angular[0] = self.velocity_angular[0] + random.random() * 0.01 * self.velocity_angular[0]
+        self.velocity_angular[1] = self.velocity_angular[1] + random.random() * 0.01 * self.velocity_angular[1]
+        self.velocity_angular[2] = self.velocity_angular[2] + random.random() * 0.01 * self.velocity_angular[2]
+
+    def update_position(self, dt=C.TIME_STEP):
+        """ update bacterium position based on velocity """
         self.position[0] = self.position[0] + self.velocity[0] * dt
         self.position[1] = self.position[1] + self.velocity[1] * dt
         self.position[2] = self.position[2] + self.velocity[2] * dt
-        self.angle[0] = self.angle[0] + self.velocity_angular[0] * dt
-        self.angle[1] = self.angle[1] + self.velocity_angular[1] * dt
 
-    def move(self, frameDim=C.WINDOW_SIZE, dt=C.TIME_STEP, friction=0.1):
-        """
-        Move Bacteria for 1 time unit and add random movement and rotation
-        :return:
-        """
-        # Active motion
-        if (self.moving == True) and (self.living == True):
-            self.velocity[0] = self.velocity[0] + 1.0 * math.sin(self.angle[0]) * dt
-            self.velocity[1] = self.velocity[1] + 1.0 * math.cos(self.angle[0]) * dt
-            self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.1 * dt
-            self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * dt
-        # Passive motion
-        if (self.moving == False) and (self.living == True):
-            self.velocity_angular[0] = self.velocity_angular[0] + (0.5 - random.random()) * 0.01 * dt
-            self.velocity_angular[1] = self.velocity_angular[1] + (0.5 - random.random()) * 0.001 * dt
-
-        # slight z-brownian random drift
-        self.velocity[2] = self.velocity[2] + (0.5 - random.random()) * 0.1 * dt
-        # And gravity
-        self.velocity[2] = self.velocity[2] - 0.981 * 0.5 * dt
-
-        # Boundary collision
-        for position in self.get_position():
-            if (False):
-                xborder = frameDim[1] * 0.5
-                if (position[0] < -xborder + self.width):
-                    self.velocity[0] = self.velocity[0] + (-position[0] - xborder + self.width) * 0.1
-                    self.total_force = self.total_force + np.linalg.norm(
-                        -position[0] - xborder + self.width) * 0.1
-                if (position[0] > xborder - self.width):
-                    self.velocity[0] = self.velocity[0] + (-position[0] + xborder - self.width) * 0.1
-                    self.total_force = self.total_force + np.linalg.norm(
-                        -position[0] + xborder - self.width) * 0.1
-            yborder = frameDim[0] * 0.5
-            if (position[1] < -yborder + self.width):
-                self.velocity[1] = self.velocity[1] + (-position[1] - yborder + self.width) * 0.1
-                self.total_force = self.total_force + np.linalg.norm(
-                    -position[1] - yborder + self.width) * 0.1
-            #    if(position[1]>yborder-self.width):
-            #        self.velocity[1] = self.velocity[1] + (-position[1]+yborder-self.width)*0.1
-            #        self.totalForce_equivalent = self.totalForce_equivalent + absolute(-position[1]+yborder-self.width)*0.1
-            # Bottom-boundary (z<=0)
-            if (position[2] < -0 + self.width):
-                self.velocity[2] = self.velocity[2] + (-position[2] + self.width) * 0.1
-                # self.totalForce_equivalent = self.totalForce_equivalent + absolute(-position[2]+self.width)*0.1
-
-                # Bounding-box torque
-                positions = self.get_position()
-                lenPos = len(positions)
-                for index in range(lenPos - 1):
-                    position = positions[index]
-                    t_radius = (index - lenPos * 0.5)
-                    # dx = _Bacterium.pos[0] - position[0]#self.pos[0]
-                    # dy = _Bacterium.pos[1] - position[1]#self.pos[1]
-                    dz = -position[2] + self.width  # self.pos[2]
-                    repulsion_z = -dz  #
-                    # dr = dx*dx+dy*dy+dz*dz
-                    interactionfactor = 0.005
-                    self.velocity_angular[1] = self.velocity_angular[1] - t_radius * math.cos(
-                        self.angle[1]) * repulsion_z / lenPos * 0.05 * interactionfactor * dt
-
-        self.position[0] = self.position[0] + self.velocity[0] * dt
-        self.position[1] = self.position[1] + self.velocity[1] * dt
-        self.position[2] = self.position[2] + self.velocity[2] * dt
-        self.angle[0] = self.angle[0] + self.velocity_angular[0] * dt
-        self.angle[1] = self.angle[1] + self.velocity_angular[1] * dt
-
-        self.velocity[0] = self.velocity[0] * friction
-        self.velocity[1] = self.velocity[1] * friction
-        self.velocity[2] = self.velocity[2] * friction
-        self.velocity_angular[0] = self.velocity_angular[0] * friction
-        self.velocity_angular[1] = self.velocity_angular[1] * friction
-
-        # self.velocity_angular[1] = self.velocity_angular[1]+0.1
-        # Total Force sum
-        # kind of proportional to biofilm pressure
-        # decays over time
-        self.total_force = self.total_energy * 0.9
+        # update orientation
+        self.angle[0] = self.angle[0] + self.velocity_angular * dt
+        self.angle[1] = self.angle[1] + self.velocity_angular * dt
+        self.angle[2] = self.angle[2] + self.velocity_angular * dt
 
     def at_boundary(self):
         x, y, z = self.position
@@ -252,7 +204,11 @@ class Bacterium:
         return False
 
     def is_split_ready(self):
-
+        """
+        checks if size of bacterium is long enough for splitting
+        If bacterium is big enough, splitting occurs with a probability of 0.8
+        returns True if splitting is possible, False otherwise
+        """
         splitting_lengths = random.randrange(C.BSUB_CRITICAL_LENGTH - 1, C.BSUB_CRITICAL_LENGTH + 1)
         if splitting_lengths <= self.length:
             return np.random.choice([True, False], p=[0.8, 0.2])
@@ -266,7 +222,6 @@ class Bacterium:
             # if distance from surface greater than 4 µm, add adhesion force
             self.force = self.force + C.MAX_CELL_SUBSTRATE_ADHESION
         # add gravitational force
-        # TODO: Scale mass with bacterium size
         self.force += gravitational_force(C.BSUB_MASS)
 
 

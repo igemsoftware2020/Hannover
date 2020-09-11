@@ -87,7 +87,7 @@ class Biofilm(object):
         self.spawn()
         print(self)
         print("\nSTARTING MODELLING")
-        print(f"SIMULATE TIME INTERVAL {duration_in_min} min in steps of {C.TIME_STEP} s.")
+        print(f"SIMULATION TIME INTERVAL {duration_in_min} min in steps of {C.TIME_STEP} s.")
         for _ in tqdm.tqdm(range(0, duration_in_min * 60 / C.TIME_STEP)):
             for bacterium in self.bacteria:
                 # Grow Bacterium
@@ -96,17 +96,25 @@ class Biofilm(object):
                 if bacterium.is_split_ready() and bacterium.living:
                     daughter = bacterium.split()
                     self.bacteria.append(daughter)
+
                 # Forces on bacterium because of drag, adhesion force, gravity
                 bacterium.update_acting_force()
+                # Add cell- cell interaction force, based on soft-repulsive potential
                 for _bacterium in self.bacteria:
-                    if _bacterium != bacterium and not np.array_equal(bacterium.position, _bacterium.position) and \
-                            (np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
+                    # check if bacterium is not itself and distance is smaller than 2 times the bacterium length
+                    if _bacterium != bacterium and (
+                            np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
+                        # add interaction force
                         bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium)
 
                 bacterium.update_velocity()
-                bacterium.move()
+                bacterium.update_position()
+                bacterium.update_orientation()
 
                 bacterium.random_cell_death()
+                if not bacterium.living:
+                    # add increase overall LPS concentration
+                    pass
 
             self.write_to_log(log_name=info_file_name)
 
@@ -116,6 +124,11 @@ class Biofilm(object):
 
     @staticmethod
     def cell_cell_interaction(self: Bacterium, other: Bacterium):
+        """
+        returns force vector of cell- cell interaction.
+        Force direction is in direction of the distance vector between the bacteria.
+        Force value based on Lennard-Jones Potential / Soft-repulsive potential
+        """
         return Biofilm.abs_force_lennard_jones_potential(other, other) * Biofilm.distance_vector(self, other)
 
     def __repr__(self):

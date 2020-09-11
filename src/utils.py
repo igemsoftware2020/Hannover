@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 # imports
 import numpy as np
 import pandas as pd
+from scipy.spatial.transform import Rotation as R
 
 # custom libraries
 from src.constants import Constants as C
@@ -257,3 +258,25 @@ def rotate(origin, point, angle):
     qx = ox + np.cos(angle) * (px - ox) - np.sin(angle) * (py - oy)
     qy = oy + np.sin(angle) * (px - ox) + np.cos(angle) * (py - oy)
     return qx, qy
+
+
+def rotation_matrix_x(theta: float):
+    # return numpy array with rotation matrix around x axis with angle theta
+    r = R.from_euler('x', theta)
+    return r.as_matrix()
+
+
+def rotation_matrix_y(theta: float):
+    # return numpy array with rotation matrix around y axis with angle theta
+    r = R.from_euler('y', theta)
+    return r.as_matrix()
+
+
+def rotation_matrix_z(theta: float):
+    # return numpy array with rotation matrix around z axis with angle theta
+    r = R.from_euler('z', theta)
+    return r.as_matrix()
+
+
+def apply_rotation(vector: np.ndarray, matrix: R):
+    return matrix.apply(vector)

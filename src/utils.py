@@ -209,7 +209,7 @@ def prompt_log_at_start(save_dir: str):
             "GROWTH FACTOR\t {BSUB_GROWTH_FACTOR}\n"
             "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n\n"
             "SAVING AS \t {saving_dir}"
-            .format(number_bacteria=C.START_NUMBER_BACTERIA,
+            .format(number_bacteria=C.NUM_INITIAL_BACTERIA,
                     type="B. subtilius", BSUB_LENGTH=C.BSUB_LENGTH,
                     BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
                     BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH,
@@ -218,13 +218,15 @@ def prompt_log_at_start(save_dir: str):
 
 def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity=C.EFFECTIVE_VISCOSITY_EPS) -> np.ndarray:
     # Calculates Stokes' drag for a sphere with Reynolds number < 1.
-    return - 6 * np.pi * radius * viscosity * velocity
+    # [um * Pa * s 1/1E-6 * um / s] = [um * kg / (um * s **2) * s  * um / s] = [um kg / (s ** 2)]
+    return - 6 * np.pi * radius * viscosity * 1E-12 * velocity
 
 
 def gravitational_force(mass: float) -> np.ndarray:
     # calculates gravitational force on a mass
     # F = m * g * e_z
-    return mass * 9.81 * np.asarray([0, 0, -1])
+    # [kg * um / s ** 2]
+    return mass * 9.81 * 1E6 * np.asarray([0, 0, -1])
 
 
 def simulation_duration(func):
@@ -258,19 +260,19 @@ def rotate(origin, point, angle):
 def rotation_matrix_x(theta: float):
     # return numpy array with rotation matrix around x axis with angle theta
     r = R.from_euler('x', theta)
-    return r.as_matrix()
+    return r
 
 
 def rotation_matrix_y(theta: float):
     # return numpy array with rotation matrix around y axis with angle theta
     r = R.from_euler('y', theta)
-    return r.as_matrix()
+    return r
 
 
 def rotation_matrix_z(theta: float):
     # return numpy array with rotation matrix around z axis with angle theta
     r = R.from_euler('z', theta)
-    return r.as_matrix()
+    return r
 
 
 def apply_rotation(vector: np.ndarray, matrix: R):

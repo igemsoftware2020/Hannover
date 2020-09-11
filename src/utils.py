@@ -195,8 +195,11 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     plt.xlabel('Step')
     plt.ylabel('Bacteria Number')
     plt.title('Bacteria Growth')
+    
+    
+    if save_fig:
+            plt.savefig(save_path / 'growth_plot.jpeg')
     plt.show()
-
 
 
 def get_info_file_path():

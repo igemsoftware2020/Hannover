@@ -11,7 +11,7 @@ from typing import Dict
 import numpy as np
 
 from src.constants import Constants as C
-from src.utils import stokes_drag_force
+from src.utils import stokes_drag_force, gravitational_force
 
 
 # ********************************************************************************************
@@ -87,8 +87,8 @@ class Bacterium:
         if self.living is True:
             self.length = self.length * (C.BSUB_GROWTH_FACTOR + 1)
         else:
-            # self.width  = self.width *gr_d_factor
-            self.length = self.length * (1 - C.gr_d_factor)
+            # if cell is dead, constant length
+            pass
 
     def random_cell_death(self):
         # Programmed cell death
@@ -265,6 +265,9 @@ class Bacterium:
         if (self.position[3] < 4) and self.attached_to_surface:
             # if distance from surface greater than 4 µm, add adhesion force
             self.force = self.force + C.MAX_CELL_SUBSTRATE_ADHESION
+        # add gravitational force
+        # TODO: Scale mass with bacterium size
+        self.force += gravitational_force(C.BSUB_MASS)
 
 
 def bacteria_dict(bacterium: Bacterium) -> Dict:

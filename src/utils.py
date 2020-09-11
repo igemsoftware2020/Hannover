@@ -216,9 +216,15 @@ def prompt_log_at_start(save_dir: str):
                     BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR, saving_dir=save_dir))
 
 
-def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity=C.EFFECTIVE_VISCOSITY_EPS):
+def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity=C.EFFECTIVE_VISCOSITY_EPS) -> np.ndarray:
     # Calculates Stokes' drag for a sphere with Reynolds number < 1.
     return - 6 * np.pi * radius * viscosity * velocity
+
+
+def gravitational_force(mass: float) -> np.ndarray:
+    # calculates gravitational force on a mass
+    # F = m * g * e_z
+    return mass * 9.81 * np.asarray([0, 0, -1])
 
 
 def simulation_duration():

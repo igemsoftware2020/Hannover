@@ -90,13 +90,13 @@ class Biofilm(object):
         print(f"SIMULATE TIME INTERVAL {duration_in_min} min in steps of {C.TIME_STEP} s.")
         for _ in tqdm.tqdm(range(0, duration_in_min * 60 / C.TIME_STEP)):
             for bacterium in self.bacteria:
-
+                # Grow Bacterium
                 bacterium.grow()
+                # Split Bacterium
                 if bacterium.is_split_ready() and bacterium.living:
                     daughter = bacterium.split()
                     self.bacteria.append(daughter)
-                bacterium.random_cell_death()
-
+                # Forces on bacterium because of drag, adhesion force, gravity
                 bacterium.update_acting_force()
                 for _bacterium in self.bacteria:
                     if _bacterium != bacterium and not np.array_equal(bacterium.position, _bacterium.position) and \
@@ -105,6 +105,8 @@ class Biofilm(object):
 
                 bacterium.update_velocity()
                 bacterium.move()
+
+                bacterium.random_cell_death()
 
             self.write_to_log(log_name=info_file_name)
 

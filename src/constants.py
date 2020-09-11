@@ -15,7 +15,6 @@ class Constants:
 
     # SIMULATION PARAMETERS
     TIME_STEP = 10  # in seconds
-    NUMBER_ITERATIONS = 720
     NUM_INITIAL_BACTERIA = 10
     # constants B. subtilius
 

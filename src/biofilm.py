@@ -13,7 +13,7 @@ import tqdm
 from src.bacteria import Bacterium
 from src.constants import Constants as C
 from src.utils import get_info_file_path
-from src.utils import write_log_template, read_in_log, save_dict_as_json
+from src.utils import write_log_template, read_in_log, save_dict_as_json, simulation_duration
 
 
 class Biofilm(object):
@@ -76,6 +76,7 @@ class Biofilm(object):
         data['BACTERIA'] = bacteria_dic
         save_dict_as_json(data, info_file_path)
 
+    @simulation_duration
     def simulate(self, duration_in_min: int):
         """
         SPAWNS BACTERIA

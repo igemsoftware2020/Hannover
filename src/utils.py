@@ -228,22 +228,18 @@ def gravitational_force(mass: float) -> np.ndarray:
     return mass * 9.81 * np.asarray([0, 0, -1])
 
 
-def simulation_duration():
-    def calculate_time(func):
-        # added arguments inside the inner1,
-        # if function takes any arguments,
-        # can be added like this.
-        def inner1(*args, **kwargs):
-            # storing time before function execution
-            begin = time.time()
+def simulation_duration(func):
+    def inner1(*args, **kwargs):
+        # storing time before function execution
+        begin = time.time()
 
-            func(*args, **kwargs)
+        func(*args, **kwargs)
 
-            # storing time after function execution
-            end = time.time()
-            print("Duration : ", func.__name__, end - begin)
+        # storing time after function execution
+        end = time.time()
+        print("Duration : ", func.__name__, end - begin)
 
-        return inner1
+    return inner1
 
 
 def rotate(origin, point, angle):

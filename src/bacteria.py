@@ -9,7 +9,7 @@ import random
 
 import numpy as np
 
-from src.constants import Constants as C
+from constants import Constants as C
 
 
 # ********************************************************************************************

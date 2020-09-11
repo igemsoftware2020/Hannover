@@ -10,9 +10,9 @@ from typing import Dict
 import numpy as np
 
 # custom libraries
-from src.bacteria import Bacterium
-from src.constants import Constants as C
-from src.utils import write_log_template, read_in_log, save_dict_as_json
+from bacteria import Bacterium
+from constants import Constants as C
+from utils import write_log_template, read_in_log, save_dict_as_json
 
 
 class Biofilm(object):

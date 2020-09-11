@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 # custom libraries
-from src.constants import Constants as C
+from constants import Constants as C
 
 
 def write_log_template(info_file_path):
@@ -186,6 +186,16 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     if save_fig:
         fig.savefig(save_path / 'size_plot.jpeg')
 
+def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    live=get_data_to_parameter(data, 'living')
+    num=live[live==True].count(axis=1)
+    plt.plot(num,color='b')
+    plt.xlabel('Step')
+    plt.ylabel('Bacteria Number')
+    plt.title('Bacteria Growth')
+    plt.show()
+
+
 
 def get_info_file_path():
     date_time = str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min_' + \
@@ -196,6 +206,8 @@ def get_info_file_path():
     path_out.mkdir()
     info_file_name = path_out / f'log_{date_time}.json'
     return info_file_name
+
+
 
 
 def prompt_log_at_start():

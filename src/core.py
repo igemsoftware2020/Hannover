@@ -11,13 +11,13 @@
 import math
 import os
 
-import cv2
+#mport cv2
 import numpy as np
 
-from src.biofilm import Biofilm
-from src.constants import Constants as C
-from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
-    prompt_log_at_start
+from biofilm import Biofilm
+from constants import Constants as C
+from utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
+    prompt_log_at_start, plot_num
 
 
 # custom libraries
@@ -256,7 +256,8 @@ def blind_run():
     plot_positions(data, info_file_path, save_fig=True)
     plot_force(data, info_file_path, save_fig=True)
     plot_size(data, info_file_path, save_fig=True)
-
+    plot_num(data,info_file_path,save_fig=True )
+    plot_pos(data,info_file_path,save_fig=True)
 
 def plot_testing(info_file_name):
     info_file_path = C.OUTPUT_PATH / info_file_name

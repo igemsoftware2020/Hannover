@@ -93,7 +93,7 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
     means = plot_data.mean(axis=1, skipna=True)
     fig, (ax1, ax2) = plt.subplots(1, 2)
     for bacteria in plot_data:
-        ax1.plot(plot_data.loc[:, bacteria])
+        ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Velocities')
     ax1.set_xlabel('Step')
@@ -117,7 +117,7 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     means = plot_data.mean(axis=1, skipna=True)
     fig, (ax1, ax2) = plt.subplots(1, 2)
     for bacteria in plot_data:
-        ax1.plot(plot_data.loc[:, bacteria])
+        ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Position')
     ax1.set_xlabel('Step')
@@ -141,7 +141,7 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     means = plot_data.mean(axis=1, skipna=True)
     fig, (ax1, ax2) = plt.subplots(1, 2)
     for bacteria in plot_data:
-        ax1.plot(plot_data.loc[:, bacteria])
+        ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Total force')
     ax1.set_xlabel('Step')
@@ -167,8 +167,8 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     length_means = length_data.mean(axis=1, skipna=True)
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
     for bacteria in width_data:
-        ax1.plot(width_data.loc[:, bacteria])
-        ax2.plot(length_data.loc[:, bacteria.replace('width', 'length')])
+        ax1.plot(width_data.loc[:, bacteria], '--', alpha=0.3)
+        ax2.plot(length_data.loc[:, bacteria.replace('width', 'length')], '--', alpha=0.3)
     ax1.set_title('width')
     ax1.set_xlabel('Step')
     ax1.set_ylabel('width')

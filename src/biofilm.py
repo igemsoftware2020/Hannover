@@ -88,7 +88,7 @@ class Biofilm(object):
         print("\nSTARTING MODELLING")
         print(f"SIMULATION TIME INTERVAL {duration_in_min} min in steps of {C.TIME_STEP} s.")
         for _ in tqdm.tqdm(range(0, round(duration_in_min * 60 / C.TIME_STEP))):
-            print("STEP ", _)
+
             for bacterium in self.bacteria:
                 # Grow Bacterium
                 bacterium.grow()
@@ -110,9 +110,7 @@ class Biofilm(object):
 
                 if bacterium.moving is True:
                     bacterium.update_velocity()
-                    print("Velocity :", bacterium.velocity)
                     bacterium.update_position()
-                    print("Postition :", bacterium.position)
                 else:
                     bacterium.moving = random.choices([True, False], weights=[0.5, 0.5])[0]
 
@@ -149,12 +147,11 @@ class Biofilm(object):
     def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium):
         """ return interaction term with bacteria in local environment"""
 
-        # TODO: update velocities accordingly
         def lennard_jones_force(r, epsilon, r_min):
             return - epsilon * (12 * (r_min ** 12 / r ** 13) - 12 * (r_min ** 6 / r ** 7))
 
         distance_vector = bacterium1.position - bacterium2.position
-        distance = np.linalg.norm(distance_vector)
+        distance = np.linalg.norm(distance_vector) * 1E6
         repulsive_force = lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION, r_min=bacterium1.width)
         return repulsive_force
 

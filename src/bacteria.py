@@ -153,9 +153,9 @@ class Bacterium:
         Add random angle movement
         """
         if self.at_boundary() == 'X':
-            apply_rotation(self.velocity, rotation_matrix_x(theta=np.pi / 2))
+            apply_rotation(self.velocity, rotation_matrix_x(theta=np.pi))
         elif self.at_boundary() == 'Y':
-            apply_rotation(self.velocity, rotation_matrix_y(theta=np.pi / 2))
+            apply_rotation(self.velocity, rotation_matrix_y(theta=np.pi))
 
         acceleration = self.force / C.BSUB_MASS * 1E-6  # [um / s ** 2]
         # update velocities
@@ -167,21 +167,22 @@ class Bacterium:
             self.velocity[2] = 0
             self.position[2] = 0
 
-        self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
-        self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
+        # Careful: rotate along bacterium axis
+        # self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
+        # self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
         # add brownian movement
-        self.velocity[0] = self.velocity[0] + random.random()
-        self.velocity[1] = self.velocity[1] + random.random()
-        self.velocity[2] = self.velocity[2] + random.random()
+        self.velocity[0] = self.velocity[0] + random.uniform(-1, 1)  # add random velocity up to 1 um / s
+        self.velocity[1] = self.velocity[1] + random.uniform(-1, 1)
+        self.velocity[2] = self.velocity[2] + random.uniform(-1, 1)
 
         # update angular velocity
         # 3D  instantaneous angular velocity vector w = r x v / |r|^2
         self.velocity_angular = np.cross(self.position, self.velocity) / np.linalg.norm(self.position) ** 2
         # add random rotational velocity
-        self.velocity_angular[0] = self.velocity_angular[0] + random.random() * self.velocity_angular[0]
-        self.velocity_angular[1] = self.velocity_angular[1] + random.random() * self.velocity_angular[1]
-        self.velocity_angular[2] = self.velocity_angular[2] + random.random() * self.velocity_angular[2]
+        self.velocity_angular[0] = self.velocity_angular[0] + random.uniform(- 0.02, 0.02)
+        self.velocity_angular[1] = self.velocity_angular[1] + random.uniform(- 0.02, 0.02)
+        self.velocity_angular[2] = self.velocity_angular[2] + random.uniform(- 0.02, 0.02)
 
     def update_position(self, dt=C.TIME_STEP):
         """ update bacterium position based on velocity """

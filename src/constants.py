@@ -14,8 +14,8 @@ class Constants:
     SOURCE_PATH = ROOT_DIRECTORY / 'src'
 
     # SIMULATION PARAMETERS
-    TIME_STEP = 10  # in seconds
-    NUM_INITIAL_BACTERIA = 1
+    TIME_STEP = 1  # in seconds
+    NUM_INITIAL_BACTERIA = 6
     # constants B. subtilius
 
     BSUB_WIDTH = 1  # MICROMETERS https://en.wikipedia.org/wiki/Bacillus_subtilis

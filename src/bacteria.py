@@ -17,7 +17,6 @@ from src.utils import stokes_drag_force, gravitational_force, apply_rotation, ro
 # ********************************************************************************************
 # main class <<<bacterium>>>
 
-
 class Bacterium:
 
     def __init__(self, position: np.ndarray = None,
@@ -167,7 +166,6 @@ class Bacterium:
             self.velocity[2] = 0
             self.position[2] = 0
 
-        # Careful: rotate along bacterium axis
         # self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
         # self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 

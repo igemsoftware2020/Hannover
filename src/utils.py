@@ -1,18 +1,21 @@
+# imports
 import json
+import math
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
 import matplotlib.pyplot as plt
-# ********************************************************************************************
-# imports
 import numpy as np
 import pandas as pd
 from scipy.spatial.transform import Rotation as R
 
 # custom libraries
 from src.constants import Constants as C
+
+
+# ********************************************************************************************
 
 
 def write_log_template(info_file_path):
@@ -277,3 +280,17 @@ def rotation_matrix_z(theta: float):
 
 def apply_rotation(vector: np.ndarray, matrix: R):
     return matrix.apply(vector)
+
+
+def rotate(origin, point, angle):
+    """
+    Rotate a point counterclockwise by a given angle around a given origin.
+
+    The angle should be given in radians.
+    """
+    ox, oy = origin
+    px, py = point
+
+    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+    return qx, qy

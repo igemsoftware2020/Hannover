@@ -248,7 +248,7 @@ def blind_run():
     print(prompt_log_at_start(info_file_name))
 
     biofilm = Biofilm()
-    biofilm.simulate(duration_in_min=60, save_name=info_file_name)
+    biofilm.simulate(duration_in_min=5, save_name=info_file_name)
 
     data = bacteria_as_pandas(info_file_name)
 

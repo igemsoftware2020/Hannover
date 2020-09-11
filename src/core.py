@@ -242,14 +242,17 @@ def coreLoop(biofilm, out, txt):
 
 
 def blind_run():
-    print(prompt_log_at_start())
 
     info_file_name = get_info_file_path()
     info_file_path = info_file_name.parent
+
+    print(prompt_log_at_start(info_file_name))
+
     biofilm = Biofilm()
     biofilm.simulate(duration_in_min=9)
 
     data = bacteria_as_pandas(info_file_name)
+
     plot_velocities(data, info_file_path, save_fig=True)
     plot_positions(data, info_file_path, save_fig=True)
     plot_force(data, info_file_path, save_fig=True)

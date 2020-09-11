@@ -90,58 +90,31 @@ class Biofilm(object):
         print(f"SIMULATE TIME INTERVAL {duration_in_min} min in steps of {C.TIME_STEP} s.")
         for _ in tqdm.tqdm(range(0, duration_in_min * 60 / C.TIME_STEP)):
             for bacterium in self.bacteria:
-                bacterium.update_acting_force()
-                bacterium.move()
+
                 bacterium.grow()
                 if bacterium.is_split_ready() and bacterium.living:
                     daughter = bacterium.split()
                     self.bacteria.append(daughter)
-
                 bacterium.random_cell_death()
 
+                bacterium.update_acting_force()
                 for _bacterium in self.bacteria:
-                    if _bacterium != bacterium:
-                        [_bacterium, bacterium] = Biofilm.cell_cell_interaction(bacterium, _bacterium)
+                    if _bacterium != bacterium and not np.array_equal(bacterium.position, _bacterium.position) and \
+                            (np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
+                        bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium)
 
-                bacterium.update_acting_forces()
+                bacterium.update_velocity()
+                bacterium.move()
 
             self.write_to_log(log_name=info_file_name)
 
-    def cell_cell_interaction(self, other: Bacterium):
-        raise NotImplemented
+    @staticmethod
+    def distance_vector(self: Bacterium, other: Bacterium):
+        return self.position - other.position
 
-    def evolve(self):
-        # Iterate over time steps
-        for bacterium in self.bacteria:
-            # Iterate over bacteria in self.bacteria
-            bacterium.grow()
-
-            if not bacterium.living and bacterium.get_volume() < 3300:
-                self.bacteria.remove(bacterium)
-            # Manage repulsion
-            # (The most expensive task)
-            for _bacterium in self.bacteria:
-                if not np.array_equal(bacterium.position, _bacterium.position):
-                    [_bacterium, bacterium] = Biofilm.interaction(bacterium, _bacterium)
-            bacterium.move()
-
-            # Manage Bacterial splitting
-            # Add a little bit of random until -----it looks good and real-----
-            if bacterium.is_split_ready() and bacterium.living:
-                energy_before = bacterium.total_energy
-                daughter = bacterium.split()
-                # self.check_energy_conservation(bacterium, daughter, energy_before)
-                self.bacteria.append(daughter)
-
-            # Manage Bacterial Motion-Mode
-            # Enable/Disable motion mode
-            if bacterium.living:
-                if random.random() > 1.0 - C.MOTION_ACTIVATION_PROBABILITY:
-                    bacterium.moving = True
-                if random.random() > 1.0 - C.MOTION_DEACTIVATION_PROBABILITY:
-                    bacterium.moving = False
-            else:
-                bacterium.moving = False
+    @staticmethod
+    def cell_cell_interaction(self: Bacterium, other: Bacterium):
+        return Biofilm.abs_force_lennard_jones_potential(other, other) * Biofilm.distance_vector(self, other)
 
     def __repr__(self):
         return f'Biofilm currently consisting of {len(self.bacteria)} bacteria'
@@ -152,7 +125,7 @@ class Biofilm(object):
         return sorted(sorted_bacteria, key=lambda x: x.position[axis], reverse=_reverse)
 
     @staticmethod
-    def interaction_jones(bacterium1: Bacterium, bacterium2: Bacterium):
+    def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium):
         """ return interaction term with bacteria in local environment"""
 
         # TODO: update velocities accordingly
@@ -160,20 +133,9 @@ class Biofilm(object):
             return - epsilon * (12 * (r_min ** 12 / r ** 13) - 12 * (r_min ** 6 / r ** 7))
 
         distance_vector = bacterium1.position - bacterium2.position
-        distance = np.sqrt(np.dot(distance_vector, distance_vector))
-
-        if distance < bacterium1.length * 4 and distance != 0:
-            # Values for epsilon and r_min kinda random
-            repulsive_force = lennard_jones_force(distance, epsilon=0.1, r_min=bacterium1.length)
-            acceleration = repulsive_force / C.BSUB_MASS
-
-            def new_position(a, v, t, r): return 1 / 2 * a * t ** 2 + v * t + r
-
-            bacterium1.position = new_position(acceleration, bacterium1.velocity, C.TIME_STEP, bacterium1.position)
-            bacterium2.position = new_position(acceleration, bacterium2.velocity, C.TIME_STEP, bacterium2.position)
-            print("Bac2 interaction position ", bacterium2.position)
-
-        return bacterium1, bacterium2
+        distance = np.linalg.norm(distance_vector)
+        repulsive_force = lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION, r_min=bacterium1.width)
+        return repulsive_force
 
     @staticmethod
     def interaction(bacterium1, bacterium2):

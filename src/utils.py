@@ -199,7 +199,7 @@ def get_info_file_path():
     return info_file_name
 
 
-def prompt_log_at_start():
+def prompt_log_at_start(save_dir: str):
     return (f"********************* BIOFILM MODELING *********************\n"
             "NUMBER OF INITIAL BACTERIA\t {number_bacteria}\n"
             "NUMBER OF ITERATIONS\t {iterations}\n\n"
@@ -207,14 +207,16 @@ def prompt_log_at_start():
             "INITIAL DIMENSIONS (LENGTH, WIDTH)\t {BSUB_LENGTH},\t{BSUB_WIDTH}\n"
             "MASS\t {BSUB_MASS}\n"
             "GROWTH FACTOR\t {BSUB_GROWTH_FACTOR}\n"
-            "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n"
+            "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n\n"
+            "SAVING AS \t {saving_dir}"
             .format(number_bacteria=C.START_NUMBER_BACTERIA, iterations=C.NUMBER_ITERATIONS,
                     type="B. subtilius", BSUB_LENGTH=C.BSUB_LENGTH,
                     BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
-                    BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH, BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR))
+                    BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH,
+                    BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR, saving_dir=save_dir))
 
 
-def stokes_drag_force(radius: int, velocity: np.ndarray, viscosity=C.EFFECTIVE_VISCOSITY_EPS):
+def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity=C.EFFECTIVE_VISCOSITY_EPS):
     # Calculates Stokes' drag for a sphere with Reynolds number < 1.
     return - 6 * np.pi * radius * viscosity * velocity
 
@@ -235,3 +237,17 @@ def simulation_duration():
             print("Duration : ", func.__name__, end - begin)
 
         return inner1
+
+
+def rotate(origin, point, angle):
+    """
+    Rotate a point counterclockwise by a given angle around a given origin.
+
+    The angle should be given in radians.
+    """
+    ox, oy = origin
+    px, py = point
+
+    qx = ox + np.cos(angle) * (px - ox) - np.sin(angle) * (py - oy)
+    qy = oy + np.sin(angle) * (px - ox) + np.cos(angle) * (py - oy)
+    return qx, qy

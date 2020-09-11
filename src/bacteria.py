@@ -11,6 +11,7 @@ from typing import Dict
 import numpy as np
 
 from src.constants import Constants as C
+from src.utils import stokes_drag_force
 
 
 # ********************************************************************************************
@@ -24,7 +25,7 @@ class Bacterium:
                  length: float = C.BSUB_LENGTH,
                  velocity: np.ndarray = None,
                  angle: np.ndarray = None, force: np.ndarray = None,
-                 living: bool = True, moving: bool = False):
+                 living: bool = True, moving: bool = False, attached_to_surface: bool = False):
         """
         initialize a instance of the Bacteria class
         :param position: position of bacteria center [x_pox, y_pos, z_pos]
@@ -53,12 +54,15 @@ class Bacterium:
         self.angle = angle  # angle is orientation of cell measured to x- axes in degree
         self.living = living
         self.moving = moving
+        self.attached_to_surface = attached_to_surface
 
         self.velocity_angular = [0, 0]
         self.force = force
         self.total_force = np.linalg.norm(self.force)
+
         self.rotational_energy = self.get_rotational_energy()
         self.translation_energy = self.get_translation_energy()
+
         self.total_energy = self.translation_energy + self.rotational_energy
 
     def get_rotational_energy(self):
@@ -78,26 +82,13 @@ class Bacterium:
         grow bacteria for 1 second with speed growth_rate
         """
         # Make the bacteria grow
-        # using a constant growth rate ( volume per time)
-        # growths inhibition factor
-        volume = self.get_volume()
+        # using a constant growth rate
+        # TODO Make volume per time
         if self.living is True:
-            #  growth_suppressor = gr_factor*gr_pr_i/(gr_pr_i+self.totalForce_equivalent*0.5)-gr_factor_inv
-            # growth_factor = (volume+volume**(1/3)*5.0*growth_suppressor*growth_suppressor)/volume
-            # self.width  = self.width *growth_factor
             self.length = self.length * (C.BSUB_GROWTH_FACTOR + 1)
         else:
             # self.width  = self.width *gr_d_factor
             self.length = self.length * (1 - C.gr_d_factor)
-
-        # if self.living is False:
-        #   growth_suppressor = C.BSUB_GROWTH_FACTOR * C.gr_pr_i / (
-        #           C.gr_pr_i + self.total_force * 0.5) - C.gr_factor_inv
-        #   growth_factor = (volume + volume ** (1 / 3) * 5.0 * growth_suppressor * growth_suppressor) / volume
-        #    # self.width  = self.width *growth_factor
-        #    self.length = self.length * (1 + growth_factor)
-
-        # self.random_cell_death()
 
     def random_cell_death(self):
         # Programmed cell death
@@ -119,8 +110,6 @@ class Bacterium:
         # Calculate new position and angle
         # Advanced new position: random angular component,
         #                       radial component sum of two radii*0.8
-        def update_angle(angle):
-            return np.array(angle) + (0.5 - random.random()) * np.pi * 0.5
 
         def get_daughter_position(position, split_distance, angle):
             offset = (split_distance * math.sin(angle[0]) * math.cos(angle[1]),
@@ -134,11 +123,11 @@ class Bacterium:
 
         # Update parameters of daughter and mother bacterium
         daughter_bac_length = volume_ratio * self.length
-        daughter_bac_angle = update_angle(self.angle)
+        daughter_bac_angle = self.angle  # same orientation?
         daughter_bac_position = get_daughter_position(position=self.position, split_distance=self.length * 0.2,
                                                       angle=daughter_bac_angle)
         daughter_bac = Bacterium(daughter_bac_position, self.width, daughter_bac_length,
-                                 self.velocity, self.angle, 0, True, False)
+                                 self.velocity, self.angle, moving=True)
 
         # update mother cell
         self.length = (1 - volume_ratio) * self.length
@@ -159,6 +148,20 @@ class Bacterium:
                           self.position[2] + int(0.1 * dz_length)))
         return np.asarray(positions)
 
+    def update_velocity(self, dt=C.TIME_STEP):
+        if (self.at_boundary() == 'X') or (self.at_boundary() == 'Y'):
+            # turn velocity by 90 degree
+            return
+
+        # projection of forces on movement direction
+        # update velocities
+
+        # add brown
+        self.position[0] = self.position[0] + self.velocity[0] * dt
+        self.position[1] = self.position[1] + self.velocity[1] * dt
+        self.position[2] = self.position[2] + self.velocity[2] * dt
+        self.angle[0] = self.angle[0] + self.velocity_angular[0] * dt
+        self.angle[1] = self.angle[1] + self.velocity_angular[1] * dt
 
     def move(self, frameDim=C.WINDOW_SIZE, dt=C.TIME_STEP, friction=0.1):
         """
@@ -249,20 +252,19 @@ class Bacterium:
         return False
 
     def is_split_ready(self):
-        def gaussian_distribution(x, mu=C.BSUB_CRITICAL_LENGTH, sigma=C.BSUB_CRITICAL_LENGTH * 0.12):
-            return 1 / np.sqrt(2 * np.pi * sigma ** 2) * np.exp(- (x - mu) ** 2 / (2 * sigma ** 2))
 
-        splitting_lengths = np.random.normal(C.BSUB_CRITICAL_LENGTH, C.BSUB_CRITICAL_LENGTH * 0.12)
+        splitting_lengths = random.randrange(C.BSUB_CRITICAL_LENGTH - 1, C.BSUB_CRITICAL_LENGTH + 1)
         if splitting_lengths <= self.length:
-            # probability_to_split = gaussian_distribution(self.length)
-            # return np.random.choice([True, False], p=[probability_to_split, 1 - probability_to_split])
-            return True
+            return np.random.choice([True, False], p=[0.8, 0.2])
         else:
             return False
 
     def update_acting_force(self):
-        raise NotImplemented
-        pass
+        # Stokes drag force
+        self.force = stokes_drag_force(radius=self.length, velocity=self.velocity)
+        if (self.position[3] < 4) and self.attached_to_surface:
+            # if distance from surface greater than 4 µm, add adhesion force
+            self.force = self.force + C.MAX_CELL_SUBSTRATE_ADHESION
 
 
 def bacteria_dict(bacterium: Bacterium) -> Dict:

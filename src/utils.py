@@ -1,4 +1,5 @@
 import json
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
@@ -8,6 +9,7 @@ import matplotlib.pyplot as plt
 # imports
 import numpy as np
 import pandas as pd
+from scipy.spatial.transform import Rotation as R
 
 # custom libraries
 from src.constants import Constants as C
@@ -91,7 +93,7 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
     means = plot_data.mean(axis=1, skipna=True)
     fig, (ax1, ax2) = plt.subplots(1, 2)
     for bacteria in plot_data:
-        ax1.plot(plot_data.loc[:, bacteria])
+        ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Velocities')
     ax1.set_xlabel('Step')
@@ -115,7 +117,7 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     means = plot_data.mean(axis=1, skipna=True)
     fig, (ax1, ax2) = plt.subplots(1, 2)
     for bacteria in plot_data:
-        ax1.plot(plot_data.loc[:, bacteria])
+        ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Position')
     ax1.set_xlabel('Step')
@@ -139,7 +141,7 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     means = plot_data.mean(axis=1, skipna=True)
     fig, (ax1, ax2) = plt.subplots(1, 2)
     for bacteria in plot_data:
-        ax1.plot(plot_data.loc[:, bacteria])
+        ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Total force')
     ax1.set_xlabel('Step')
@@ -165,8 +167,8 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     length_means = length_data.mean(axis=1, skipna=True)
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
     for bacteria in width_data:
-        ax1.plot(width_data.loc[:, bacteria])
-        ax2.plot(length_data.loc[:, bacteria.replace('width', 'length')])
+        ax1.plot(width_data.loc[:, bacteria], '--', alpha=0.3)
+        ax2.plot(length_data.loc[:, bacteria.replace('width', 'length')], '--', alpha=0.3)
     ax1.set_title('width')
     ax1.set_xlabel('Step')
     ax1.set_ylabel('width')
@@ -198,16 +200,80 @@ def get_info_file_path():
     return info_file_name
 
 
-def prompt_log_at_start():
+def prompt_log_at_start(save_dir: str):
     return (f"********************* BIOFILM MODELING *********************\n"
             "NUMBER OF INITIAL BACTERIA\t {number_bacteria}\n"
-            "NUMBER OF ITERATIONS\t {iterations}\n\n"
             "==================================================\n"
             "INITIAL DIMENSIONS (LENGTH, WIDTH)\t {BSUB_LENGTH},\t{BSUB_WIDTH}\n"
             "MASS\t {BSUB_MASS}\n"
             "GROWTH FACTOR\t {BSUB_GROWTH_FACTOR}\n"
-            "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n"
-            .format(number_bacteria=C.START_NUMBER_BACTERIA, iterations=C.NUMBER_ITERATIONS,
+            "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n\n"
+            "SAVING AS \t {saving_dir}"
+            .format(number_bacteria=C.NUM_INITIAL_BACTERIA,
                     type="B. subtilius", BSUB_LENGTH=C.BSUB_LENGTH,
                     BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
-                    BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH, BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR))
+                    BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH,
+                    BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR, saving_dir=save_dir))
+
+
+def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity=C.EFFECTIVE_VISCOSITY_EPS) -> np.ndarray:
+    # Calculates Stokes' drag for a sphere with Reynolds number < 1.
+    # [um * Pa * s 1/1E-6 * um / s] = [um * kg / (um * s **2) * s  * um / s] = [um kg / (s ** 2)]
+    return - 6 * np.pi * radius * viscosity * 1E-12 * velocity
+
+
+def gravitational_force(mass: float) -> np.ndarray:
+    # calculates gravitational force on a mass
+    # F = m * g * e_z
+    # [kg * um / s ** 2]
+    return mass * 9.81 * 1E6 * np.asarray([0, 0, -1])
+
+
+def simulation_duration(func):
+    def inner1(*args, **kwargs):
+        # storing time before function execution
+        begin = time.time()
+
+        func(*args, **kwargs)
+
+        # storing time after function execution
+        end = time.time()
+        print("Duration : ", func.__name__, end - begin)
+
+    return inner1
+
+
+def rotate(origin, point, angle):
+    """
+    Rotate a point counterclockwise by a given angle around a given origin.
+
+    The angle should be given in radians.
+    """
+    ox, oy = origin
+    px, py = point
+
+    qx = ox + np.cos(angle) * (px - ox) - np.sin(angle) * (py - oy)
+    qy = oy + np.sin(angle) * (px - ox) + np.cos(angle) * (py - oy)
+    return qx, qy
+
+
+def rotation_matrix_x(theta: float):
+    # return numpy array with rotation matrix around x axis with angle theta
+    r = R.from_euler('x', theta)
+    return r
+
+
+def rotation_matrix_y(theta: float):
+    # return numpy array with rotation matrix around y axis with angle theta
+    r = R.from_euler('y', theta)
+    return r
+
+
+def rotation_matrix_z(theta: float):
+    # return numpy array with rotation matrix around z axis with angle theta
+    r = R.from_euler('z', theta)
+    return r
+
+
+def apply_rotation(vector: np.ndarray, matrix: R):
+    return matrix.apply(vector)

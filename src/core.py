@@ -17,7 +17,7 @@ import numpy as np
 from biofilm import Biofilm
 from constants import Constants as C
 from utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
-    prompt_log_at_start, plot_num
+    prompt_log_at_start, plot_num, dens_map, get_gent
 
 
 # custom libraries

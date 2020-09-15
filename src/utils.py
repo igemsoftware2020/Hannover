@@ -2,13 +2,13 @@ import json
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
-
+import seaborn as sns
 import matplotlib.pyplot as plt
 # ********************************************************************************************
 # imports
 import numpy as np
 import pandas as pd
-
+from sklearn.linear_model import LinearRegression
 # custom libraries
 from constants import Constants as C
 
@@ -189,15 +189,65 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     live=get_data_to_parameter(data, 'living')
     num=live[live==True].count(axis=1)
-    plt.plot(num,color='b')
-    plt.xlabel('Step')
-    plt.ylabel('Bacteria Number')
-    plt.title('Bacteria Growth')
-    
-    
+    log_num=num.apply(np.log10)
+    x, yfit, slope, generation_time=get_gent(data)
+    fig,(ax1,ax2)=plt.subplots(2, 1)
+    ax1.plot(num,color='b')
+    ax1.set(xlabel='steps',ylabel='Bacteria Number',title='Bacteria Growth')
+    ax2.plot(num,label='log curve')
+    ax2.set(xlabel='steps',ylabel='Bacteria Number [log]',title='Bacteria Growth')
+    ax2.plot(x,10**yfit,label='fit curve')
+    ax2.legend(loc='lower right')
+    ax2.text(0.1,0.9,'slope: '+str(round(slope,5)),transform=ax2.transAxes)
+    ax2.text(0.1,0.8,'generationtime: '+str(round(generation_time,5)),transform=ax2.transAxes)
+    ax2.set_yscale('log')
+
+    plt.tight_layout()
     if save_fig:
             plt.savefig(save_path / 'growth_plot.jpeg')
     plt.show()
+    
+    
+    
+def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    x,y=last_pos(data)
+    plt.style.use('seaborn')
+    fig,(ax1,ax2)=plt.subplots(1,2)
+    ax1.scatter(x,y,c='g',s=20,alpha=0.8,marker='x')
+    #da=pd.DataFrame(np.array([x,y]).T,columns=['x','y'])
+    #print(da)
+    sns.kdeplot(data=x,data2=y,ax=ax2,shade=True,cbar=True)
+    plt.show()
+    
+def get_gent(data: pd.DataFrame):
+    live=get_data_to_parameter(data, 'living')
+    y=live[live==True].count(axis=1).values
+    y=np.log10(y)
+    y=y[y!=y[0]]
+    x=live.index[live[live==True].count(axis=1)!=live[live==True].count(axis=1)[0]].to_numpy()
+    model=LinearRegression(fit_intercept=True)
+    model.fit(x[:,np.newaxis],y)
+    generation_time=np.log(2)/model.coef_[0]
+    yfit=model.predict(x[:,np.newaxis])
+    slope=model.coef_[0]
+    print('slope:',model.coef_[0])
+    print(generation_time)
+    return x, yfit, slope, generation_time
+
+
+
+def last_pos(data):
+    last_coor_x=[]
+    last_coor_y=[]
+    for bac in data['position'].index:
+        last_coor_x.append(data['position'][bac][-1][0])
+        last_coor_y.append(data['position'][bac][-1][1])
+    return last_coor_x, last_coor_y
+
+
+
+
+
 
 
 def get_info_file_path():

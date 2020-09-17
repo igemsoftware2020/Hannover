@@ -288,12 +288,25 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
 
 def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
-    x, y = last_pos(data)
+    x, y, z = last_pos(data)
     fig, (ax1, ax2) = plt.subplots(1, 2)
     ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
     sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=False, cmap='mako', levels=200, thresh=0)
     if save_fig:
         plt.savefig(save_path / 'density_plot.jpeg')
+    plt.show()
+
+
+def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    x, y, z = last_pos(data)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(x, y, z, c='g', s=50, alpha=0.8, marker='o')
+    ax.set_xlabel('x / um')
+    ax.set_ylabel('y / um')
+    ax.set_zlabel('z / um')
+    if save_fig:
+        plt.savefig(save_path / 'scatter_last_positions.jpeg')
     plt.show()
 
 
@@ -316,10 +329,12 @@ def get_gent(data: pd.DataFrame):
 def last_pos(data):
     last_cord_x = []
     last_cord_y = []
+    last_cord_z = []
     for bac in data['position'].index:
         last_cord_x.append(data['position'][bac][-1][0])
         last_cord_y.append(data['position'][bac][-1][1])
-    return last_cord_x, last_cord_y
+        last_cord_z.append(data['position'][bac][-1][2])
+    return last_cord_x, last_cord_y, last_cord_z
 
 
 def prompt_log_at_start(save_dir: str):

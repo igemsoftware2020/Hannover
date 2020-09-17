@@ -291,7 +291,7 @@ def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     x, y = last_pos(data)
     fig, (ax1, ax2) = plt.subplots(1, 2)
     ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
-    sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=True)
+    sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=False, cmap='mako', levels=200, thresh=0)
     if save_fig:
         plt.savefig(save_path / 'density_plot.jpeg')
     plt.show()

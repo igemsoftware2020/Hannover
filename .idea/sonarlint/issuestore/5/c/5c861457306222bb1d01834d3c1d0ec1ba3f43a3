@@ -1,12 +1,11 @@
 
-lpython:S1763π"GDelete this unreachable code or refactor the code to make it reachable.(ΛΥό€ϋÿÿÿÿ8ώδύΐΖ.
-Kpython:S1481‘"&Remove the unused local variable "dt".(»Ϋβδύÿÿÿÿ8ώδύΐΖ.
+spython:S1542z"URename function "coreFunction" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(Ήα‰8ώδύΐΖ.
 rpython:S3923¶"RRemove this if statement or edit its code blocks so that they're not all the same.(Κδϊ8ώδύΐΖ.
-vpython:S1542†"QRename function "coreLoop" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(‰ΥΒΣϋÿÿÿÿ8ώδύΐΖ.
 Gpython:S1481A"(Remove the unused local variable "path".(ξ“σ—8ώδύΐΖ.
+Ypython:S1481•"4Remove the unused local variable "frameDimBacteria".(Α¥ϊÿÿÿÿ8ώδύΐΖ.
 Qpython:S1481«",Remove the unused local variable "z_coding".(ϋΦ“Ύύÿÿÿÿ8ώδύΐΖ.
 Epython:S1481Έ"%Remove the unused local variable "b".(Ή³† 8ώδύΐΖ.
+lpython:S1763π"GDelete this unreachable code or refactor the code to make it reachable.(ΛΥό€ϋÿÿÿÿ8ώδύΐΖ.
+vpython:S1542†"QRename function "coreLoop" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(‰ΥΒΣϋÿÿÿÿ8ώδύΐΖ.
+Kpython:S1481‘"&Remove the unused local variable "dt".(»Ϋβδύÿÿÿÿ8ώδύΐΖ.
 Epython:S1481Ύ"%Remove the unused local variable "b".(Ή³† 8ώδύΐΖ.
-Ypython:S1481•"4Remove the unused local variable "frameDimBacteria".(Α¥ϊÿÿÿÿ8ώδύΐΖ.
-spython:S1542z"URename function "coreFunction" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(Ήα‰8ώδύΐΖ.
-ypython:S3776†"TRefactor this function to reduce its Cognitive Complexity from 47 to the 15 allowed.(‰ΥΒΣϋÿÿÿÿ8θΖαΊΘ.

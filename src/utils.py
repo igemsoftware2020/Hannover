@@ -121,7 +121,7 @@ def scatter_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     plot_data = get_data_to_parameter(data, 'position', exact=True)
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    'bacteria_0_position'
+
     def init():
         for bacteria in plot_data:
             if not np.isnan(np.min(plot_data.loc[0, bacteria])):
@@ -138,8 +138,8 @@ def scatter_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
                                   plot_data.loc[i, bacteria][2], alpha=0.2)
         return scat
 
-    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=10, interval=200, repeat=True)
-    anim.save('scatter3d.mp4', writer='ffmpeg', fps=30)
+    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=400, interval=200, repeat=True)
+    # anim.save('scatter3d.mp4', writer='ffmpeg', fps=30)
     plt.show()
 
 

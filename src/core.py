@@ -17,7 +17,7 @@ import numpy as np
 from src.biofilm import Biofilm
 from src.constants import Constants as C
 from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
-    prompt_log_at_start, scatter_positions, plot_as_ellipse
+    prompt_log_at_start, scatter_positions
 
 
 # custom libraries
@@ -261,12 +261,12 @@ def blind_run():
 
 def plot_testing(info_file_path):
     data = bacteria_as_pandas(info_file_path)
-    # plot_velocities(data, info_file_path)
-    # plot_positions(data, info_file_path)
+    plot_velocities(data, info_file_path)
+    plot_positions(data, info_file_path)
     # plot_force(data, info_file_path)
     # plot_size(data, info_file_path)
     #plot_as_ellipse(data, info_file_path)
-    scatter_positions(data, info_file_path, save_fig=True)
+    #scatter_positions(data, info_file_path, save_fig=True)
     
 
 # ********************************************************************************************

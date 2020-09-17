@@ -7,21 +7,20 @@
 
 # ********************************************************************************************
 # imports
+
 import math
 import os
 
-import cv2
+#import cv2
 import numpy as np
 
 from src.biofilm import Biofilm
 from src.constants import Constants as C
 from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
-    prompt_log_at_start, plot_num, dens_map, get_gent
-
-import math
-import os
+    prompt_log_at_start, plot_num, dens_map
 
 
+# custom libraries
 
 
 # custom libraries
@@ -255,19 +254,22 @@ def blind_run():
     biofilm.simulate(duration_in_min=60, save_name=info_file_name)
 
     data = bacteria_as_pandas(info_file_name)
-
+    plot_num(data, info_file_path)
     dens_map(data, info_file_path)
     plot_velocities(data, info_file_path, save_fig=True)
     plot_positions(data, info_file_path, save_fig=True)
     plot_force(data, info_file_path, save_fig=True)
     plot_size(data, info_file_path, save_fig=True)
-    plot_num(data,info_file_path,save_fig=True )
-    
+
 
 def plot_testing(info_file_name):
     info_file_path = C.OUTPUT_PATH / info_file_name
 
+
     data = bacteria_as_pandas(info_file_path)
+
+    plot_num(data, info_file_path)
+    dens_map(data, info_file_path)
     plot_velocities(data, info_file_path)
     plot_positions(data, info_file_path)
     plot_force(data, info_file_path)
@@ -279,4 +281,5 @@ def plot_testing(info_file_name):
 # ********************************************************************************************
 if __name__ == "__main__":
     blind_run()
-    # coreFunction())
+     #coreFunction())
+#plot_testing(r'C:\Users\jonas\github\biofilm_growth_modeling\src\output\log_19h37min_1792020\log_19h37min_1792020.json')

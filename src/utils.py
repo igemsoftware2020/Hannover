@@ -284,6 +284,7 @@ def apply_rotation(vector: np.ndarray, matrix: R):
 def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     '''get data'''
     live=get_data_to_parameter(data, 'living')
+    print(get_data_to_parameter(data, 'living'))
     num=live[live==True].count(axis=1)
     x, yfit, slope, generation_time=get_gent(data)
     '''plot data'''

@@ -241,27 +241,3 @@ def get_bacteria_dict(bacterium: Bacterium) -> Dict:
         moving=[bacterium.moving],
         length=[bacterium.length],
         width=[bacterium.width])
-
-    def update_acting_force(self):
-        # Stokes drag force
-        self.force = stokes_drag_force(radius=self.length, velocity=self.velocity)
-        if (self.position[2] < 4) and self.attached_to_surface:
-            # if distance from surface greater than 4 µm, add adhesion force
-            self.force = self.force + C.MAX_CELL_SUBSTRATE_ADHESION * 1E-6 * np.asarray([0, 0, -1])
-        # add gravitational force
-        self.force += gravitational_force(C.BSUB_MASS)
-
-
-def get_bacteria_dict(bacterium: Bacterium) -> Dict:
-    """ returns the dict entry of a bacteria """
-    return dict(
-        position=[bacterium.position.tolist()],
-        velocity=[bacterium.velocity.tolist()],
-        angle=[bacterium.angle.tolist()],
-        force=[bacterium.force.tolist()],
-        total_force=[bacterium.total_force],
-        total_energy=[bacterium.total_energy],
-        living=[bacterium.living],
-        moving=[bacterium.moving],
-        length=[bacterium.length],
-        width=[bacterium.width])

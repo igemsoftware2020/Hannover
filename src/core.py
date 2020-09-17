@@ -11,7 +11,7 @@
 import math
 import os
 
-#import cv2
+# import cv2
 import numpy as np
 
 from src.biofilm import Biofilm
@@ -264,8 +264,6 @@ def blind_run():
 
 def plot_testing(info_file_name):
     info_file_path = C.OUTPUT_PATH / info_file_name
-
-
     data = bacteria_as_pandas(info_file_path)
 
     plot_num(data, info_file_path)
@@ -281,5 +279,5 @@ def plot_testing(info_file_name):
 # ********************************************************************************************
 if __name__ == "__main__":
     blind_run()
-     #coreFunction())
-#plot_testing(r'C:\Users\jonas\github\biofilm_growth_modeling\src\output\log_19h37min_1792020\log_19h37min_1792020.json')
+    # coreFunction())
+    # plot_testing(r'C:\Users\David\PycharmProjects\biofilm_modelling\output\log_21h41min_1192020\log_21h41min_1192020.json')

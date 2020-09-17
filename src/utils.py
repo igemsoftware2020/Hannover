@@ -4,15 +4,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
-import seaborn as sns
-from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
 # ********************************************************************************************
 # imports
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from scipy.spatial.transform import Rotation as R
-
 from sklearn.linear_model import LinearRegression
+
 # custom libraries
 from src.constants import Constants as C
 
@@ -202,22 +202,6 @@ def get_info_file_path():
     return info_file_name
 
 
-def prompt_log_at_start(save_dir: str):
-    return (f"********************* BIOFILM MODELING *********************\n"
-            "NUMBER OF INITIAL BACTERIA\t {number_bacteria}\n"
-            "==================================================\n"
-            "INITIAL DIMENSIONS (LENGTH, WIDTH)\t {BSUB_LENGTH},\t{BSUB_WIDTH}\n"
-            "MASS\t {BSUB_MASS}\n"
-            "GROWTH FACTOR\t {BSUB_GROWTH_FACTOR}\n"
-            "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n\n"
-            "SAVING AS \t {saving_dir}"
-            .format(number_bacteria=C.NUM_INITIAL_BACTERIA,
-                    type="B. subtilius", BSUB_LENGTH=C.BSUB_LENGTH,
-                    BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
-                    BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH,
-                    BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR, saving_dir=save_dir))
-
-
 def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity=C.EFFECTIVE_VISCOSITY_EPS) -> np.ndarray:
     # Calculates Stokes' drag for a sphere with Reynolds number < 1.
     # [um * Pa * s 1/1E-6 * um / s] = [um * kg / (um * s **2) * s  * um / s] = [um kg / (s ** 2)]
@@ -282,79 +266,61 @@ def apply_rotation(vector: np.ndarray, matrix: R):
 
 def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     '''get data'''
-    live=get_data_to_parameter(data, 'living')
+    live = get_data_to_parameter(data, 'living')
     print(get_data_to_parameter(data, 'living'))
-    num=live[live==True].count(axis=1)
-    log_num=num.apply(np.log10)
-    x, yfit, slope, generation_time=get_gent(data)
+    num = live[live == True].count(axis=1)
+    log_num = num.apply(np.log10)
+    x, yfit, slope, generation_time = get_gent(data)
     '''plot data'''
-    fig,(ax1,ax2)=plt.subplots(2, 1)
-    ax1.plot(num,color='b')
-    ax1.set(xlabel='steps',ylabel='Bacteria Number',title='Bacteria Growth')
-    ax2.plot(num,label='log curve')
-    ax2.set(xlabel='steps',ylabel='Bacteria Number [log]',title='Bacteria Growth')
-    ax2.plot(x,np.exp(yfit),label='fit curve')
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(num, color='b')
+    ax1.set(xlabel='steps', ylabel='Bacteria Number', title='Bacteria Growth')
+    ax2.plot(num, label='log curve')
+    ax2.set(xlabel='steps', ylabel='Bacteria Number [log]', title='Bacteria Growth')
+    ax2.plot(x, np.exp(yfit), label='fit curve')
     ax2.legend(loc='lower right')
-    ax2.text(0.1,0.9,'slope: '+str(round(slope,5)),transform=ax2.transAxes)
-    ax2.text(0.1,0.8,'generationtime: '+str(round(generation_time,5)),transform=ax2.transAxes)
+    ax2.text(0.1, 0.9, 'slope: ' + str(round(slope, 5)), transform=ax2.transAxes)
+    ax2.text(0.1, 0.8, 'generationtime: ' + str(round(generation_time, 5)), transform=ax2.transAxes)
     ax2.set_yscale('log')
 
     plt.tight_layout()
     if save_fig:
-            plt.savefig(save_path / 'growth_plot.jpeg')
+        plt.savefig(save_path / 'growth_plot.jpeg')
     plt.show()
-
 
 
 def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
-    x,y=last_pos(data)
-    fig,(ax1,ax2)=plt.subplots(1,2)
-    ax1.scatter(x,y,c='g',s=20,alpha=0.8,marker='x')
-    sns.kdeplot(data=x,data2=y,ax=ax2,shade=True,cbar=True)
+    x, y = last_pos(data)
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
+    sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=True)
     plt.show()
-
 
 
 def get_gent(data: pd.DataFrame):
     '''get data'''
-    live=get_data_to_parameter(data, 'living')#get data
-    y=live[live==True].count(axis=1).values#transform data and return an array
-    y=np.log(y)#transform data
-    y=y[y!=y[0]]#cut out bacteria in lag phase
-    x=live.index[live[live==True].count(axis=1)!=live[live==True].count(axis=1)[0]].to_numpy()#get index array
+    live = get_data_to_parameter(data, 'living')  # get data
+    y = live[live == True].count(axis=1).values  # transform data and return an array
+    y = np.log(y)  # transform data
+    y = y[y != y[0]]  # cut out bacteria in lag phase
+    x = live.index[
+        live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy()  # get index array
     '''start linear regression'''
-    model=LinearRegression(fit_intercept=True)
-    model.fit(x[:,np.newaxis],y)#fit the data
-    generation_time=np.log(2)/model.coef_[0]#compute generation time
-    yfit=model.predict(x[:,np.newaxis])#get fittet curve
-    slope=model.coef_[0]#slope is growth coefficient
+    model = LinearRegression(fit_intercept=True)
+    model.fit(x[:, np.newaxis], y)  # fit the data
+    generation_time = np.log(2) / model.coef_[0]  # compute generation time
+    yfit = model.predict(x[:, np.newaxis])  # get fittet curve
+    slope = model.coef_[0]  # slope is growth coefficient
     return x, yfit, slope, generation_time
 
 
-
 def last_pos(data):
-    last_coor_x=[]
-    last_coor_y=[]
+    last_coor_x = []
+    last_coor_y = []
     for bac in data['position'].index:
         last_coor_x.append(data['position'][bac][-1][0])
         last_coor_y.append(data['position'][bac][-1][1])
     return last_coor_x, last_coor_y
-
-
-
-
-
-
-
-def get_info_file_path():
-    date_time = str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min_' + \
-                str(datetime.now().day) + str(datetime.now().month) + \
-                str(datetime.now().year)
-
-    path_out = C.OUTPUT_PATH / f'log_{date_time}'
-    path_out.mkdir()
-    info_file_name = path_out / f'log_{date_time}.json'
-    return info_file_name
 
 
 def prompt_log_at_start(save_dir: str):
@@ -371,66 +337,3 @@ def prompt_log_at_start(save_dir: str):
                     BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
                     BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH,
                     BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR, saving_dir=save_dir))
-
-
-def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity=C.EFFECTIVE_VISCOSITY_EPS) -> np.ndarray:
-    # Calculates Stokes' drag for a sphere with Reynolds number < 1.
-    # [um * Pa * s 1/1E-6 * um / s] = [um * kg / (um * s **2) * s  * um / s] = [um kg / (s ** 2)]
-    return - 6 * np.pi * radius * viscosity * 1E-12 * velocity
-
-
-def gravitational_force(mass: float) -> np.ndarray:
-    # calculates gravitational force on a mass
-    # F = m * g * e_z
-    # [kg * um / s ** 2]
-    return mass * 9.81 * 1E6 * np.asarray([0, 0, -1])
-
-
-def simulation_duration(func):
-    def inner1(*args, **kwargs):
-        # storing time before function execution
-        begin = time.time()
-
-        func(*args, **kwargs)
-
-        # storing time after function execution
-        end = time.time()
-        print("Duration : ", func.__name__, end - begin)
-
-    return inner1
-
-
-def rotate(origin, point, angle):
-    """
-    Rotate a point counterclockwise by a given angle around a given origin.
-
-    The angle should be given in radians.
-    """
-    ox, oy = origin
-    px, py = point
-
-    qx = ox + np.cos(angle) * (px - ox) - np.sin(angle) * (py - oy)
-    qy = oy + np.sin(angle) * (px - ox) + np.cos(angle) * (py - oy)
-    return qx, qy
-
-
-def rotation_matrix_x(theta: float):
-    # return numpy array with rotation matrix around x axis with angle theta
-    r = R.from_euler('x', theta)
-    return r
-
-
-def rotation_matrix_y(theta: float):
-    # return numpy array with rotation matrix around y axis with angle theta
-    r = R.from_euler('y', theta)
-    return r
-
-
-def rotation_matrix_z(theta: float):
-    # return numpy array with rotation matrix around z axis with angle theta
-    r = R.from_euler('z', theta)
-    return r
-
-
-def apply_rotation(vector: np.ndarray, matrix: R):
-    return matrix.apply(vector)

@@ -15,7 +15,7 @@ class Constants:
 
     # SIMULATION PARAMETERS
     TIME_STEP = 1  # in seconds
-    NUMBER_ITERATIONS = 200
+    NUMBER_ITERATIONS = 190
     # constants B. subtilius
 
     BSUB_WIDTH = 1  # MICROMETERS https://en.wikipedia.org/wiki/Bacillus_subtilis

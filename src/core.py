@@ -7,20 +7,21 @@
 
 # ********************************************************************************************
 # imports
+import math
+import os
+
+import cv2
+import numpy as np
+
+from src.biofilm import Biofilm
+from src.constants import Constants as C
+from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
+    prompt_log_at_start, plot_num, dens_map, get_gent
 
 import math
 import os
 
-#mport cv2
-import numpy as np
-import matplotlib.pyplot as plt
-# custom libraries
-import tqdm
-
-from biofilm import Biofilm
-from constants import Constants as C
-from utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
-    prompt_log_at_start, plot_num, dens_map, get_gent
+ 
 
 
 # ********************************************************************************************
@@ -258,7 +259,6 @@ def blind_run():
     print(f"Finished run with {len(biofilm.bacteria)} bacteria.")
 
     data = bacteria_as_pandas(info_file_name)
-    plt.style.use('seaborn')
     dens_map(data, info_file_path)
     plot_velocities(data, info_file_path, save_fig=True)
     plot_positions(data, info_file_path, save_fig=True)

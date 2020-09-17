@@ -105,7 +105,7 @@ class Biofilm(object):
                     if bacterium != _bacterium \
                             and (np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
                         # add interaction force
-                        bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium)
+                        bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium, exact=True)
 
                 if bacterium.moving is True:
                     bacterium.update_velocity()
@@ -126,12 +126,15 @@ class Biofilm(object):
         return self.position - other.position
 
     @staticmethod
-    def cell_cell_interaction(self: Bacterium, other: Bacterium):
+    def cell_cell_interaction(self: Bacterium, other: Bacterium, exact=False):
         """
         returns force vector of cell- cell interaction.
         Force direction is in direction of the distance vector between the bacteria.
         Force value based on Lennard-Jones Potential / Soft-repulsive potential
         """
+        if exact:
+            return Biofilm.abs_force_lennard_jones_potential(self, other, exact=True) * Biofilm.distance_vector(self,
+                                                                                                                other)
         return Biofilm.abs_force_lennard_jones_potential(self, other) * Biofilm.distance_vector(self, other)
 
     def __repr__(self):
@@ -143,15 +146,26 @@ class Biofilm(object):
         return sorted(sorted_bacteria, key=lambda x: x.position[axis], reverse=_reverse)
 
     @staticmethod
-    def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium):
+    def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium, exact=False):
         """ return interaction term with bacteria in local environment"""
 
         def lennard_jones_force(r, epsilon, r_min):
             return - epsilon * (12 * (r_min ** 12 / r ** 13) - 12 * (r_min ** 6 / r ** 7))
 
-        distance_vector = bacterium1.position - bacterium2.position
-        distance = np.linalg.norm(distance_vector) * 1E6
-        repulsive_force = lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION, r_min=bacterium1.width)
+        if exact:
+            bac1_pos = bacterium1.get_position()
+            bac2_pos = bacterium2.get_position()
+            repulsive_force = 0
+            for i in range(0, len(bac1_pos)):
+                distance_vector = bac1_pos[i] - bac2_pos[i]
+                distance = np.linalg.norm(distance_vector) * 1E6
+                repulsive_force += lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION,
+                                                       r_min=bacterium1.width)
+        else:
+            """ calculate interaction just for center"""
+            distance_vector = bacterium1.position - bacterium2.position
+            distance = np.linalg.norm(distance_vector) * 1E6
+            repulsive_force = lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION, r_min=bacterium1.width)
         return repulsive_force
 
     @staticmethod

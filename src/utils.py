@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Dict
 
 import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
+import matplotlib.animation as animation
 # ********************************************************************************************
 # imports
 import numpy as np
@@ -49,7 +51,7 @@ def save_dict_as_json(data: Dict, info_file_path: Path):
         json.dump(data, json_file)
 
 
-def get_data_to_parameter(data: pd.DataFrame, key: str):
+def get_data_to_parameter(data: pd.DataFrame, key: str, exact: bool = False):
     """
     Gets complete bacteria data as a DataFrame.
     Resorts data to parameters 'key' into another DataFrame:
@@ -68,12 +70,19 @@ def get_data_to_parameter(data: pd.DataFrame, key: str):
     for index, bacteria in data.iterrows():
         df_bac = pd.DataFrame(bacteria).loc[key, :]
         for vectors in df_bac:
-            if key == 'velocity' or key == 'position':
+            if key == 'velocity' or key == 'position' and not exact:
                 # calculate norm for velocity and position
                 vectors = get_euclid_norm(vectors)
             dic.update({str(index) + '_' + key: vectors})
     df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in dic.items()]))
-    df = df.transform(lambda x: sorted(x, key=pd.isnull, reverse=True))
+
+    def isnan(vector):
+        if np.isnan(np.min(vector)):
+            return False
+        else:
+            return True
+
+    df = df.transform(lambda x: sorted(x, key=isnan, reverse=True))
     return df
 
 
@@ -106,6 +115,54 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
 
     if save_fig:
         fig.savefig(save_path / 'velocity_plot.jpeg')
+
+
+def scatter_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    plot_data = get_data_to_parameter(data, 'position', exact=True)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    'bacteria_0_position'
+    def init():
+        for bacteria in plot_data:
+            if not np.isnan(np.min(plot_data.loc[0, bacteria])):
+                scat = ax.scatter(plot_data.loc[0, bacteria][0],
+                                  plot_data.loc[0, bacteria][1],
+                                  plot_data.loc[0, bacteria][2], alpha=0.2)
+        return scat
+
+    def animate(i):
+        for bacteria in plot_data:
+            if not np.isnan(np.min(plot_data.loc[i, bacteria])):
+                scat = ax.scatter(plot_data.loc[i, bacteria][0],
+                                  plot_data.loc[i, bacteria][1],
+                                  plot_data.loc[i, bacteria][2], alpha=0.2)
+        return scat
+
+    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=10, interval=200, repeat=True)
+    anim.save('scatter3d.mp4', writer='ffmpeg', fps=30)
+    plt.show()
+
+
+def plot_as_ellipse(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    pos_data = get_data_to_parameter(data, 'position')
+    angle_data = get_data_to_parameter(data, 'angle')
+    length_data = get_data_to_parameter(data, 'length')
+    fig, ax = plt.subplots(1, 1)
+    ells = []
+    for bacteria in pos_data:
+        patch = Ellipse(xy=pos_data.loc[0, bacteria], width=1,
+                        height=length_data.loc[0, bacteria],
+                        angle=angle_data.loc[0, bacteria][0])
+        ells.append(patch)
+
+    for e in ells:
+        ax.add_artist(e)
+        e.set_clip_box(ax.bbox)
+        e.set_alpha(0.4)
+    plt.show()
+
+    if save_fig:
+        fig.savefig(save_path / 'ellipse_plot.jpeg')
 
 
 def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):

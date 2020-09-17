@@ -17,7 +17,7 @@ import numpy as np
 from src.biofilm import Biofilm
 from src.constants import Constants as C
 from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
-    prompt_log_at_start
+    prompt_log_at_start, scatter_positions, plot_as_ellipse
 
 
 # custom libraries
@@ -248,7 +248,7 @@ def blind_run():
     print(prompt_log_at_start(info_file_name))
 
     biofilm = Biofilm()
-    biofilm.simulate(duration_in_min=60, save_name=info_file_name)
+    biofilm.simulate(duration_in_min=10, save_name=info_file_name)
 
     data = bacteria_as_pandas(info_file_name)
 
@@ -256,21 +256,23 @@ def blind_run():
     plot_positions(data, info_file_path, save_fig=True)
     plot_force(data, info_file_path, save_fig=True)
     plot_size(data, info_file_path, save_fig=True)
+    scatter_positions(data, info_file_path, save_fig=True)
 
 
-def plot_testing(info_file_name):
-    info_file_path = C.OUTPUT_PATH / info_file_name
-
+def plot_testing(info_file_path):
     data = bacteria_as_pandas(info_file_path)
-    plot_velocities(data, info_file_path)
-    plot_positions(data, info_file_path)
-    plot_force(data, info_file_path)
-    plot_size(data, info_file_path)
-
+    # plot_velocities(data, info_file_path)
+    # plot_positions(data, info_file_path)
+    # plot_force(data, info_file_path)
+    # plot_size(data, info_file_path)
+    #plot_as_ellipse(data, info_file_path)
+    scatter_positions(data, info_file_path, save_fig=True)
+    
 
 # ********************************************************************************************
 # main-method to start the program
 # ********************************************************************************************
 if __name__ == "__main__":
-    blind_run()
+    # blind_run()
     # coreFunction())
+    plot_testing('/home/david/PycharmProjects/biofilm_growth_modeling/output/log_11h22min_1792020/log_11h22min_1792020.json')

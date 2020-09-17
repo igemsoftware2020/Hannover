@@ -172,9 +172,9 @@ class Bacterium:
         # self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
         # add brownian movement
-        self.velocity[0] = self.velocity[0] + random.uniform(-1, 1)  # add random velocity up to 1 um / s
-        self.velocity[1] = self.velocity[1] + random.uniform(-1, 1)
-        self.velocity[2] = self.velocity[2] + random.uniform(-1, 1)
+        self.velocity[0] = self.velocity[0] + random.uniform(-0.5, 0.5)  # add random velocity up to 0.5 um / s
+        self.velocity[1] = self.velocity[1] + random.uniform(-0.5, 0.5)
+        self.velocity[2] = self.velocity[2] + random.uniform(-0.5, 0.5)
 
         # update angular velocity
         # 3D  instantaneous angular velocity vector w = r x v / |r|^2

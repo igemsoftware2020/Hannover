@@ -265,22 +265,20 @@ def apply_rotation(vector: np.ndarray, matrix: R):
 
 
 def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
-    '''get data'''
     live = get_data_to_parameter(data, 'living')
     print(get_data_to_parameter(data, 'living'))
-    num = live[live == True].count(axis=1)
-    log_num = num.apply(np.log10)
-    x, yfit, slope, generation_time = get_gent(data)
+    num = live[live is True].count(axis=1)
+    x, y_fit, slope, generation_time = get_gent(data)
     '''plot data'''
     fig, (ax1, ax2) = plt.subplots(2, 1)
     ax1.plot(num, color='b')
-    ax1.set(xlabel='steps', ylabel='Bacteria Number', title='Bacteria Growth')
+    ax1.set(xlabel='Time in s', ylabel='Bacteria Number', title='Bacteria Growth')
     ax2.plot(num, label='log curve')
-    ax2.set(xlabel='steps', ylabel='Bacteria Number [log]', title='Bacteria Growth')
-    ax2.plot(x, np.exp(yfit), label='fit curve')
+    ax2.set(xlabel='Time in s', ylabel='Bacteria Number [log]', title='Bacteria Growth')
+    ax2.plot(x, np.exp(y_fit), label='fit curve')
     ax2.legend(loc='lower right')
     ax2.text(0.1, 0.9, 'slope: ' + str(round(slope, 5)), transform=ax2.transAxes)
-    ax2.text(0.1, 0.8, 'generationtime: ' + str(round(generation_time, 5)), transform=ax2.transAxes)
+    ax2.text(0.1, 0.8, 'generation time: ' + str(round(generation_time, 5)), transform=ax2.transAxes)
     ax2.set_yscale('log')
 
     plt.tight_layout()
@@ -294,33 +292,34 @@ def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig, (ax1, ax2) = plt.subplots(1, 2)
     ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
     sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=True)
+    if save_fig:
+        plt.savefig(save_path / 'density_plot.jpeg')
     plt.show()
 
 
 def get_gent(data: pd.DataFrame):
-    '''get data'''
     live = get_data_to_parameter(data, 'living')  # get data
-    y = live[live == True].count(axis=1).values  # transform data and return an array
+    y = live[live is True].count(axis=1).values  # transform data and return an array
     y = np.log(y)  # transform data
     y = y[y != y[0]]  # cut out bacteria in lag phase
     x = live.index[
-        live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy()  # get index array
+        live[live is True].count(axis=1) != live[live is True].count(axis=1)[0]].to_numpy()  # get index array
     '''start linear regression'''
     model = LinearRegression(fit_intercept=True)
     model.fit(x[:, np.newaxis], y)  # fit the data
     generation_time = np.log(2) / model.coef_[0]  # compute generation time
-    yfit = model.predict(x[:, np.newaxis])  # get fittet curve
+    y_fit = model.predict(x[:, np.newaxis])  # get fitted curve
     slope = model.coef_[0]  # slope is growth coefficient
-    return x, yfit, slope, generation_time
+    return x, y_fit, slope, generation_time
 
 
 def last_pos(data):
-    last_coor_x = []
-    last_coor_y = []
+    last_cord_x = []
+    last_cord_y = []
     for bac in data['position'].index:
-        last_coor_x.append(data['position'][bac][-1][0])
-        last_coor_y.append(data['position'][bac][-1][1])
-    return last_coor_x, last_coor_y
+        last_cord_x.append(data['position'][bac][-1][0])
+        last_cord_y.append(data['position'][bac][-1][1])
+    return last_cord_x, last_cord_y
 
 
 def prompt_log_at_start(save_dir: str):

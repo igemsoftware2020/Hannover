@@ -70,7 +70,7 @@ def get_data_to_parameter(data: pd.DataFrame, key: str, exact: bool = False):
     for index, bacteria in data.iterrows():
         df_bac = pd.DataFrame(bacteria).loc[key, :]
         for vectors in df_bac:
-            if key == 'velocity' or key == 'position' and not exact:
+            if (key == 'velocity' or key == 'position') and (exact is False):
                 # calculate norm for velocity and position
                 vectors = get_euclid_norm(vectors)
             dic.update({str(index) + '_' + key: vectors})
@@ -117,29 +117,26 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
         fig.savefig(save_path / 'velocity_plot.jpeg')
 
 
-def scatter_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     plot_data = get_data_to_parameter(data, 'position', exact=True)
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
 
-    def init():
-        for bacteria in plot_data:
-            if not np.isnan(np.min(plot_data.loc[0, bacteria])):
-                scat = ax.scatter(plot_data.loc[0, bacteria][0],
-                                  plot_data.loc[0, bacteria][1],
-                                  plot_data.loc[0, bacteria][2], alpha=0.2)
-        return scat
+    fig, ax = plt.subplots()
 
-    def animate(i):
-        for bacteria in plot_data:
-            if not np.isnan(np.min(plot_data.loc[i, bacteria])):
-                scat = ax.scatter(plot_data.loc[i, bacteria][0],
-                                  plot_data.loc[i, bacteria][1],
-                                  plot_data.loc[i, bacteria][2], alpha=0.2)
-        return scat
+    x_data = [vector[0] for vector in plot_data['bacteria_0_position']]
+    y_data = [vector[1] for vector in plot_data['bacteria_0_position']]
+    x_data1 = [vector[0] for vector in plot_data['bacteria_1_position']]
+    y_data1 = [vector[1] for vector in plot_data['bacteria_1_position']]
+    line, = ax.plot(x_data, y_data)
+    line1, = ax.plot(x_data1, y_data1)
 
-    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=400, interval=200, repeat=True)
-    # anim.save('scatter3d.mp4', writer='ffmpeg', fps=30)
+    def update(num):
+        line.set_data(x_data[num-15:num], y_data[num-15:num])
+        line1.set_data(x_data1[num-15:num], y_data1[num-15:num])
+        return line,
+
+    anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
+                                   interval=200, repeat=True, fargs=[])
+    # anim.save(str(save_path + 'scatter3d.mp4'), writer='ffmpeg', fps=30)
     plt.show()
 
 

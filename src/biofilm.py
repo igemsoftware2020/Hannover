@@ -105,7 +105,6 @@ class Biofilm(object):
                     if bacterium != _bacterium and (
                             np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
                         bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium)
-                        pass
 
                 if bacterium.moving is True:
                     bacterium.update_velocity()

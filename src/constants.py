@@ -15,7 +15,7 @@ class Constants:
 
     # SIMULATION PARAMETERS
     TIME_STEP = 1  # in seconds
-    NUM_INITIAL_BACTERIA = 2
+    NUM_INITIAL_BACTERIA = 10
     # constants B. subtilius
 
     BSUB_WIDTH = 1  # MICROMETERS https://en.wikipedia.org/wiki/Bacillus_subtilis
@@ -40,12 +40,9 @@ class Constants:
     BSUB_DOUBLING_TIME = 720  # SECONDS DOI: 10.1128/jb.167.1.219-230.1986
     ECOLI_DOUBLING_TIME = 1200  # [s] LINK https://de.wikipedia.org/wiki/Generationszeit
     ECOLI_GROWTH_RATE = np.log(2) / ECOLI_DOUBLING_TIME  # [1 / s]
-    # BSUB_GROWTH_RATE = np.log(2) / BSUB_DOUBLING_TIME  # [1 / s]
+    BSUB_GROWTH_RATE = np.log(2) / BSUB_DOUBLING_TIME  # [1 / s]
     BSUB_GROWTH_FACTOR = 0.02  # [um / s]
 
-    gr_factor_inv = 0.05  # 0.2
-    gr_pr_i = 10.1  # 1.1
-    gr_d_factor = 0.05
     MOTION_ACTIVATION_PROBABILITY = 0.005
     MOTION_DEACTIVATION_PROBABILITY = 0.01
 

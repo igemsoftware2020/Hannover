@@ -112,10 +112,12 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
     ax2.set_title('Mean Velocity')
     ax2.set_xlabel('Step')
     ax2.set_ylabel('velocity')
-    plt.show()
 
     if save_fig:
-        fig.savefig(save_path / 'velocity_plot.jpeg')
+        path = Path(save_path).parent / 'velocity_plot.png'
+        fig.savefig(str(path))
+    else:
+        plt.show()
 
 
 def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
@@ -146,7 +148,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
 
-                                   interval=10, repeat=False, fargs=[lines, data, living])
+                                   interval=200, repeat=False, fargs=[lines, data, living])
 
     if save_fig:
         writer = animation.FFMpegWriter(fps=30, metadata=dict(artist='Me'), bitrate=-1)
@@ -178,7 +180,7 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         return lines,
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
-                                   interval=300, repeat=False, fargs=[lines, data])
+                                   interval=200, repeat=False, fargs=[lines, data])
     if save_fig:
         writer = animation.FFMpegWriter(fps=50, metadata=dict(artist='Me'), bitrate=-1)
         path = Path(save_path).parent / '3d_animation.mp4'
@@ -227,10 +229,12 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.set_title('Mean position')
     ax2.set_xlabel('Step')
     ax2.set_ylabel('distance')
-    plt.show()
 
     if save_fig:
-        fig.savefig(save_path / 'positions_plot.jpeg')
+        path = Path(save_path).parent / 'positions_plot.png'
+        fig.savefig(path)
+    else:
+        plt.show()
 
 
 def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
@@ -251,10 +255,12 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.set_title('Mean force')
     ax2.set_xlabel('Step')
     ax2.set_ylabel('force')
-    plt.show()
 
     if save_fig:
-        fig.savefig(save_path / 'force_plot.jpeg')
+        path = Path(save_path).parent / 'force_plot.png'
+        fig.savefig(path)
+    else:
+        plt.show()
 
 
 def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
@@ -284,10 +290,12 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax4.set_title('length mean')
     ax4.set_xlabel('Step')
     ax4.set_ylabel('length')
-    plt.show()
 
     if save_fig:
-        fig.savefig(save_path / 'size_plot.jpeg')
+        path = Path(save_path).parent / 'size_plot.png'
+        fig.savefig(path)
+    else:
+        plt.show()
 
 
 def get_info_file_path():

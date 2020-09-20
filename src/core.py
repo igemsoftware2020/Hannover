@@ -16,7 +16,7 @@ import numpy as np
 
 from src.biofilm import Biofilm
 from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
-    prompt_log_at_start, animate_positions
+    prompt_log_at_start, animate_positions, animate_3d
 
 
 # custom libraries
@@ -243,35 +243,28 @@ def coreLoop(biofilm, out, txt):
 def blind_run():
     info_file_name = get_info_file_path()
     info_file_path = info_file_name.parent
-
     print(prompt_log_at_start(info_file_name))
-
     biofilm = Biofilm()
-    biofilm.simulate(duration_in_min=10, save_name=info_file_name)
+    biofilm.simulate(duration_in_min=120, save_name=info_file_name)
 
-    data = bacteria_as_pandas(info_file_name)
 
+def plotting(info_file_path):
+    data = bacteria_as_pandas(info_file_path)
     plot_velocities(data, info_file_path, save_fig=True)
-    plot_positions(data, info_file_path, save_fig=True)
+    plot_positions(data, info_file_path, save_fig=True)  # this one messes with data
     plot_force(data, info_file_path, save_fig=True)
     plot_size(data, info_file_path, save_fig=True)
-
-
-def plot_testing(info_file_path):
     data = bacteria_as_pandas(info_file_path)
-    # plot_velocities(data, info_file_path)
-    #plot_positions(data, info_file_path)
-    # plot_force(data, info_file_path)
-    # plot_size(data, info_file_path)
-    #plot_as_ellipse(data, info_file_path)
     animate_positions(data, info_file_path, save_fig=True)
-    # animate_3d(data, info_file_path, save_fig=False)
+    animate_3d(data, info_file_path, save_fig=True)
 
 # ********************************************************************************************
 # main-method to start the program
 # ********************************************************************************************
+
+
 if __name__ == "__main__":
-    # blind_run()
+    blind_run()
     # coreFunction())
-    plot_testing(
-        'C:\\Users\David\PycharmProjects\\biofilm_modelling\\output\\log_21h41min_1192020\\log_21h41min_1192020.json')
+    # path = 'C:\\Users\\David\\PycharmProjects\\biofilm_modelling\\output\\log_16h32min_2092020\\log_16h32min_2092020.json'
+    # plotting(path)

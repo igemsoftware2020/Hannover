@@ -83,7 +83,7 @@ class Bacterium:
         # using a constant growth rate
         # TODO Make volume per time
         if self.living is True:
-            self.length = self.length * (C.BSUB_GROWTH_FACTOR + 1)
+            self.length = self.length * (C.BSUB_GROWTH_RATE + 1)
         else:
             # if cell is dead, constant length
             pass
@@ -92,6 +92,7 @@ class Bacterium:
         # Programmed cell death
         if random.random() > 1.0 - C.BSUB_MORTALITY_RATE:
             self.living = False
+            self.moving = False
 
     def __eq__(self, other):
 
@@ -173,10 +174,10 @@ class Bacterium:
         # self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
         # self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
-        # add brownian movement
-        self.velocity[0] = self.velocity[0] + random.uniform(-0.5, 0.5)  # add random velocity up to 0.5 um / s
-        self.velocity[1] = self.velocity[1] + random.uniform(-0.5, 0.5)
-        self.velocity[2] = self.velocity[2] + random.uniform(-0.5, 0.5)
+        # add brownian movement, up to 5 % of absolute value
+        self.velocity[0] = self.velocity[0] + 0.05 * random.uniform(-self.velocity[0], self.velocity[0])
+        self.velocity[1] = self.velocity[1] + 0.05 * random.uniform(- self.velocity[1], self.velocity[1])
+        self.velocity[2] = self.velocity[2] + 0.05 * random.uniform(- self.velocity[1], self.velocity[1])
 
         # update angular velocity
         # 3D  instantaneous angular velocity vector w = r x v / |r|^2
@@ -190,10 +191,10 @@ class Bacterium:
         """ update bacterium position based on velocity """
         self.position[0] = self.position[0] + self.velocity[0] * dt
         self.position[1] = self.position[1] + self.velocity[1] * dt
-        if (self.position[2] + self.velocity[2] * dt) < 0:
+        self.position[2] = self.position[2] + self.velocity[2] * dt
+
+        if self.position[2] < 1E-3:
             self.position[2] = 0
-        else:
-            self.position[2] = self.position[2] + self.velocity[2] * dt
 
         # update orientation
         self.angle[0] = self.angle[0] + self.velocity_angular[0] * dt
@@ -217,12 +218,13 @@ class Bacterium:
         """
         splitting_lengths = random.randrange(C.BSUB_CRITICAL_LENGTH - 1, C.BSUB_CRITICAL_LENGTH + 1)
         if splitting_lengths <= self.length:
-            return np.random.choice([True, False], p=[0.8, 0.2])
+            return np.random.choice([True, False], p=[0.6, 0.4])
         else:
             return False
 
     def update_acting_force(self):
         # Stokes drag force
+        self.force = 0
         self.force = stokes_drag_force(radius=self.length, velocity=self.velocity)
         if (self.position[2] < 4) and self.attached_to_surface:
             # if distance from surface greater than 4 µm, add adhesion force

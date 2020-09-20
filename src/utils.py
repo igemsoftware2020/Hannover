@@ -4,13 +4,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
-import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse
 import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d.axes3d as p3
 # ********************************************************************************************
 # imports
 import numpy as np
 import pandas as pd
+from matplotlib.patches import Ellipse
 from scipy.spatial.transform import Rotation as R
 
 # custom libraries
@@ -119,25 +120,71 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
 
 def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     plot_data = get_data_to_parameter(data, 'position', exact=True)
+    living_data = get_data_to_parameter(data, 'living')
 
     fig, ax = plt.subplots()
+    lines = []
+    data = []
+    living = []
 
-    x_data = [vector[0] for vector in plot_data['bacteria_0_position']]
-    y_data = [vector[1] for vector in plot_data['bacteria_0_position']]
-    x_data1 = [vector[0] for vector in plot_data['bacteria_1_position']]
-    y_data1 = [vector[1] for vector in plot_data['bacteria_1_position']]
-    line, = ax.plot(x_data, y_data)
-    line1, = ax.plot(x_data1, y_data1)
+    for bacteria in plot_data:
+        x_data = [vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        y_data = [vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        lines.append(ax.plot(x_data, y_data, ), )
+        data.append([x_data, y_data])
+        living.append([living_data[bacteria.replace('position', 'living')]])
 
-    def update(num):
-        line.set_data(x_data[num-15:num], y_data[num-15:num])
-        line1.set_data(x_data1[num-15:num], y_data1[num-15:num])
-        return line,
+    def update(num, line_plots, dataLines, living_data):
+        for line, dataLine, alive in zip(line_plots, dataLines, living_data):
+            # update data for line plot: dataLine[0] = x data, dataLine[1] y data
+            line[0].set_data(dataLine[0][:num], dataLine[1][:num])
+            if alive[0] is False:
+                line[0].set_color('black')
+                line[0].set_alpha(0.5)
+
+        return lines,
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
-                                   interval=200, repeat=True, fargs=[])
-    # anim.save(str(save_path + 'scatter3d.mp4'), writer='ffmpeg', fps=30)
-    plt.show()
+
+                                   interval=10, repeat=False, fargs=[lines, data, living])
+
+    if save_fig:
+        writer = animation.FFMpegWriter(fps=30, metadata=dict(artist='Me'), bitrate=-1)
+        path = Path(save_path).parent / '3d_animation.mp4'
+        anim.save(str(path), writer=writer)
+    else:
+        plt.show()
+
+
+def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    plot_data = get_data_to_parameter(data, 'position', exact=True)
+
+    fig = plt.figure()
+    ax = p3.Axes3D(fig)
+    lines = []
+    data = []
+    for bacteria in plot_data:
+        x_data = [vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        y_data = [vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        z_data = [vector[2] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        lines.append(ax.plot(x_data, y_data, z_data, alpha=0.9), )
+        data.append([x_data, y_data, z_data])
+
+    def update(num, line_plots, dataLines):
+        for line, dataLine in zip(line_plots, dataLines):
+            # update data for line plot: dataLine[0] = x data, dataLine[1] y data
+            line[0].set_data(dataLine[0][:num], dataLine[1][:num])
+            line[0].set_3d_properties(dataLine[2][:num])
+        return lines,
+
+    anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
+                                   interval=300, repeat=False, fargs=[lines, data])
+    if save_fig:
+        writer = animation.FFMpegWriter(fps=50, metadata=dict(artist='Me'), bitrate=-1)
+        path = Path(save_path).parent / '3d_animation.mp4'
+        anim.save(str(path), writer=writer)
+    else:
+        plt.show()
 
 
 def plot_as_ellipse(data: pd.DataFrame, save_path: Path, save_fig: bool = False):

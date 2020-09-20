@@ -102,10 +102,9 @@ class Biofilm(object):
                 # Add cell- cell interaction force, based on soft-repulsive potential
                 for _bacterium in self.bacteria:
                     # check if bacterium is not itself and distance is smaller than 2 times the bacterium length
-                    if bacterium != bacterium and (
+                    if bacterium != _bacterium and (
                             np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
-                        # add interaction force
-                        # bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium)
+                        bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium)
                         pass
 
                 if bacterium.moving is True:

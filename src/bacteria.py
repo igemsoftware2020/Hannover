@@ -124,11 +124,13 @@ class Bacterium:
         daughter_bac_angle = self.angle  # same orientation?
         daughter_bac_position = get_daughter_position(position=self.position, split_distance=self.length * 0.2,
                                                       angle=daughter_bac_angle)
+        daughter_bac_velocity = - self.velocity / 2
         daughter_bac = Bacterium(daughter_bac_position, self.width, daughter_bac_length,
-                                 -self.velocity, self.angle, moving=True, force=-self.force)
+                                 daughter_bac_velocity, self.angle, moving=True, force=-self.force)
 
         # update mother cell
         self.length = (1 - volume_ratio) * self.length
+        self.velocity = self.velocity / 2
         return daughter_bac
 
     def get_position(self) -> np.ndarray:
@@ -172,9 +174,9 @@ class Bacterium:
         # self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
         # add brownian movement
-        self.velocity[0] = self.velocity[0] + random.uniform(-1, 1)  # add random velocity up to 1 um / s
-        self.velocity[1] = self.velocity[1] + random.uniform(-1, 1)
-        self.velocity[2] = self.velocity[2] + random.uniform(-1, 1)
+        self.velocity[0] = self.velocity[0] + random.uniform(-0.5, 0.5)  # add random velocity up to 0.5 um / s
+        self.velocity[1] = self.velocity[1] + random.uniform(-0.5, 0.5)
+        self.velocity[2] = self.velocity[2] + random.uniform(-0.5, 0.5)
 
         # update angular velocity
         # 3D  instantaneous angular velocity vector w = r x v / |r|^2

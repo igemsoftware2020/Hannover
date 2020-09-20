@@ -150,7 +150,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
 
     if save_fig:
         writer = animation.FFMpegWriter(fps=30, metadata=dict(artist='Me'), bitrate=-1)
-        path = Path(save_path).parent / '3d_animation.mp4'
+        path = Path(save_path).parent / '2d_animation.mp4'
         anim.save(str(path), writer=writer)
     else:
         plt.show()

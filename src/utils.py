@@ -267,7 +267,7 @@ def apply_rotation(vector: np.ndarray, matrix: R):
 def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     live = get_data_to_parameter(data, 'living')
     print(get_data_to_parameter(data, 'living'))
-    num = live[live is True].count(axis=1)
+    num = live[live == True].count(axis=1)
     x, y_fit, slope, generation_time = get_gent(data)
     '''plot data'''
     fig, (ax1, ax2) = plt.subplots(2, 1)
@@ -312,11 +312,11 @@ def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool =
 
 def get_gent(data: pd.DataFrame):
     live = get_data_to_parameter(data, 'living')  # get data
-    y = live[live is True].count(axis=1).values  # transform data and return an array
+    y = live[live == True].count(axis=1).values  # transform data and return an array
     y = np.log(y)  # transform data
     y = y[y != y[0]]  # cut out bacteria in lag phase
     x = live.index[
-        live[live is True].count(axis=1) != live[live is True].count(axis=1)[0]].to_numpy()  # get index array
+        live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy()  # get index array
     '''start linear regression'''
     model = LinearRegression(fit_intercept=True)
     model.fit(x[:, np.newaxis], y)  # fit the data

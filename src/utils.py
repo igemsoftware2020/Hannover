@@ -84,10 +84,12 @@ def get_data_to_parameter(data: pd.DataFrame, key: str, exact: bool = False):
     df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in dic.items()]))
 
     def isnan(vector):
-        if np.isnan(np.min(vector)):
+        if np.isnan(np.min(vector)) and exact:
             return False
-        else:
+        elif exact:
             return True
+        elif not exact:
+            return pd.isna(vector)
 
     df = df.transform(lambda x: sorted(x, key=isnan, reverse=True))
     return df

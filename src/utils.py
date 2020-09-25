@@ -297,14 +297,41 @@ def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     plt.show()
 
 
+def get_z(data):
+    x = []
+    y = []
+    z = []
+    z_new=0
+    for bac in data['position'].index:
+        x.append(data['position'][bac][-1][0])
+        y.append(data['position'][bac][-1][1])
+        z.append(data['position'][bac][-1][2])
+    a=np.vstack((x,y,z)).T
+    pos=pd.DataFrame(a,columns=['x','y','z'])
+    pos=pos.sort_values('z',ascending=False)
+    pos=pos[0:int(np.round((len(pos)*0.1)))].values
+    x=pos[:,0]
+    y=pos[:,1]
+    z=pos[:,2]
+    return x,y,z
+    
+            
+        
+            
+
+
+
 def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     x, y, z = last_pos(data)
+    X,Y,Z=get_z(data)
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111,projection='3d')
     ax.scatter(x, y, z, c='g', s=50, alpha=0.8, marker='o')
+    ax.plot_trisurf(X,Y,Z, cmap='Greens',edgecolor='none')
     ax.set_xlabel('x / um')
     ax.set_ylabel('y / um')
     ax.set_zlabel('z / um')
+    ax.view_init(60)
     if save_fig:
         plt.savefig(save_path / 'scatter_last_positions.jpeg')
     plt.show()
@@ -336,7 +363,34 @@ def last_pos(data):
         last_cord_z.append(data['position'][bac][-1][2])
     return last_cord_x, last_cord_y, last_cord_z
 
+    
 
+
+
+
+
+
+
+def movepath(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    coor_x=[]
+    coor_y=[]
+    coor_z=[]
+    fig=plt.figure()
+    ax1=fig.add_subplot(1,2,1)
+    ax2=fig.add_subplot(1,2,2,projection='3d')
+    for bac in data['position'].index:
+        
+        for a in range(len(data['position'][bac])):
+            coor_x.append(data['position'][bac][a][0])
+            coor_y.append(data['position'][bac][a][1])
+            coor_z.append(data['position'][bac][a][2])
+        ax1.plot(coor_x,coor_y)
+        ax2.plot(coor_x, coor_y, coor_z)
+        coor_x.clear()
+        coor_y.clear()
+        coor_z.clear()
+    fig.show()
+    
 def prompt_log_at_start(save_dir: str):
     return (f"********************* BIOFILM MODELING *********************\n"
             "NUMBER OF INITIAL BACTERIA\t {number_bacteria}\n"

@@ -17,7 +17,7 @@ import numpy as np
 from src.biofilm import Biofilm
 from src.constants import Constants as C
 from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
-    prompt_log_at_start, plot_num, dens_map
+    prompt_log_at_start, plot_num, dens_map, movepath, scatter_last_positions
 
 
 # custom libraries
@@ -251,11 +251,13 @@ def blind_run():
     print(prompt_log_at_start(info_file_name))
 
     biofilm = Biofilm()
-    biofilm.simulate(duration_in_min=60, save_name=info_file_name)
+    biofilm.simulate(duration_in_min=3, save_name=info_file_name)
 
     data = bacteria_as_pandas(info_file_name)
     plot_num(data, info_file_path)
     dens_map(data, info_file_path)
+    movepath(data, info_file_path)
+    scatter_last_positions(data, info_file_path)
     plot_velocities(data, info_file_path, save_fig=True)
     plot_positions(data, info_file_path, save_fig=True)
     plot_force(data, info_file_path, save_fig=True)
@@ -265,7 +267,7 @@ def blind_run():
 def plot_testing(info_file_name):
     info_file_path = C.OUTPUT_PATH / info_file_name
     data = bacteria_as_pandas(info_file_path)
-
+    
     plot_num(data, info_file_path)
     dens_map(data, info_file_path)
     plot_velocities(data, info_file_path)
@@ -280,4 +282,4 @@ def plot_testing(info_file_name):
 if __name__ == "__main__":
     blind_run()
     # coreFunction())
-    # plot_testing(r'C:\Users\David\PycharmProjects\biofilm_modelling\output\log_21h41min_1192020\log_21h41min_1192020.json')
+#plot_testing(r'C:\Users\jonas\github\biofilm_growth_modeling\src\output\log_19h54min_1792020\log_19h54min_1792020.json')

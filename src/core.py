@@ -245,7 +245,7 @@ def blind_run():
     info_file_path = info_file_name.parent
     print(prompt_log_at_start(info_file_name))
     biofilm = Biofilm()
-    biofilm.simulate(duration_in_min=120, save_name=info_file_name)
+    biofilm.simulate(duration_in_min=5, save_name=info_file_name)
 
 
 def plotting(info_file_path):

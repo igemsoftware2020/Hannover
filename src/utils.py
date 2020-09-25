@@ -1,3 +1,4 @@
+# imports
 import json
 import time
 from datetime import datetime
@@ -16,6 +17,9 @@ from scipy.spatial.transform import Rotation as R
 
 # custom libraries
 from src.constants import Constants as C
+
+
+# ********************************************************************************************
 
 
 def write_log_template(info_file_path):
@@ -106,12 +110,12 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
         ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Velocities')
-    ax1.set_xlabel('Step')
-    ax1.set_ylabel('velocity')
+    ax1.set_xlabel('Time in s')
+    ax1.set_ylabel('Velocity in um / s')
     ax2.plot(means)
     ax2.set_title('Mean Velocity')
-    ax2.set_xlabel('Step')
-    ax2.set_ylabel('velocity')
+    ax2.set_xlabel('Time in s')
+    ax2.set_ylabel('Velocity in um / s')
 
     if save_fig:
         path = Path(save_path).parent / 'velocity_plot.png'
@@ -223,12 +227,14 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Position')
-    ax1.set_xlabel('Step')
-    ax1.set_ylabel('distance')
+    ax1.set_xlabel('Time in s')
+    ax1.set_ylabel('Distance in um')
     ax2.plot(means)
+    ax2.ylim([0, C.WINDOW_SIZE[2]])
     ax2.set_title('Mean position')
-    ax2.set_xlabel('Step')
-    ax2.set_ylabel('distance')
+    ax2.set_xlabel('Time in s')
+    ax2.set_ylabel('Mean distance in um')
+    plt.show()
 
     if save_fig:
         path = Path(save_path).parent / 'positions_plot.png'
@@ -249,12 +255,14 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Total force')
-    ax1.set_xlabel('Step')
-    ax1.set_ylabel('force')
+    ax1.set_xlabel('Time in s')
+    ax1.set_ylabel('Force in N')
+    ax1.yscale('log')
     ax2.plot(means)
     ax2.set_title('Mean force')
-    ax2.set_xlabel('Step')
-    ax2.set_ylabel('force')
+    ax2.set_xlabel('Time in s')
+    ax2.set_ylabel('Force in N')
+    plt.show()
 
     if save_fig:
         path = Path(save_path).parent / 'force_plot.png'
@@ -277,19 +285,20 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         ax1.plot(width_data.loc[:, bacteria], '--', alpha=0.3)
         ax2.plot(length_data.loc[:, bacteria.replace('width', 'length')], '--', alpha=0.3)
     ax1.set_title('width')
-    ax1.set_xlabel('Step')
-    ax1.set_ylabel('width')
+    ax1.set_xlabel('Time in s')
+    ax1.set_ylabel('width in um')
     ax2.set_title('length')
-    ax2.set_xlabel('Step')
-    ax2.set_ylabel('length')
+    ax2.set_xlabel('Time in s')
+    ax2.set_ylabel('length in um')
     ax3.plot(width_means)
     ax4.plot(length_means)
     ax3.set_title('width mean')
-    ax3.set_xlabel('Step')
-    ax3.set_ylabel('width')
+    ax3.set_xlabel('Time in s')
+    ax3.set_ylabel('mean width in um')
     ax4.set_title('length mean')
-    ax4.set_xlabel('Step')
-    ax4.set_ylabel('length')
+    ax4.set_xlabel('Time in s')
+    ax4.set_ylabel('mean length in um')
+    plt.show()
 
     if save_fig:
         path = Path(save_path).parent / 'size_plot.png'
@@ -347,7 +356,7 @@ def simulation_duration(func):
 
         # storing time after function execution
         end = time.time()
-        print("Duration : ", func.__name__, end - begin)
+        print(f'Duration of {func.__name__} : {end - begin} s')
 
     return inner1
 

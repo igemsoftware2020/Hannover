@@ -165,6 +165,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
 
 
 def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
     plot_data = get_data_to_parameter(data, 'position', exact=True)
 
     fig = plt.figure()
@@ -172,11 +173,13 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     lines = []
     data = []
     for bacteria in plot_data:
-        x_data = [vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
-        y_data = [vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
-        z_data = [vector[2] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        x_data = np.asarray([vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))])
+        y_data = np.asarray([vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))])
+        z_data = np.asarray([vector[2] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))])
         lines.append(ax.plot(x_data, y_data, z_data, alpha=0.9), )
         data.append([x_data, y_data, z_data])
+    lines = np.asarray(lines)
+    data = np.asarray(data)
 
     def update(num, line_plots, dataLines):
         for line, dataLine in zip(line_plots, dataLines):
@@ -232,7 +235,7 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Distance in um')
     ax2.plot(means)
-    ax2.ylim([0, C.WINDOW_SIZE[2]])
+    # ax2.set_ylim([0, C.WINDOW_SIZE[2]])
     ax2.set_title('Mean position')
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('Mean distance in um')
@@ -259,7 +262,7 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax1.set_title('Total force')
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Force in N')
-    ax1.yscale('log')
+    ax1.set_yscale('log')
     ax2.plot(means)
     ax2.set_title('Mean force')
     ax2.set_xlabel('Time in s')

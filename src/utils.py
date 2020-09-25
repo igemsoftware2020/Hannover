@@ -433,11 +433,6 @@ def get_z(data):
     z=pos[:,2]
     return x,y,z
     
-            
-        
-            
-
-
 
 def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     x, y, z = last_pos(data)
@@ -458,8 +453,9 @@ def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool =
 def get_gent(data: pd.DataFrame):
     live = get_data_to_parameter(data, 'living')  # get data
     y = live[live == True].count(axis=1).values  # transform data and return an array
-    y = np.log(y)  # transform data
     y = y[y != y[0]]  # cut out bacteria in lag phase
+    y = [np.log(value) if value > 0 else value for value in y]  # transform data
+
     x = live.index[
         live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy()  # get index array
     '''start linear regression'''

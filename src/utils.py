@@ -403,8 +403,10 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
     plt.tight_layout()
     if save_fig:
-        plt.savefig(save_path / 'growth_plot.jpeg')
-    plt.show()
+        path = Path(save_path).parent / 'growth_plot.png'
+        plt.savefig(path)
+    else:
+        plt.show()
 
 
 def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
@@ -413,8 +415,10 @@ def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
     sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=False, cmap='mako', levels=200, thresh=0)
     if save_fig:
-        plt.savefig(save_path / 'density_plot.jpeg')
-    plt.show()
+        path = Path(save_path).parent / 'density_plot.png'
+        plt.savefig(path)
+    else:
+        plt.show()
 
 
 def get_z(data):
@@ -447,8 +451,10 @@ def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool =
     ax.set_zlabel('z / um')
     ax.view_init(60)
     if save_fig:
-        plt.savefig(save_path / 'scatter_last_positions.jpeg')
-    plt.show()
+        path = Path(save_path).parent / 'scatter_last_plot.png'
+        plt.savefig(path)
+    else:
+        plt.show()
 
 
 def get_gent(data: pd.DataFrame):
@@ -477,27 +483,6 @@ def last_pos(data):
         last_cord_y.append(data['position'][bac][-1][1])
         last_cord_z.append(data['position'][bac][-1][2])
     return last_cord_x, last_cord_y, last_cord_z
-
-
-def movepath(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
-    coor_x = []
-    coor_y = []
-    coor_z = []
-    fig = plt.figure()
-    ax1 = fig.add_subplot(1, 2, 1)
-    ax2 = fig.add_subplot(1, 2, 2, projection='3d')
-    for bac in data['position'].index:
-
-        for a in range(len(data['position'][bac])):
-            coor_x.append(data['position'][bac][a][0])
-            coor_y.append(data['position'][bac][a][1])
-            coor_z.append(data['position'][bac][a][2])
-        ax1.plot(coor_x, coor_y)
-        ax2.plot(coor_x, coor_y, coor_z)
-        coor_x.clear()
-        coor_y.clear()
-        coor_z.clear()
-    fig.show()
 
 
 def prompt_log_at_start(save_dir: str):

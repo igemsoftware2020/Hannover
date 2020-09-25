@@ -1,9 +1,5 @@
-# coding latin-1
-# ********************************************************************************************
-# THR
-# semiautodeveloped code
-# ********************************************************************************************
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # ********************************************************************************************
 # imports
@@ -11,12 +7,13 @@
 import math
 import os
 
-# import cv2
+import cv2
 import numpy as np
 
+# custom libraries
 from src.biofilm import Biofilm
 from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
-    prompt_log_at_start, plot_num, dens_map, movepath, scatter_last_position
+    prompt_log_at_start, plot_num, dens_map, animate_3d, animate_positions
 
 
 # custom libraries
@@ -251,8 +248,8 @@ def blind_run():
 def plotting(info_file_path):
     data = bacteria_as_pandas(info_file_path)
 
-    plot_num(data, info_file_path)
-    dens_map(data, info_file_path)
+    plot_num(data, info_file_path, save_fig=True)
+    dens_map(data, info_file_path, save_fig=True)
     plot_velocities(data, info_file_path, save_fig=True)
     plot_positions(data, info_file_path, save_fig=True)  # this one messes with data
     plot_force(data, info_file_path, save_fig=True)
@@ -267,7 +264,7 @@ def plotting(info_file_path):
 
 
 if __name__ == "__main__":
-    blind_run()
+    # blind_run()
     # coreFunction())
-    # path = 'C:\\Users\\David\\PycharmProjects\\biofilm_modelling\\output\\log_16h32min_2092020\\log_16h32min_2092020.json'
-    # plotting(path)
+    path = '/home/david/PycharmProjects/biofilm_growth_modeling/output/log_12h59min_2592020/log_12h59min_2592020.json'
+    plotting(path)

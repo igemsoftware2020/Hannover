@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
+# ********************************************************************************************
+# imports
 import random
 from pathlib import Path
 
-# ********************************************************************************************
-# imports
 import numpy as np
 import tqdm
 
@@ -17,12 +16,20 @@ from src.utils import write_log_template, read_in_log, save_dict_as_json, simula
 
 
 class Biofilm(object):
+    """
+    The Biofilm class initializes a configuration of bacteria spread on a plane.
+    All bacteria of the biofilm are stored as a list and are updated,
+    when simulating the growth of the biofilm.
+    """
 
     def __init__(self):
         self.bacteria = []
         self.num_bacteria = len(self.bacteria)
 
     def spawn(self):
+        """ spawn an initial number of bacteria.
+         Bacteria are randomly distributed on a plane with aspect ratios specified in the Constants class
+         """
         for _ in range(C.NUM_INITIAL_BACTERIA):
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
             rnd_position = np.asarray([random.uniform(C.WINDOW_SIZE[0] / 2 - 40, C.WINDOW_SIZE[0] / 2 + 40),
@@ -38,6 +45,11 @@ class Biofilm(object):
             self.bacteria.append(bac)
 
     def write_to_log(self, log_name):
+        """
+        Saves the current parameters of all bacteria in "self.bacteria" as a dictionary in a json file
+        with the name log_name. If no json file exits it will create a template. No entries are overwritten,
+        instead the parameter lists are updated accordingly
+        """
         info_file_path = C.OUTPUT_PATH / log_name
         if not log_name.is_file():
             # create json template and save
@@ -78,10 +90,9 @@ class Biofilm(object):
     @simulation_duration
     def simulate(self, duration_in_min: int, save_name: Path):
         """
-        SPAWNS BACTERIA
-        Iterates over all Bacteria and updates Parameters
-        Because doubling time of bacteria is high with 20 mi, time is measured in minutes.
-         All units are SI, therefore conversion in seconds with factor 60 for calculations
+        Sets up and runs simulation.
+        Iterates over all Bacteria and updates parameters, based on euler- forward scheme.
+        All units are SI, expect lengths, which are measured in um
         """
         self.spawn()
         print(self)
@@ -122,6 +133,7 @@ class Biofilm(object):
 
     @staticmethod
     def distance_vector(self: Bacterium, other: Bacterium):
+        """ return distance vector between two bacteria """
         return self.position - other.position
 
     @staticmethod
@@ -146,7 +158,10 @@ class Biofilm(object):
 
     @staticmethod
     def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium, exact=False):
-        """ return interaction term with bacteria in local environment"""
+        """ return absolute interaction force with one bacteria.
+         Interaction force is calculated from the distance and gradient value
+         of the lennard- jones potential at this distance
+        """
 
         def lennard_jones_force(r, epsilon, r_min):
             return - epsilon * (12 * (r_min ** 12 / r ** 13) - 12 * (r_min ** 6 / r ** 7))
@@ -161,7 +176,7 @@ class Biofilm(object):
                 repulsive_force += lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION,
                                                        r_min=bacterium1.width)
         else:
-            """ calculate interaction just for center"""
+            # only calculate for the center of the bacteria
             distance_vector = bacterium1.position - bacterium2.position
             distance = np.linalg.norm(distance_vector) * 1E6
             repulsive_force = lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION, r_min=bacterium1.width)
@@ -169,5 +184,6 @@ class Biofilm(object):
 
     @staticmethod
     def check_energy_conservation(bacterium1: Bacterium, bacterium2: Bacterium, total_energy_before):
+        """ checks if energy is conserved in the splitting process"""
         if bacterium1.total_energy + bacterium2.total_energy != total_energy_before:
             raise ValueError("Energy conversation broken while splitting.")

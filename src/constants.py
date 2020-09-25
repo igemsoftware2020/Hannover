@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+# ********************************************************************************************
+# imports
 import os
 from pathlib import Path
 
@@ -7,8 +10,11 @@ import numpy as np
 
 
 class Constants:
+    """
+    This class is for managing and storing different biological and physical constants,
+    which are used in the simulation
+    """
     # FILE PATHS
-
     ROOT_DIRECTORY = Path(os.getcwd())
     OUTPUT_PATH = ROOT_DIRECTORY / 'output'
     SOURCE_PATH = ROOT_DIRECTORY / 'src'
@@ -16,8 +22,8 @@ class Constants:
     # SIMULATION PARAMETERS
     TIME_STEP = 1  # in seconds
     NUM_INITIAL_BACTERIA = 3
-    # constants B. subtilius
 
+    # constants regarding B. subtilius
     BSUB_WIDTH = 1  # MICROMETERS https://en.wikipedia.org/wiki/Bacillus_subtilis
     BSUB_LENGTH = 4.9  # MICROMETERS https://en.wikipedia.org/wiki/Bacillus_subtilis
     BSUB_MASS = 10 ** (-15)  # kg

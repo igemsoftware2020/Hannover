@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-import math
 # ********************************************************************************************
 # imports
+import math
 import random
 from typing import Dict
 
 import numpy as np
 
+# custom libraries
 from src.constants import Constants as C
 from src.utils import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x
 
@@ -63,10 +63,12 @@ class Bacterium:
         self.total_energy = self.translation_energy + self.rotational_energy
 
     def update_rotational_energy(self):
+        """ updates the rotational energy """
         moment_of_inertia = C.BSUB_MASS / 6 * (3 * self.width ** 2 + self.length) + C.BSUB_MASS / 2 * self.width ** 2
         self.rotational_energy = 1 / 2 * moment_of_inertia * np.dot(self.velocity_angular, self.velocity_angular)
 
     def update_translation_energy(self):
+        """ updates the translation energy """
         self.translation_energy = 1 / 2 * C.BSUB_MASS * np.dot(self.velocity, self.velocity)
 
     def get_volume(self):
@@ -87,13 +89,13 @@ class Bacterium:
             pass
 
     def random_cell_death(self):
-        # Programmed cell death
+        """ random cell dying """
         if random.random() > 1.0 - C.BSUB_MORTALITY_RATE:
             self.living = False
             self.moving = False
 
     def __eq__(self, other):
-
+        """ new __eq__ based on bacteria parameters """
         if get_bacteria_dict(self) == get_bacteria_dict(other):
             return True
         return False
@@ -199,6 +201,7 @@ class Bacterium:
         self.angle[2] = self.angle[2] + self.velocity_angular[2] * dt
 
     def at_boundary(self):
+        """ checks if bacteria is at the edge of the simulation plane"""
         x, y, z = self.position
         if x + self.length >= C.WINDOW_SIZE[0] or x - self.length <= 0:
             # elastic scattering at boundary
@@ -220,6 +223,12 @@ class Bacterium:
             return False
 
     def update_acting_force(self):
+        """ Calculates all forces acting on the bacteria
+        and updates the according parameter of the bacteria.
+        Forces included:
+         Stokes drag force, bacterium- bacterium adhesion,
+        bacterium-Substrate adhesion, gravitation
+        """
         # Stokes drag force
         self.force = 0
         self.force = stokes_drag_force(radius=self.length, velocity=self.velocity)

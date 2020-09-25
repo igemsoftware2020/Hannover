@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# ********************************************************************************************
 # imports
 import json
 import time
@@ -8,8 +12,6 @@ from typing import Dict
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
-# ********************************************************************************************
-# imports
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -25,6 +27,7 @@ from src.constants import Constants as C
 
 
 def write_log_template(info_file_path):
+    """ saves a json template for saving bacteria parameters"""
     constants = C()
     with open(info_file_path, 'w+') as json_file:
         data = {'BACTERIA': {}, 'CONSTANTS': {}}
@@ -38,17 +41,20 @@ def write_log_template(info_file_path):
 
 
 def read_in_log(info_file_path) -> Dict:
+    """ returns data from a json file as dictionary"""
     with open(info_file_path, "r") as json_file:
         data = json.load(json_file)
     return data
 
 
 def bacteria_as_pandas(info_file_path) -> pd.DataFrame:
+    """ sorts bacteria parameters into DataFrame"""
     data = read_in_log(info_file_path)
     return pd.DataFrame(data['BACTERIA']).transpose()
 
 
 def constants_as_pandas(info_file_path):
+    """ sorts all saved constants into a Dataframe and returns"""
     data = read_in_log(info_file_path)
     return pd.DataFrame(data['CONSTANTS']).transpose()
 
@@ -129,6 +135,10 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
 
 
 def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    """
+    Plots or saves (as mp4) an 2d animation of the biofilm.
+    Animation is a top view of the biofilm and shows the trajectories of all bacteria in the simulation time.
+    """
     plot_data = get_data_to_parameter(data, 'position', exact=True)
     living_data = get_data_to_parameter(data, 'living')
 
@@ -167,6 +177,10 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
 
 
 def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    """
+    Plots or saves (as mp4) an 3d animation of the biofilm.
+    Shows the trajectories of all bacteria in the simulation time in 3 dimensions.
+    """
     np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
     plot_data = get_data_to_parameter(data, 'position', exact=True)
 
@@ -488,6 +502,7 @@ def last_pos(data):
 
 
 def prompt_log_at_start(save_dir: str):
+    """ Log printed in terminal at start """
     return (f"********************* BIOFILM MODELING *********************\n"
             "NUMBER OF INITIAL BACTERIA\t {number_bacteria}\n"
             "==================================================\n"

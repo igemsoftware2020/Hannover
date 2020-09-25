@@ -32,7 +32,6 @@ class Bacterium:
         :param length:  length of ellipse in meter, default value 2 µm for B. subtilis
         :param velocity: velocity of bacteria [v_x, v_y, v_z] in m/s
         :param angle: angle of bacteria  measured to x axis in radian
-
         """
 
         if angle is None:

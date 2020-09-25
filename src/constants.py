@@ -21,8 +21,7 @@ class Constants:
     BSUB_WIDTH = 1  # MICROMETERS https://en.wikipedia.org/wiki/Bacillus_subtilis
     BSUB_LENGTH = 4.9  # MICROMETERS https://en.wikipedia.org/wiki/Bacillus_subtilis
     BSUB_MASS = 10 ** (-15)  # kg
-    BSUB_MORTALITY_RATE = 0.01
-
+    BSUB_MORTALITY_RATE = 0.00
     BSUB_CRITICAL_LENGTH = 9  # MICROMETERS
 
     # SPEEDS

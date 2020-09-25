@@ -12,8 +12,10 @@ import mpl_toolkits.mplot3d.axes3d as p3
 # imports
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from matplotlib.patches import Ellipse
 from scipy.spatial.transform import Rotation as R
+from sklearn.linear_model import LinearRegression
 
 # custom libraries
 from src.constants import Constants as C
@@ -318,22 +320,6 @@ def get_info_file_path():
     return info_file_name
 
 
-def prompt_log_at_start(save_dir: str):
-    return (f"********************* BIOFILM MODELING *********************\n"
-            "NUMBER OF INITIAL BACTERIA\t {number_bacteria}\n"
-            "==================================================\n"
-            "INITIAL DIMENSIONS (LENGTH, WIDTH)\t {BSUB_LENGTH},\t{BSUB_WIDTH}\n"
-            "MASS\t {BSUB_MASS}\n"
-            "GROWTH FACTOR\t {BSUB_GROWTH_FACTOR}\n"
-            "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n\n"
-            "SAVING AS \t {saving_dir}"
-            .format(number_bacteria=C.NUM_INITIAL_BACTERIA,
-                    type="B. subtilius", BSUB_LENGTH=C.BSUB_LENGTH,
-                    BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
-                    BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH,
-                    BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR, saving_dir=save_dir))
-
-
 def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity=C.EFFECTIVE_VISCOSITY_EPS) -> np.ndarray:
     # Calculates Stokes' drag for a sphere with Reynolds number < 1.
     # [um * Pa * s 1/1E-6 * um / s] = [um * kg / (um * s **2) * s  * um / s] = [um kg / (s ** 2)]
@@ -364,7 +350,6 @@ def simulation_duration(func):
 def rotate(origin, point, angle):
     """
     Rotate a point counterclockwise by a given angle around a given origin.
-
     The angle should be given in radians.
     """
     ox, oy = origin
@@ -395,3 +380,146 @@ def rotation_matrix_z(theta: float):
 
 def apply_rotation(vector: np.ndarray, matrix: R):
     return matrix.apply(vector)
+
+
+def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    live = get_data_to_parameter(data, 'living')
+    print(get_data_to_parameter(data, 'living'))
+    num = live[live == True].count(axis=1)
+    x, y_fit, slope, generation_time = get_gent(data)
+    '''plot data'''
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(num, color='b')
+    ax1.set(xlabel='Time in s', ylabel='Bacteria Number', title='Bacteria Growth')
+    ax2.plot(num, label='log curve')
+    ax2.set(xlabel='Time in s', ylabel='Bacteria Number [log]', title='Bacteria Growth')
+    ax2.plot(x, np.exp(y_fit), label='fit curve')
+    ax2.legend(loc='lower right')
+    ax2.text(0.1, 0.9, 'slope: ' + str(round(slope, 5)), transform=ax2.transAxes)
+    ax2.text(0.1, 0.8, 'generation time: ' + str(round(generation_time, 5)), transform=ax2.transAxes)
+    ax2.set_yscale('log')
+
+    plt.tight_layout()
+    if save_fig:
+        plt.savefig(save_path / 'growth_plot.jpeg')
+    plt.show()
+
+
+def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    x, y, z = last_pos(data)
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
+    sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=False, cmap='mako', levels=200, thresh=0)
+    if save_fig:
+        plt.savefig(save_path / 'density_plot.jpeg')
+    plt.show()
+
+
+def get_z(data):
+    x = []
+    y = []
+    z = []
+    z_new=0
+    for bac in data['position'].index:
+        x.append(data['position'][bac][-1][0])
+        y.append(data['position'][bac][-1][1])
+        z.append(data['position'][bac][-1][2])
+    a=np.vstack((x,y,z)).T
+    pos=pd.DataFrame(a,columns=['x','y','z'])
+    pos=pos.sort_values('z',ascending=False)
+    pos=pos[0:int(np.round((len(pos)*0.1)))].values
+    x=pos[:,0]
+    y=pos[:,1]
+    z=pos[:,2]
+    return x,y,z
+    
+            
+        
+            
+
+
+
+def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    x, y, z = last_pos(data)
+    X,Y,Z=get_z(data)
+    fig = plt.figure()
+    ax = fig.add_subplot(111,projection='3d')
+    ax.scatter(x, y, z, c='g', s=50, alpha=0.8, marker='o')
+    ax.plot_trisurf(X,Y,Z, cmap='Greens',edgecolor='none')
+    ax.set_xlabel('x / um')
+    ax.set_ylabel('y / um')
+    ax.set_zlabel('z / um')
+    ax.view_init(60)
+    if save_fig:
+        plt.savefig(save_path / 'scatter_last_positions.jpeg')
+    plt.show()
+
+
+def get_gent(data: pd.DataFrame):
+    live = get_data_to_parameter(data, 'living')  # get data
+    y = live[live == True].count(axis=1).values  # transform data and return an array
+    y = np.log(y)  # transform data
+    y = y[y != y[0]]  # cut out bacteria in lag phase
+    x = live.index[
+        live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy()  # get index array
+    '''start linear regression'''
+    model = LinearRegression(fit_intercept=True)
+    model.fit(x[:, np.newaxis], y)  # fit the data
+    generation_time = np.log(2) / model.coef_[0]  # compute generation time
+    y_fit = model.predict(x[:, np.newaxis])  # get fitted curve
+    slope = model.coef_[0]  # slope is growth coefficient
+    return x, y_fit, slope, generation_time
+
+
+def last_pos(data):
+    last_cord_x = []
+    last_cord_y = []
+    last_cord_z = []
+    for bac in data['position'].index:
+        last_cord_x.append(data['position'][bac][-1][0])
+        last_cord_y.append(data['position'][bac][-1][1])
+        last_cord_z.append(data['position'][bac][-1][2])
+    return last_cord_x, last_cord_y, last_cord_z
+
+    
+
+
+
+
+
+
+
+def movepath(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    coor_x=[]
+    coor_y=[]
+    coor_z=[]
+    fig=plt.figure()
+    ax1=fig.add_subplot(1,2,1)
+    ax2=fig.add_subplot(1,2,2,projection='3d')
+    for bac in data['position'].index:
+        
+        for a in range(len(data['position'][bac])):
+            coor_x.append(data['position'][bac][a][0])
+            coor_y.append(data['position'][bac][a][1])
+            coor_z.append(data['position'][bac][a][2])
+        ax1.plot(coor_x,coor_y)
+        ax2.plot(coor_x, coor_y, coor_z)
+        coor_x.clear()
+        coor_y.clear()
+        coor_z.clear()
+    fig.show()
+    
+def prompt_log_at_start(save_dir: str):
+    return (f"********************* BIOFILM MODELING *********************\n"
+            "NUMBER OF INITIAL BACTERIA\t {number_bacteria}\n"
+            "==================================================\n"
+            "INITIAL DIMENSIONS (LENGTH, WIDTH)\t {BSUB_LENGTH},\t{BSUB_WIDTH}\n"
+            "MASS\t {BSUB_MASS}\n"
+            "GROWTH FACTOR\t {BSUB_GROWTH_FACTOR}\n"
+            "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n\n"
+            "SAVING AS \t {saving_dir}"
+            .format(number_bacteria=C.NUM_INITIAL_BACTERIA,
+                    type="B. subtilius", BSUB_LENGTH=C.BSUB_LENGTH,
+                    BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
+                    BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH,
+                    BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR, saving_dir=save_dir))

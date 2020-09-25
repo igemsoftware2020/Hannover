@@ -235,7 +235,7 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Distance in um')
     ax2.plot(means)
-    # ax2.set_ylim([0, C.WINDOW_SIZE[2]])
+    ax2.set_ylim((0, C.WINDOW_SIZE[1]))
     ax2.set_title('Mean position')
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('Mean distance in um')

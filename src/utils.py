@@ -1,20 +1,27 @@
+# imports
 import json
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
+import matplotlib.animation as animation
 import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d.axes3d as p3
 # ********************************************************************************************
 # imports
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib.patches import Ellipse
 from scipy.spatial.transform import Rotation as R
 from sklearn.linear_model import LinearRegression
 
 # custom libraries
 from src.constants import Constants as C
+
+
+# ********************************************************************************************
 
 
 def write_log_template(info_file_path):
@@ -51,7 +58,7 @@ def save_dict_as_json(data: Dict, info_file_path: Path):
         json.dump(data, json_file)
 
 
-def get_data_to_parameter(data: pd.DataFrame, key: str):
+def get_data_to_parameter(data: pd.DataFrame, key: str, exact: bool = False):
     """
     Gets complete bacteria data as a DataFrame.
     Resorts data to parameters 'key' into another DataFrame:
@@ -70,12 +77,19 @@ def get_data_to_parameter(data: pd.DataFrame, key: str):
     for index, bacteria in data.iterrows():
         df_bac = pd.DataFrame(bacteria).loc[key, :]
         for vectors in df_bac:
-            if key == 'velocity' or key == 'position':
+            if (key == 'velocity' or key == 'position') and (exact is False):
                 # calculate norm for velocity and position
                 vectors = get_euclid_norm(vectors)
             dic.update({str(index) + '_' + key: vectors})
     df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in dic.items()]))
-    df = df.transform(lambda x: sorted(x, key=pd.isnull, reverse=True))
+
+    def isnan(vector):
+        if np.isnan(np.min(vector)):
+            return False
+        else:
+            return True
+
+    df = df.transform(lambda x: sorted(x, key=isnan, reverse=True))
     return df
 
 
@@ -98,16 +112,109 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
         ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Velocities')
-    ax1.set_xlabel('Step')
-    ax1.set_ylabel('velocity')
+    ax1.set_xlabel('Time in s')
+    ax1.set_ylabel('Velocity in um / s')
     ax2.plot(means)
     ax2.set_title('Mean Velocity')
-    ax2.set_xlabel('Step')
-    ax2.set_ylabel('velocity')
+    ax2.set_xlabel('Time in s')
+    ax2.set_ylabel('Velocity in um / s')
+
+    if save_fig:
+        path = Path(save_path).parent / 'velocity_plot.png'
+        fig.savefig(str(path))
+    else:
+        plt.show()
+
+
+def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    plot_data = get_data_to_parameter(data, 'position', exact=True)
+    living_data = get_data_to_parameter(data, 'living')
+
+    fig, ax = plt.subplots()
+    lines = []
+    data = []
+    living = []
+
+    for bacteria in plot_data:
+        x_data = [vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        y_data = [vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        lines.append(ax.plot(x_data, y_data, ), )
+        data.append([x_data, y_data])
+        living.append([living_data[bacteria.replace('position', 'living')]])
+
+    def update(num, line_plots, dataLines, living_data):
+        for line, dataLine, alive in zip(line_plots, dataLines, living_data):
+            # update data for line plot: dataLine[0] = x data, dataLine[1] y data
+            line[0].set_data(dataLine[0][:num], dataLine[1][:num])
+            if alive[0] is False:
+                line[0].set_color('black')
+                line[0].set_alpha(0.5)
+
+        return lines,
+
+    anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
+
+                                   interval=200, repeat=False, fargs=[lines, data, living])
+
+    if save_fig:
+        writer = animation.FFMpegWriter(fps=30, metadata=dict(artist='Me'), bitrate=-1)
+        path = Path(save_path).parent / '2d_animation.mp4'
+        anim.save(str(path), writer=writer)
+    else:
+        plt.show()
+
+
+def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    plot_data = get_data_to_parameter(data, 'position', exact=True)
+
+    fig = plt.figure()
+    ax = p3.Axes3D(fig)
+    lines = []
+    data = []
+    for bacteria in plot_data:
+        x_data = [vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        y_data = [vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        z_data = [vector[2] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        lines.append(ax.plot(x_data, y_data, z_data, alpha=0.9), )
+        data.append([x_data, y_data, z_data])
+
+    def update(num, line_plots, dataLines):
+        for line, dataLine in zip(line_plots, dataLines):
+            # update data for line plot: dataLine[0] = x data, dataLine[1] y data
+            line[0].set_data(dataLine[0][:num], dataLine[1][:num])
+            line[0].set_3d_properties(dataLine[2][:num])
+        return lines,
+
+    anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
+                                   interval=200, repeat=False, fargs=[lines, data])
+    if save_fig:
+        writer = animation.FFMpegWriter(fps=50, metadata=dict(artist='Me'), bitrate=-1)
+        path = Path(save_path).parent / '3d_animation.mp4'
+        anim.save(str(path), writer=writer)
+    else:
+        plt.show()
+
+
+def plot_as_ellipse(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    pos_data = get_data_to_parameter(data, 'position')
+    angle_data = get_data_to_parameter(data, 'angle')
+    length_data = get_data_to_parameter(data, 'length')
+    fig, ax = plt.subplots(1, 1)
+    ells = []
+    for bacteria in pos_data:
+        patch = Ellipse(xy=pos_data.loc[0, bacteria], width=1,
+                        height=length_data.loc[0, bacteria],
+                        angle=angle_data.loc[0, bacteria][0])
+        ells.append(patch)
+
+    for e in ells:
+        ax.add_artist(e)
+        e.set_clip_box(ax.bbox)
+        e.set_alpha(0.4)
     plt.show()
 
     if save_fig:
-        fig.savefig(save_path / 'velocity_plot.jpeg')
+        fig.savefig(save_path / 'ellipse_plot.jpeg')
 
 
 def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
@@ -122,16 +229,20 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Position')
-    ax1.set_xlabel('Step')
-    ax1.set_ylabel('distance')
+    ax1.set_xlabel('Time in s')
+    ax1.set_ylabel('Distance in um')
     ax2.plot(means)
+    ax2.ylim([0, C.WINDOW_SIZE[2]])
     ax2.set_title('Mean position')
-    ax2.set_xlabel('Step')
-    ax2.set_ylabel('distance')
+    ax2.set_xlabel('Time in s')
+    ax2.set_ylabel('Mean distance in um')
     plt.show()
 
     if save_fig:
-        fig.savefig(save_path / 'positions_plot.jpeg')
+        path = Path(save_path).parent / 'positions_plot.png'
+        fig.savefig(path)
+    else:
+        plt.show()
 
 
 def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
@@ -146,16 +257,20 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Total force')
-    ax1.set_xlabel('Step')
-    ax1.set_ylabel('force')
+    ax1.set_xlabel('Time in s')
+    ax1.set_ylabel('Force in N')
+    ax1.yscale('log')
     ax2.plot(means)
     ax2.set_title('Mean force')
-    ax2.set_xlabel('Step')
-    ax2.set_ylabel('force')
+    ax2.set_xlabel('Time in s')
+    ax2.set_ylabel('Force in N')
     plt.show()
 
     if save_fig:
-        fig.savefig(save_path / 'force_plot.jpeg')
+        path = Path(save_path).parent / 'force_plot.png'
+        fig.savefig(path)
+    else:
+        plt.show()
 
 
 def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
@@ -172,23 +287,26 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         ax1.plot(width_data.loc[:, bacteria], '--', alpha=0.3)
         ax2.plot(length_data.loc[:, bacteria.replace('width', 'length')], '--', alpha=0.3)
     ax1.set_title('width')
-    ax1.set_xlabel('Step')
-    ax1.set_ylabel('width')
+    ax1.set_xlabel('Time in s')
+    ax1.set_ylabel('width in um')
     ax2.set_title('length')
-    ax2.set_xlabel('Step')
-    ax2.set_ylabel('length')
+    ax2.set_xlabel('Time in s')
+    ax2.set_ylabel('length in um')
     ax3.plot(width_means)
     ax4.plot(length_means)
     ax3.set_title('width mean')
-    ax3.set_xlabel('Step')
-    ax3.set_ylabel('width')
+    ax3.set_xlabel('Time in s')
+    ax3.set_ylabel('mean width in um')
     ax4.set_title('length mean')
-    ax4.set_xlabel('Step')
-    ax4.set_ylabel('length')
+    ax4.set_xlabel('Time in s')
+    ax4.set_ylabel('mean length in um')
     plt.show()
 
     if save_fig:
-        fig.savefig(save_path / 'size_plot.jpeg')
+        path = Path(save_path).parent / 'size_plot.png'
+        fig.savefig(path)
+    else:
+        plt.show()
 
 
 def get_info_file_path():
@@ -224,7 +342,7 @@ def simulation_duration(func):
 
         # storing time after function execution
         end = time.time()
-        print("Duration : ", func.__name__, end - begin)
+        print(f'Duration of {func.__name__} : {end - begin} s')
 
     return inner1
 

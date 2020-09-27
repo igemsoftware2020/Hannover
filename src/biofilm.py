@@ -172,14 +172,14 @@ class Biofilm(object):
             repulsive_force = 0
             for i in range(0, len(bac1_pos)):
                 distance_vector = bac1_pos[i] - bac2_pos[i]
-                distance = np.linalg.norm(distance_vector) * 1E6
+                distance = np.linalg.norm(distance_vector)
                 repulsive_force += lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION,
-                                                       r_min=bacterium1.width)
+                                                       r_min=bacterium1.length)
         else:
             # only calculate for the center of the bacteria
             distance_vector = bacterium1.position - bacterium2.position
-            distance = np.linalg.norm(distance_vector) * 1E6
-            repulsive_force = lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION, r_min=bacterium1.width)
+            distance = np.linalg.norm(distance_vector)
+            repulsive_force = lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION, r_min=bacterium1.length)
         return repulsive_force
 
     @staticmethod

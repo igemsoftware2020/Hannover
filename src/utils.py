@@ -127,9 +127,12 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('Velocity in um / s')
 
+    plt.ioff()
+
     if save_fig:
         path = Path(save_path).parent / 'velocity_plot.png'
         fig.savefig(str(path))
+        plt.close(fig)
     else:
         plt.show()
 
@@ -168,10 +171,13 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
 
                                    interval=200, repeat=False, fargs=[lines, data, living])
 
+    plt.ioff()
+
     if save_fig:
         writer = animation.FFMpegWriter(fps=30, metadata=dict(artist='Me'), bitrate=-1)
         path = Path(save_path).parent / '2d_animation.mp4'
         anim.save(str(path), writer=writer)
+        plt.close(fig)
     else:
         plt.show()
 
@@ -206,10 +212,13 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
                                    interval=200, repeat=False, fargs=[lines, data])
+
+    plt.ioff()
     if save_fig:
         writer = animation.FFMpegWriter(fps=50, metadata=dict(artist='Me'), bitrate=-1)
         path = Path(save_path).parent / '3d_animation.mp4'
         anim.save(str(path), writer=writer)
+        plt.close(fig)
     else:
         plt.show()
 
@@ -255,11 +264,13 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.set_title('Mean position')
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('Mean distance in um')
-    plt.show()
+
+    plt.ioff()
 
     if save_fig:
         path = Path(save_path).parent / 'positions_plot.png'
         fig.savefig(path)
+        plt.close(fig)
     else:
         plt.show()
 
@@ -283,11 +294,12 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.set_title('Mean force')
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('Force in N')
-    plt.show()
 
+    plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'force_plot.png'
         fig.savefig(path)
+        plt.close(fig)
     else:
         plt.show()
 
@@ -319,11 +331,12 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax4.set_title('length mean')
     ax4.set_xlabel('Time in s')
     ax4.set_ylabel('mean length in um')
-    plt.show()
 
+    plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'size_plot.png'
         fig.savefig(path)
+        plt.close(fig)
     else:
         plt.show()
 
@@ -418,9 +431,11 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.set_yscale('log')
 
     plt.tight_layout()
+    plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'growth_plot.png'
         plt.savefig(path)
+        plt.close(fig)
     else:
         plt.show()
 
@@ -430,9 +445,11 @@ def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig, (ax1, ax2) = plt.subplots(1, 2)
     ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
     sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=False, cmap='mako', levels=200, thresh=0)
+    plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'density_plot.png'
         plt.savefig(path)
+        plt.close(fig)
     else:
         plt.show()
 
@@ -466,9 +483,12 @@ def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool =
     ax.set_ylabel('y / um')
     ax.set_zlabel('z / um')
     ax.view_init(60)
+
+    plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'scatter_last_plot.png'
         plt.savefig(path)
+        plt.close(fig)
     else:
         plt.show()
 

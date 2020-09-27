@@ -1,11 +1,12 @@
 
-lpython:S1763ğ"GDelete this unreachable code or refactor the code to make it reachable.(ËÕü€ûÿÿÿÿ8Îß±ßÉ.
-Qpython:S1481«",Remove the unused local variable "z_coding".(ûÖ“¾ıÿÿÿÿ8Îß±ßÉ.
-Ypython:S1481•"4Remove the unused local variable "frameDimBacteria".(ŒÁ¥úÿÿÿÿ8Îß±ßÉ.
-Kpython:S1481‘"&Remove the unused local variable "dt".(»Ûâäıÿÿÿÿ8Îß±ßÉ.
-Gpython:S1481A"(Remove the unused local variable "path".(î“ó—8Îß±ßÉ.
-vpython:S1542†"QRename function "coreLoop" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(‰ÕÂÓûÿÿÿÿ8Îß±ßÉ.
-spython:S1542z"URename function "coreFunction" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(¹á‰8Îß±ßÉ.
-Epython:S1481¸"%Remove the unused local variable "b".(¹³† 8Îß±ßÉ.
-Epython:S1481¾"%Remove the unused local variable "b".(¹³† 8Îß±ßÉ.
-rpython:S3923¶"RRemove this if statement or edit its code blocks so that they're not all the same.(Êäú8Îß±ßÉ.
+Rpython:S1481õ"2Remove the unused local variable "info_file_path".(ÊÁœ±8Ëˆ‡ßÊ.
+Epython:S1481½"%Remove the unused local variable "b".(¹³† 8Ö’öŞÊ.
+Gpython:S1481@"(Remove the unused local variable "path".(î“ó—8Ö’öŞÊ.
+lpython:S1763ï"GDelete this unreachable code or refactor the code to make it reachable.(ËÕü€ûÿÿÿÿ8Ö’öŞÊ.
+Kpython:S1481"&Remove the unused local variable "dt".(»Ûâäıÿÿÿÿ8Ö’öŞÊ.
+Qpython:S1481ª",Remove the unused local variable "z_coding".(ûÖ“¾ıÿÿÿÿ8Ö’öŞÊ.
+Epython:S1481·"%Remove the unused local variable "b".(¹³† 8Ö’öŞÊ.
+spython:S1542y"URename function "coreFunction" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(¹á‰8Ö’öŞÊ.
+vpython:S1542…"QRename function "coreLoop" to match the regular expression ^[a-z_][a-z0-9_]{2,}$.(‰ÕÂÓûÿÿÿÿ8Ö’öŞÊ.
+Ypython:S1481”"4Remove the unused local variable "frameDimBacteria".(ŒÁ¥úÿÿÿÿ8Ö’öŞÊ.
+rpython:S3923µ"RRemove this if statement or edit its code blocks so that they're not all the same.(Êäú8Ö’öŞÊ.

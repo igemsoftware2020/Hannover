@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import numpy as np
 # ********************************************************************************************
 # imports
 import os
 from pathlib import Path
-
-import numpy as np
+from tkinter import filedialog
 
 
 class Constants:
@@ -22,6 +22,8 @@ class Constants:
         self.source_path = self.root_dir / 'src'
 
         # SIMULATION PARAMETERS
+        self.simulation_constants = {}
+        self.duration = 10
         self.num_initial_bac = 0
         self.time_step = 1
         self.window_size = (500, 750)
@@ -35,6 +37,35 @@ class Constants:
             self.bac_constants = Constants.get_bsub_constants()
         elif self.bac_type == "E. Coli." and default:
             self.bac_constants = Constants.get_ecoli_constants()
+
+    def get_bacteria_constants(self):
+        if self.bac_constant:
+            return self.bac_constants
+        else:
+            raise ValueError("Bacteria constants are not set.")
+
+    def get_simulation_constants(self):
+        if self.simulation_constants:
+            return self.simulation_constants
+        else:
+            raise ValueError(" constants are not set.")
+
+    def get_root_dir(self):
+        return self.root_dir
+
+    def set_root_dir(self):
+        new_root = filedialog.askdirectory(initialdir=self.get_root_dir())
+        self.root_dir = os.chdir(new_root)
+        self.output_path = self.root_dir / 'output'
+        self.source_path = self.root_dir / 'src'
+
+    def set_simulation_constants(self):
+        self.simulation_constants = {
+            "Num_initial_bacteria": self.num_initial_bac,
+            "Window_size": self.window_size,
+            "Time_step": self.time_step,
+            "Duration": self.duration
+        }
 
     @staticmethod
     def get_bsub_constants():

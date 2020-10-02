@@ -9,8 +9,8 @@ from typing import Dict
 
 import numpy as np
 
+import src.constants as Constants
 # custom libraries
-from src.constants import Constants as C
 from src.utils import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x
 
 
@@ -19,9 +19,7 @@ from src.utils import stokes_drag_force, gravitational_force, apply_rotation, ro
 
 class Bacterium:
 
-    def __init__(self, position: np.ndarray = None,
-                 width: float = C.BSUB_WIDTH,
-                 length: float = C.BSUB_LENGTH,
+    def __init__(self, constants: Constants, strain: str = "Ecoli", position: np.ndarray = None,
                  velocity: np.ndarray = np.asarray([0, 0, 0]),
                  angle: np.ndarray = None, force: np.ndarray = None,
                  living: bool = True, moving: bool = False, attached_to_surface: bool = False):
@@ -45,8 +43,23 @@ class Bacterium:
         self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
         self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
-        self.width = width
-        self.length = length
+        self.constants = constants
+        self.strain = strain
+        if self.strain == "Bsub":
+            self.width = self.constants.get_bsub_constants(key="WIDTH")
+            self.length = self.constants.get_bsub_constants(key="LENGTH")
+            self.mass = self.constants.get_bsub_constants(key="MASS")
+            self.growth_rate = self.constants.get_bsub_constants(key="GROWTH_RATE")
+            self.mortality_rate = self.constants.get_bsub_constants(key="MORTALITY_RATE")
+            self.critical_length = self.constants.get_bsub_constants(key="CRITICAL_LENGTH")
+        elif self.strain == "Ecoli":
+            self.width = self.constants.get_ecoli_constants(key="WIDTH")
+            self.length = self.constants.get_ecoli_constants(key="LENGTH")
+            self.mass = self.constants.get_ecoli_constants(key="MASS")
+            self.growth_rate = self.constants.get_ecoli_constants(key="GROWTH_RATE")
+            self.mortality_rate = self.constants.get_ecoli_constants(key="MORTALITY_RATE")
+            self.critical_length = self.constants.get_ecoli_constants(key="CRITICAL_LENGTH")
+
         self.living = living
         self.moving = moving
         self.attached_to_surface = attached_to_surface
@@ -64,12 +77,12 @@ class Bacterium:
 
     def update_rotational_energy(self):
         """ updates the rotational energy """
-        moment_of_inertia = C.BSUB_MASS / 6 * (3 * self.width ** 2 + self.length) + C.BSUB_MASS / 2 * self.width ** 2
+        moment_of_inertia = self.mass / 6 * (3 * self.width ** 2 + self.length) + self.mass / 2 * self.width ** 2
         self.rotational_energy = 1 / 2 * moment_of_inertia * np.dot(self.velocity_angular, self.velocity_angular)
 
     def update_translation_energy(self):
         """ updates the translation energy """
-        self.translation_energy = 1 / 2 * C.BSUB_MASS * np.dot(self.velocity, self.velocity)
+        self.translation_energy = 1 / 2 * self.mass * np.dot(self.velocity, self.velocity)
 
     def get_volume(self):
         """ gives out the cubic volume equivalent """
@@ -83,14 +96,14 @@ class Bacterium:
         # using a constant growth rate
         # TODO Make volume per time
         if self.living is True:
-            self.length = self.length * (C.BSUB_GROWTH_RATE + 1)
+            self.length = self.length * (self.growth_rate + 1)
         else:
             # if cell is dead, constant length
             pass
 
     def random_cell_death(self):
         """ random cell dying """
-        if random.random() > 1.0 - C.BSUB_MORTALITY_RATE:
+        if random.random() > 1.0 - self.mortality_rate:
             self.living = False
             self.moving = False
 
@@ -149,18 +162,19 @@ class Bacterium:
                           self.position[2] + int(0.1 * dz_length)))
         return np.asarray(positions)
 
-    def update_velocity(self, dt=C.TIME_STEP):
+    def update_velocity(self):
         """
         Update velocity direction and value based on the acting force.
         Add Brownian movement in x,y,z direction
         Add random angle movement
         """
+        dt = self.constants.get_simulation_constants(key="time_step")
         if self.at_boundary() == 'X':
             apply_rotation(self.velocity, rotation_matrix_x(theta=np.pi))
         elif self.at_boundary() == 'Y':
             apply_rotation(self.velocity, rotation_matrix_y(theta=np.pi))
 
-        acceleration = self.force / C.BSUB_MASS * 1E-6  # [um / s ** 2]
+        acceleration = self.force / self.mass * 1E-6  # [um / s ** 2]
         # update velocities
         self.velocity[0] = self.velocity[0] + acceleration[0] * dt
         self.velocity[1] = self.velocity[1] + acceleration[1] * dt
@@ -186,8 +200,9 @@ class Bacterium:
         self.velocity_angular[1] = self.velocity_angular[1] + random.uniform(- 0.02, 0.02)
         self.velocity_angular[2] = self.velocity_angular[2] + random.uniform(- 0.02, 0.02)
 
-    def update_position(self, dt=C.TIME_STEP):
+    def update_position(self):
         """ update bacterium position based on velocity """
+        dt = self.constants.get_simulation_constants(key="time_step")
         self.position[0] = self.position[0] + self.velocity[0] * dt
         self.position[1] = self.position[1] + self.velocity[1] * dt
         self.position[2] = self.position[2] + self.velocity[2] * dt
@@ -203,10 +218,11 @@ class Bacterium:
     def at_boundary(self):
         """ checks if bacteria is at the edge of the simulation plane"""
         x, y, z = self.position
-        if x + self.length >= C.WINDOW_SIZE[0] or x - self.length <= 0:
+        window_size = self.constants.get_simulation_constants(key="window_size")
+        if x + self.length >= window_size[0] or x - self.length <= 0:
             # elastic scattering at boundary
             return "X"
-        elif y + self.length >= C.WINDOW_SIZE[1] or y - self.length <= 0:
+        elif y + self.length >= window_size[1] or y - self.length <= 0:
             return "Y"
         return False
 
@@ -216,7 +232,7 @@ class Bacterium:
         If bacterium is big enough, splitting occurs with a probability of 0.8
         returns True if splitting is possible, False otherwise
         """
-        splitting_lengths = random.randrange(C.BSUB_CRITICAL_LENGTH - 1, C.BSUB_CRITICAL_LENGTH + 1)
+        splitting_lengths = random.randrange(self.critical_length - 1, self.critical_length + 1)
         if splitting_lengths <= self.length:
             return np.random.choice([True, False], p=[0.6, 0.4])
         else:
@@ -231,12 +247,13 @@ class Bacterium:
         """
         # Stokes drag force
         self.force = 0
-        self.force = stokes_drag_force(radius=self.length, velocity=self.velocity)
+        self.force = stokes_drag_force(radius=self.length, velocity=self.velocity,
+                                       viscosity=self.constants.EFFECTIVE_VISCOSITY_EPS)
         if (self.position[2] < 4) and self.attached_to_surface:
-            # if distance from surface greater than 4 µm, add adhesion force
-            self.force = self.force + C.MAX_CELL_SUBSTRATE_ADHESION * 1E-6 * np.asarray([0, 0, -1])
+            # if distance from surface smaller than 4 µm, add adhesion force
+            self.force = self.force + self.constants.MAX_CELL_SUBSTRATE_ADHESION * 1E-6 * np.asarray([0, 0, -1])
         # add gravitational force
-        self.force += gravitational_force(C.BSUB_MASS)
+        self.force += gravitational_force(self.mass)
 
 
 def get_bacteria_dict(bacterium: Bacterium) -> Dict:

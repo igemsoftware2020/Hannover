@@ -44,7 +44,7 @@ class Biofilm(object):
             # substrate cell adhesion, in cartesian coordinates
             adhesion_force = np.asarray([0, 0, self.constants.MAX_CELL_SUBSTRATE_ADHESION])
             bac = Bacterium(position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force,
-                            attached_to_surface=True, constants=self.constants)
+                            attached_to_surface=True, constants=self.constants, strain=self.constants.bac_type)
             self.bacteria.append(bac)
 
     def write_to_log(self, log_name):
@@ -163,7 +163,8 @@ class Biofilm(object):
         # To return a new list, use the sorted() built-in function...
         return sorted(sorted_bacteria, key=lambda x: x.position[axis], reverse=_reverse)
 
-    def abs_force_lennard_jones_potential(self, bacterium1: Bacterium, bacterium2: Bacterium, exact=False):
+    @staticmethod
+    def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium, exact=False):
         """ return absolute interaction force with one bacteria.
          Interaction force is calculated from the distance and gradient value
          of the lennard- jones potential at this distance
@@ -179,13 +180,14 @@ class Biofilm(object):
             for i in range(0, len(bac1_pos)):
                 distance_vector = bac1_pos[i] - bac2_pos[i]
                 distance = np.linalg.norm(distance_vector) * 1E6
-                repulsive_force += lennard_jones_force(distance, epsilon=self.constants.MAX_CELL_CELL_ADHESION,
-                                                       r_min=bacterium1.width)
+                repulsive_force += lennard_jones_force(distance,
+                                                       epsilon=10 * bacterium1.constants.MAX_CELL_CELL_ADHESION,
+                                                       r_min=2 * bacterium1.width)
         else:
             # only calculate for the center of the bacteria
             distance_vector = bacterium1.position - bacterium2.position
             distance = np.linalg.norm(distance_vector) * 1E6
-            repulsive_force = lennard_jones_force(distance, epsilon=self.constants.MAX_CELL_CELL_ADHESION,
+            repulsive_force = lennard_jones_force(distance, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
                                                   r_min=bacterium1.width)
         return repulsive_force
 

@@ -19,10 +19,10 @@ from src.utils import stokes_drag_force, gravitational_force, apply_rotation, ro
 
 class Bacterium:
 
-    def __init__(self, constants: Constants, strain: str = "Ecoli", position: np.ndarray = None,
+    def __init__(self, constants: Constants, strain: str = "E. Coli.", position: np.ndarray = None,
                  velocity: np.ndarray = np.asarray([0, 0, 0]),
                  angle: np.ndarray = None, force: np.ndarray = None,
-                 living: bool = True, moving: bool = False, attached_to_surface: bool = False):
+                 living: bool = True, moving: bool = False, attached_to_surface: bool = False, length: float = 0):
         """
         initialize a instance of the Bacteria class
         :param position: position of bacteria center [x_pox, y_pos, z_pos]
@@ -38,21 +38,23 @@ class Bacterium:
             self.angle = angle
 
         self.position = position
-        self.velocity = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.int64)
+        self.velocity: np.ndarray = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.int64)
         # rotate velocity in direction of orientation
         self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
         self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
         self.constants = constants
+        self.mass = self.constants.get_bsub_constants(key="MASS")
+
         self.strain = strain
-        if self.strain == "Bsub":
+        if self.strain == "B.Sub.":
             self.width = self.constants.get_bsub_constants(key="WIDTH")
             self.length = self.constants.get_bsub_constants(key="LENGTH")
             self.mass = self.constants.get_bsub_constants(key="MASS")
             self.growth_rate = self.constants.get_bsub_constants(key="GROWTH_RATE")
             self.mortality_rate = self.constants.get_bsub_constants(key="MORTALITY_RATE")
             self.critical_length = self.constants.get_bsub_constants(key="CRITICAL_LENGTH")
-        elif self.strain == "Ecoli":
+        elif self.strain == "E.Coli.":
             self.width = self.constants.get_ecoli_constants(key="WIDTH")
             self.length = self.constants.get_ecoli_constants(key="LENGTH")
             self.mass = self.constants.get_ecoli_constants(key="MASS")
@@ -138,9 +140,14 @@ class Bacterium:
         daughter_bac_angle = self.angle  # same orientation?
         daughter_bac_position = get_daughter_position(position=self.position, split_distance=self.length * 0.2,
                                                       angle=daughter_bac_angle)
-        daughter_bac_velocity = - self.velocity / 2
-        daughter_bac = Bacterium(daughter_bac_position, self.width, daughter_bac_length,
-                                 daughter_bac_velocity, self.angle, moving=True, force=-self.force)
+        daughter_bac_velocity = - (self.velocity / 2)
+
+        daughter_bac = Bacterium(constants=self.constants, strain=self.strain,
+                                 angle=self.angle, force=self.force,
+                                 living=True, moving=True,
+                                 attached_to_surface=self.attached_to_surface,
+                                 velocity=daughter_bac_velocity,
+                                 position=daughter_bac_position, length=daughter_bac_length)
 
         # update mother cell
         self.length = (1 - volume_ratio) * self.length

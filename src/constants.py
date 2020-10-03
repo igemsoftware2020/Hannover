@@ -32,7 +32,7 @@ class Constants:
         self.num_initial_bac = 3
         self.time_step = 1
         self.window_size = (500, 750)
-        self.duration = 5
+        self.duration = 60  # simulation time in minutes
         # Bacteria constants
         self.bac_type = bac_type
         self.bac_constants = {}

@@ -16,6 +16,12 @@ class Constants:
     which are used in the simulation
     """
 
+    # Global parameters
+    # ADHESION FORCES and VISCOSITY
+    MAX_CELL_SUBSTRATE_ADHESION = 5.08 * 1E-9  # [N] DOI 10.1016/S0167-7012(99)00137-2
+    MAX_CELL_CELL_ADHESION = 6.81 * 1E-9  # [N] DOI 10.1016/S0167-7012(99)00137-2
+    EFFECTIVE_VISCOSITY_EPS = np.log(1E3)  # [Pa * s] : of bacterial P. aeruginosa PAO1 10.1103/PhysRevLett.93.098102
+
     def __init__(self, bac_type: str):
         # FILE PATHS
         self.root_dir = Path(os.getcwd())
@@ -32,7 +38,7 @@ class Constants:
         self.bac_constants = {}
 
     def set_bacteria_constants(self, default=True):
-        if self.bac_type == "B.Sub." and default:
+        if self.bac_type == "B. Sub." and default:
             self.bac_constants = Constants.get_bsub_constants()
         elif self.bac_type == "E. Coli." and default:
             self.bac_constants = Constants.get_ecoli_constants()
@@ -110,8 +116,3 @@ class Constants:
 
     # MAX_RADIAL_SPEED = 6  # [um / h] DOI 10.1126/science.abb8501 (2020).
     # MAX_LATERAL_SPEED = 8  # [um / h] DOI 10.1126/science.abb8501 (2020)
-
-    # ADHESION FORCES and VISCOSITY
-    MAX_CELL_SUBSTRATE_ADHESION = 5.08 * 1E-9  # [N] DOI 10.1016/S0167-7012(99)00137-2
-    MAX_CELL_CELL_ADHESION = 6.81 * 1E-9  # [N] DOI 10.1016/S0167-7012(99)00137-2
-    EFFECTIVE_VISCOSITY_EPS = np.log(1E3)  # [Pa * s] : of bacterial P. aeruginosa PAO1 10.1103/PhysRevLett.93.098102

@@ -500,16 +500,18 @@ def prompt_log_at_start(constants: Constants):
 
     def print_dic(dic: Dict):
         for key, item in dic.items():
-            print(key, item)
+            print(f"{key} :  {item}")
 
     print(f"********************* BIOFILM MODELING *********************\n"
-          " a project of the iGEM Teams Hannover x Darmstadt\n")
+          "     A project of the iGEM Teams Hannover x Darmstadt\n")
     print(" ************ SIMULATION CONSTANTS ************ ")
     print_dic(constants.get_simulation_constants())
 
     print(" ************ PATHS ************ ")
     print_dic(constants.get_paths())
-    print(" ************ BACTERIA CONSTANTS ************ \n          B.subtilius")
-    print_dic(constants.get_bsub_constants())
-    print("             E. Coli")
-    print_dic(constants.get_ecoli_constants())
+    print(" ************ BACTERIA CONSTANTS ************ \n")
+    print("TYPE : ", constants.bac_type)
+    if constants.bac_type == "E. Coli":
+        print_dic(constants.get_ecoli_constants())
+    elif constants.bac_type == "B. Sub.":
+        print_dic(constants.get_bsub_constants())

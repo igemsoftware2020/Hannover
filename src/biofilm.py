@@ -127,7 +127,7 @@ class Biofilm(object):
                     bacterium.update_velocity()
                     bacterium.update_position()
                 else:
-                    bacterium.moving = random.choices([True, False], weights=[0.5, 0.5])[0]
+                    bacterium.moving = random.choices([True, False], weights=[0.9, 0.1])[0]
 
                 if bacterium.living is True:
                     bacterium.random_cell_death()
@@ -191,7 +191,7 @@ class Biofilm(object):
             distance_vector = bacterium1.position - bacterium2.position
             distance = np.linalg.norm(distance_vector) * 1E6
             repulsive_force = lennard_jones_force(distance, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
-                                                  r_min=bacterium1.width)
+                                                  r_min=bacterium1.length)
         return repulsive_force
 
     @staticmethod

@@ -4,10 +4,11 @@
 # ********************************************************************************************
 # imports
 import os
+from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog
-
 import numpy as np
+from typing import Dict
 
 
 class Constants:
@@ -24,9 +25,9 @@ class Constants:
 
     def __init__(self, bac_type: str):
         # FILE PATHS
-        self.root_dir = Path(os.getcwd())
-        self.output_path = self.root_dir / 'output'
-        self.source_path = self.root_dir / 'src'
+        self.root_dir = ""
+        self.output_path = ""
+        self.info_path = ""
 
         # SIMULATION PARAMETERS
         self.num_initial_bac = 3
@@ -34,20 +35,28 @@ class Constants:
         self.window_size = (500, 750)
         self.duration = 60  # simulation time in minutes
         self.sim_dict = {}
+
         # Bacteria constants
         self.bac_type = bac_type
         self.bac_constants = {}
 
     def __repr__(self):
-        repr_str = " ******  CONSTANTS   ******\n "
-        repr_str += f"* Constants of {self.bac_type} *\n"
         bac_dict = self.get_bac_constants()
         sim_dict = self.get_simulation_constants()
-        for key, values in bac_dict.items():
-            repr_str += f"{str(key)} :   {str(values)}\n"
+        paths = self.get_paths()
+
+        def append_dic_str(s: str, d: Dict):
+            for key, values in d.items():
+                s += f"{str(key)} :   {str(values)}\n"
+            return s
+
+        repr_str = f"\n ******  PATHS   ******\n "
+        repr_str = append_dic_str(repr_str, paths)
+        repr_str += f"\n ******  CONSTANTS   ******\n "
+        repr_str += f"* Constants of {self.bac_type} *\n"
+        repr_str = append_dic_str(repr_str, bac_dict)
         repr_str += f"\n * Simulation constants *\n"
-        for key, values in sim_dict.items():
-            repr_str += f"{str(key)} :   {str(values)}\n"
+        repr_str = append_dic_str(repr_str, sim_dict)
         return repr_str
 
     def set_bacteria_constants(self, default=True):
@@ -67,7 +76,7 @@ class Constants:
         paths_dir = {
             "root": self.root_dir,
             "output": self.output_path,
-            "source": self.source_path
+            "info": self.info_path
         }
         if key:
             if key not in paths_dir.keys():
@@ -77,12 +86,23 @@ class Constants:
         else:
             return paths_dir
 
-    def set_paths(self):
-        path = Path(filedialog.askdirectory())
-        os.chdir(path)
+    def set_paths(self, default: bool = True):
+        if not default:
+            path = Path(filedialog.askdirectory())
+            os.chdir(path)
+        else:
+            path = Path(os.getcwd())
+
         self.root_dir = path
         self.output_path = self.root_dir / 'output'
-        self.source_path = self.root_dir / 'src'
+
+        date_time = str(datetime.now().day) + str(datetime.now().month) + str(datetime.now().year) + \
+                    '_' + str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min'
+
+        path_out = self.output_path / f'log_{date_time}'
+        if not path_out.exists():
+            path_out.mkdir()
+        self.info_path = path_out / f'log_{date_time}.json'
 
     def get_simulation_constants(self, key: str = None):
         dict = self.sim_dict

@@ -321,18 +321,6 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         plt.show()
 
 
-def get_info_file_path(constants: Constants):
-    date_time = str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min_' + \
-                str(datetime.now().day) + str(datetime.now().month) + \
-                str(datetime.now().year)
-
-    path_out = constants.get_paths("output") / f'log_{date_time}'
-    if not path_out.exists():
-        path_out.mkdir()
-    info_file_name = path_out / f'log_{date_time}.json'
-    return info_file_name
-
-
 def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity: float) -> np.ndarray:
     # Calculates Stokes' drag for a sphere with Reynolds number < 1.
     # [um * Pa * s 1/1E-6 * um / s] = [um * kg / (um * s **2) * s  * um / s] = [um kg / (s ** 2)]
@@ -497,21 +485,11 @@ def last_pos(data):
 
 def prompt_log_at_start(constants: Constants):
     """ Log printed in terminal at start """
+    print(f" ************ BIOFILM MODELING ************ \n"
+          " A project of the iGEM Teams Hannover x Darmstadt\n")
+    print(constants)
 
-    def print_dic(dic: Dict):
-        for key, item in dic.items():
-            print(f"{key} :  {item}")
 
-    print(f"********************* BIOFILM MODELING *********************\n"
-          "     A project of the iGEM Teams Hannover x Darmstadt\n")
-    print(" ************ SIMULATION CONSTANTS ************ ")
-    print_dic(constants.get_simulation_constants())
-
-    print(" ************ PATHS ************ ")
-    print_dic(constants.get_paths())
-    print(" ************ BACTERIA CONSTANTS ************ \n")
-    print("TYPE : ", constants.bac_type)
-    if constants.bac_type == "E. Coli":
-        print_dic(constants.get_ecoli_constants())
-    elif constants.bac_type == "B. Sub.":
-        print_dic(constants.get_bsub_constants())
+def print_dic(dic: Dict):
+    for key, item in dic.items():
+        print(f"  {key} :  {item}")

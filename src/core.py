@@ -7,35 +7,32 @@
 # custom libraries
 from src.biofilm import Biofilm
 from src.constants import Constants
-from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, get_info_file_path, \
+from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, \
     prompt_log_at_start, plot_num, dens_map, animate_3d, animate_positions
-
-
-# ********************************************************************************************
-# general dependency functions
-def norm(value):
-    if value <= 1.0:
-        if value >= 0.0:
-            return value
-        else:
-            return -value
-    else:
-        return 1.0
 
 
 # ********************************************************************************************
 # core function
 
-
-# ********************************************************************************************
-
 def blind_run():
-    biofilm = Biofilm()
-    biofilm.constants = Constants(bac_type="B.Sub.")
 
-    info_file_name = get_info_file_path(constants=biofilm.constants)
+    # Set constants for modelling run
+    constants = Constants(bac_type="B.Sub.")
+    constants.set_bacteria_constants()
+    constants.set_simulation_constants()
+    constants.set_paths(default=True)
+
+    # Init a new Biofilm with above constants
+    biofilm = Biofilm()
+    # pass constants to biofilm object
+    biofilm.constants = constants
+
+    prompt_log_at_start(biofilm.constants)
+
+    # Save log file for
+    info_file_name = constants.get_paths(key="info")
     info_file_path = info_file_name.parent
-    prompt_log_at_start(constants=biofilm.constants)
+
     biofilm.simulate(save_name=info_file_name)
 
 

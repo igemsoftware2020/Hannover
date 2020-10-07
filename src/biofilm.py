@@ -101,11 +101,11 @@ class Biofilm(object):
         duration = self.constants.get_simulation_constants(key="duration")
         self.spawn()
 
-        print("\nSTARTING MODELLING")
-        print(self)
+        print("\n ********* STARTING MODELLING  ********* ")
         print(f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s.")
         for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
-
+            old_number_bacteria = len(self.bacteria)
+            new_number_bacteria = 0
             for bacterium in self.bacteria:
                 # Grow Bacterium
                 bacterium.grow()
@@ -134,8 +134,11 @@ class Biofilm(object):
                 else:
                     # add increase overall LPS concentration
                     pass
+                new_number_bacteria = len(self.bacteria)
 
             self.write_to_log(log_name=save_name)
+            if old_number_bacteria != new_number_bacteria:
+                print(self)
 
     @staticmethod
     def distance_vector(self: Bacterium, other: Bacterium):
@@ -156,7 +159,7 @@ class Biofilm(object):
                * Biofilm.distance_vector(self, other)
 
     def __repr__(self):
-        return f'Biofilm currently consisting of {len(self.bacteria)} bacteria'
+        return f'Biofilm consisting of {len(self.bacteria)} bacteria'
 
     def sort_by_depth(self, axis, _reverse):
         sorted_bacteria = self.bacteria

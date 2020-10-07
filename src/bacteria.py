@@ -8,6 +8,7 @@ import random
 from typing import Dict
 
 import numpy as np
+import scipy.stats
 
 import src.constants as Constants
 # custom libraries
@@ -236,14 +237,11 @@ class Bacterium:
     def is_split_ready(self):
         """
         checks if size of bacterium is long enough for splitting
-        If bacterium is big enough, splitting occurs with a probability of 0.8
+        If bacterium is big enough, splitting occurs with a probability of a normal distribution with mean at self.critical_length
         returns True if splitting is possible, False otherwise
         """
-        splitting_lengths = random.randrange(self.critical_length - 1, self.critical_length + 1)
-        if splitting_lengths <= self.length:
-            return np.random.choice([True, False], p=[0.6, 0.4])
-        else:
-            return False
+        probability = scipy.stats.norm.pdf(self.length, loc=self.critical_length, scale=self.critical_length * 0.12)
+        return np.random.choice([True, False], p=[probability, 1 - probability])
 
     def update_acting_force(self):
         """ Calculates all forces acting on the bacteria

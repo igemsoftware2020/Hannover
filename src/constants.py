@@ -7,8 +7,9 @@ import os
 from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog
-import numpy as np
 from typing import Dict
+
+import numpy as np
 
 
 class Constants:
@@ -123,14 +124,14 @@ class Constants:
     @staticmethod
     def get_bsub_constants(key: str = None):
         bsub_dic = {
-            "LENGTH": 4.9,  # [um] https://en.wikipedia.org/wiki/Bacillus_subtilis
+            "LENGTH": np.random.normal(loc=2.5, scale=2.5 * 0.14),
             "WIDTH": 1,  # [um] https://en.wikipedia.org/wiki/Bacillus_subtilis
             "MASS": 10 ** (-15),  # [kg]
-            "MORTALITY_RATE": 0.00,
-            "CRITICAL_LENGTH": 9,  # [um]
+            "MORTALITY_RATE": 0.01,
+            "CRITICAL_LENGTH": 4.7,  # [um]
             "FREE_MEAN_SPEED": 50,  # [um / s]
-            "DOUBLING_TIME": 720,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
-            "GROWTH_RATE": np.log(2) / 720,  # [1 / s]
+            "DOUBLING_TIME": 7200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
+            "GROWTH_RATE": 2.2 / 7200,  # [um / s]
             "MOTION_ACTIVATION_PROBABILITY": 0.005,
             "MOTION_DEACTIVATION_PROBABILITY": 0.01
         }
@@ -142,14 +143,14 @@ class Constants:
     @staticmethod
     def get_ecoli_constants(key: str = None):
         ecoli_dic = {
-            "LENGTH": 2,  # [um] https://en.wikipedia.org/wiki/Escherichia_coli
+            "LENGTH": np.random.normal(loc=1, scale=1 * 0.14),  # [um] https://en.wikipedia.org/wiki/Escherichia_coli
             "WIDTH": 0.5,  # [um] https://en.wikipedia.org/wiki/Escherichia_coli
             "MASS": 10 ** (-15),  # [kg]
-            "MORTALITY_RATE": 0.00,
-            "CRITICAL_LENGTH": 9,  # [um]
+            "MORTALITY_RATE": 0.01,
+            "CRITICAL_LENGTH": 2,  # [um]
             "FREE_MEAN_SPEED": 50,  # [um / s]
             "DOUBLING_TIME": 1200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
-            "GROWTH_RATE": np.log(2) / 1200,  # [1 / s]
+            "GROWTH_RATE": 1 / 1200,  # [um / s]
             "MOTION_ACTIVATION_PROBABILITY": 0.005,
             "MOTION_DEACTIVATION_PROBABILITY": 0.01
         }

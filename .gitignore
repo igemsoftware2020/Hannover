@@ -1,3 +1,4 @@
-/output/
-/.idea/
+/src/output/
 /materials/
+/.settings/
+/.idea/

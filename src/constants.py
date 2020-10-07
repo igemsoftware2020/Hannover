@@ -33,15 +33,35 @@ class Constants:
         self.time_step = 1
         self.window_size = (500, 750)
         self.duration = 60  # simulation time in minutes
+        self.sim_dict = {}
         # Bacteria constants
         self.bac_type = bac_type
         self.bac_constants = {}
 
+    def __repr__(self):
+        repr_str = " ******  CONSTANTS   ******\n "
+        repr_str += f"* Constants of {self.bac_type} *\n"
+        bac_dict = self.get_bac_constants()
+        sim_dict = self.get_simulation_constants()
+        for key, values in bac_dict.items():
+            repr_str += f"{str(key)} :   {str(values)}\n"
+        repr_str += f"\n * Simulation constants *\n"
+        for key, values in sim_dict.items():
+            repr_str += f"{str(key)} :   {str(values)}\n"
+        return repr_str
+
     def set_bacteria_constants(self, default=True):
-        if self.bac_type == "B. Sub." and default:
+        if self.bac_type == "B.Sub." and default:
             self.bac_constants = Constants.get_bsub_constants()
-        elif self.bac_type == "E. Coli." and default:
+        elif self.bac_type == "E.Coli." and default:
             self.bac_constants = Constants.get_ecoli_constants()
+
+    def get_bac_constants(self, key: str = None):
+        dict = self.bac_constants
+        if key and (key in dict.keys()):
+            return dict[key]
+        else:
+            return dict
 
     def get_paths(self, key=None):
         paths_dir = {
@@ -65,16 +85,20 @@ class Constants:
         self.source_path = self.root_dir / 'src'
 
     def get_simulation_constants(self, key: str = None):
+        dict = self.sim_dict
+        if key and (key in dict.keys()):
+            return dict[key]
+        else:
+            return dict
+
+    def set_simulation_constants(self):
         sim_dict = {
             "num_initial": self.num_initial_bac,
             "time_step": self.time_step,
             "window_size": self.window_size,
             "duration": self.duration
         }
-        if key and (key in sim_dict.keys()):
-            return sim_dict[key]
-        else:
-            return sim_dict
+        self.sim_dict = sim_dict
 
     @staticmethod
     def get_bsub_constants(key: str = None):

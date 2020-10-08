@@ -4,20 +4,19 @@
 # ********************************************************************************************
 # imports
 import json
-import time
-from datetime import datetime
-from pathlib import Path
-from typing import Dict
-
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import time
+from datetime import datetime
 from matplotlib.patches import Ellipse
+from pathlib import Path
 from scipy.spatial.transform import Rotation as R
 from sklearn.linear_model import LinearRegression
+from typing import Dict
 
 # custom libraries
 import src.constants as Constants
@@ -323,7 +322,7 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
 def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity: float) -> np.ndarray:
     # Calculates Stokes' drag for a sphere with Reynolds number < 1.
-    # [um * Pa * s 1/1E-6 * um / s] = [um * kg / (um * s **2) * s  * um / s] = [um kg / (s ** 2)]
+    # [um * Pa * s 1/1E-6 * um / s] = [um * kg / (um * s ** 2) * s  * um / s] = [um kg / (s ** 2)]
     return - 6 * np.pi * radius * viscosity * 1E-12 * velocity
 
 
@@ -331,7 +330,7 @@ def gravitational_force(mass: float) -> np.ndarray:
     # calculates gravitational force on a mass
     # F = m * g * e_z
     # [kg * um / s ** 2]
-    return mass * 9.81 * 1E6 * np.asarray([0, 0, -1])
+    return mass * 9.81 * np.asarray([0, 0, -1])
 
 
 def simulation_duration(func):

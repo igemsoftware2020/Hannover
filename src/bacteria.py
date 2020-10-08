@@ -4,11 +4,10 @@
 # ********************************************************************************************
 # imports
 import math
-import random
-from typing import Dict
-
 import numpy as np
+import random
 import scipy.stats
+from typing import Dict
 
 import src.constants as Constants
 # custom libraries
@@ -20,10 +19,13 @@ from src.utils import stokes_drag_force, gravitational_force, apply_rotation, ro
 
 class Bacterium:
 
-    def __init__(self, constants: Constants, strain: str = "E. Coli.", position: np.ndarray = None,
-                 velocity: np.ndarray = np.asarray([0, 0, 0]),
+    def __init__(self, constants: Constants, strain: str = "E.Coli.", position: np.ndarray = None,
+                 velocity: np.ndarray = np.asarray([np.random.normal(0, 0.5),
+                                                    np.random.normal(0, 0.5),
+                                                    np.random.normal(0, 0.5)]),
                  angle: np.ndarray = None, force: np.ndarray = None,
-                 living: bool = True, moving: bool = False, attached_to_surface: bool = False, length: float = 0):
+                 living: bool = True, moving: bool = False,
+                 attached_to_surface: bool = False, length: float = None):
         """
         initialize a instance of the Bacteria class
         :param position: position of bacteria center [x_pox, y_pos, z_pos]
@@ -41,28 +43,32 @@ class Bacterium:
         self.position = position
         self.velocity: np.ndarray = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.int64)
         # rotate velocity in direction of orientation
-        self.velocity : np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
+        self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
         self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
         self.constants = constants
         self.mass = self.constants.get_bsub_constants(key="MASS")
+        self.length = length
 
         self.strain = strain
         if self.strain == "B.Sub.":
             self.width = self.constants.get_bsub_constants(key="WIDTH")
-            self.length = self.constants.get_bsub_constants(key="LENGTH")
-            self.mass = self.constants.get_bsub_constants(key="MASS")
+            if length is None:
+                self.length = self.constants.get_bsub_constants(key="LENGTH")
+
             self.growth_rate = self.constants.get_bsub_constants(key="GROWTH_RATE")
             self.mortality_rate = self.constants.get_bsub_constants(key="MORTALITY_RATE")
             self.critical_length = self.constants.get_bsub_constants(key="CRITICAL_LENGTH")
         elif self.strain == "E.Coli.":
             self.width = self.constants.get_ecoli_constants(key="WIDTH")
-            self.length = self.constants.get_ecoli_constants(key="LENGTH")
-            self.mass = self.constants.get_ecoli_constants(key="MASS")
+            if length is None:
+                self.length = self.constants.get_ecoli_constants(key="LENGTH")
+
             self.growth_rate = self.constants.get_ecoli_constants(key="GROWTH_RATE")
             self.mortality_rate = self.constants.get_ecoli_constants(key="MORTALITY_RATE")
             self.critical_length = self.constants.get_ecoli_constants(key="CRITICAL_LENGTH")
 
+        self.update_mass()
         self.living = living
         self.moving = moving
         self.attached_to_surface = attached_to_surface
@@ -71,6 +77,7 @@ class Bacterium:
 
         self.force: np.ndarray = force
         self.total_force = np.linalg.norm(self.force)
+        self.acceleration = self.force / self.mass * 1E-6
 
         self.rotational_energy = 0
         self.translation_energy = 0
@@ -103,6 +110,15 @@ class Bacterium:
         else:
             # if cell is dead, constant length
             pass
+
+    def update_mass(self):
+        """update mass of bacteria on based on volume"""
+        # Mass / Volume ration for grown bacteria
+        ratio = self.constants.get_bac_constants(key="MASS") / \
+                (np.pi * self.constants.get_bac_constants(key="WIDTH") ** 2
+                 * self.constants.get_bac_constants(key="LENGTH"))
+        volume = np.pi * 1 ** 2 * self.length
+        self.mass = ratio * volume
 
     def random_cell_death(self):
         """ random cell dying """
@@ -182,11 +198,10 @@ class Bacterium:
         elif self.at_boundary() == 'Y':
             apply_rotation(self.velocity, rotation_matrix_y(theta=np.pi))
 
-        acceleration = self.force / self.mass * 1E-6  # [um / s ** 2]
         # update velocities
-        self.velocity[0] = self.velocity[0] + acceleration[0] * dt
-        self.velocity[1] = self.velocity[1] + acceleration[1] * dt
-        self.velocity[2] = self.velocity[2] + acceleration[2] * dt
+        self.velocity[0] += self.acceleration[0] * dt
+        self.velocity[1] += self.acceleration[1] * dt
+        self.velocity[2] += self.acceleration[2] * dt
 
         if self.position[2] < 1E-1:
             self.position[2] = 0
@@ -195,32 +210,32 @@ class Bacterium:
         # self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
         # add brownian movement, up to 5 % of absolute value
-        self.velocity[0] = self.velocity[0] + np.random.normal(loc=0, scale=np.abs(self.velocity[0]) / 2)
-        self.velocity[1] = self.velocity[1] + np.random.normal(loc=0, scale=np.abs(self.velocity[1]) / 2)
-        self.velocity[2] = self.velocity[2] + np.random.normal(loc=0, scale=np.abs(self.velocity[2]) / 2)
+        self.velocity[0] += np.random.normal(loc=0, scale=np.abs(self.velocity[0]) / 2)
+        self.velocity[1] += np.random.normal(loc=0, scale=np.abs(self.velocity[1]) / 2)
+        self.velocity[2] += np.random.normal(loc=0, scale=np.abs(self.velocity[2]) / 2)
 
         # update angular velocity
         # 3D  instantaneous angular velocity vector w = r x v / |r|^2
         self.velocity_angular = np.cross(self.position, self.velocity) / np.linalg.norm(self.position) ** 2
         # add random rotational velocity
-        self.velocity_angular[0] = self.velocity_angular[0] + np.random.normal(loc=0, scale=np.abs(self.velocity_angular[0]) / 2)
-        self.velocity_angular[1] = self.velocity_angular[1] + np.random.normal(loc=0, scale=np.abs(self.velocity_angular[1]) / 2)
-        self.velocity_angular[2] = self.velocity_angular[2] + np.random.normal(loc=0, scale=np.abs(self.velocity_angular[2]) / 2)
+        self.velocity_angular[0] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[0]) / 2)
+        self.velocity_angular[1] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[1]) / 2)
+        self.velocity_angular[2] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[2]) / 2)
 
     def update_position(self):
         """ update bacterium position based on velocity """
         dt = self.constants.get_simulation_constants(key="time_step")
-        self.position[0] = self.position[0] + self.velocity[0] * dt
-        self.position[1] = self.position[1] + self.velocity[1] * dt
-        self.position[2] = self.position[2] + self.velocity[2] * dt
+        self.position[0] += self.velocity[0] * dt
+        self.position[1] += self.velocity[1] * dt
+        self.position[2] += self.velocity[2] * dt
 
-        if self.position[2] < 1E-3:
+        if self.position[2] < 0.5:
             self.position[2] = 0
 
         # update orientation
-        self.angle[0] = self.angle[0] + self.velocity_angular[0] * dt
-        self.angle[1] = self.angle[1] + self.velocity_angular[1] * dt
-        self.angle[2] = self.angle[2] + self.velocity_angular[2] * dt
+        self.angle[0] += self.velocity_angular[0] * dt
+        self.angle[1] += self.velocity_angular[1] * dt
+        self.angle[2] += self.velocity_angular[2] * dt
 
     def at_boundary(self):
         """ checks if bacteria is at the edge of the simulation plane"""
@@ -250,15 +265,22 @@ class Bacterium:
         bacterium-Substrate adhesion, gravitation
         """
         # offset
-        self.force = 0
+        self.force = self.mass * self.acceleration * 1E6
         # Stokes drag force
-        self.force = stokes_drag_force(radius=self.length, velocity=self.velocity,
-                                       viscosity=self.constants.EFFECTIVE_VISCOSITY_EPS)
+        self.force += stokes_drag_force(radius=self.length, velocity=self.velocity,
+                                        viscosity=self.constants.EFFECTIVE_VISCOSITY_EPS)
+
         if (self.position[2] < 4) and self.attached_to_surface:
             # if distance from surface smaller than 4 µm, add adhesion force
-            self.force = self.force + self.constants.MAX_CELL_SUBSTRATE_ADHESION * 1E-6 * np.asarray([0, 0, -1])
+            # self.force += self.constants.MAX_CELL_SUBSTRATE_ADHESION * np.asarray([0, 0, -1])
+            pass
         # add gravitational force
         self.force += gravitational_force(self.mass)
+
+        # self.force = self.force * np.asarray([1, 1, 1E-2])
+
+    def update_acceleration(self):
+        self.acceleration = self.force / self.mass * 1E-6
 
 
 def get_bacteria_dict(bacterium: Bacterium) -> Dict:

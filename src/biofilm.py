@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import numpy as np
 # ********************************************************************************************
 # imports
 import random
-from pathlib import Path
-
-import numpy as np
 import tqdm
+from pathlib import Path
 
 # custom libraries
 from src.bacteria import Bacterium, get_bacteria_dict
@@ -33,16 +32,29 @@ class Biofilm(object):
          """
         num_initial_bacteria = self.constants.get_simulation_constants(key="num_initial")
         window_size = self.constants.get_simulation_constants(key="window_size")
+        mean_speed = self.constants.get_bac_constants(key="FREE_MEAN_SPEED")
         for _ in range(num_initial_bacteria):
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
-            rnd_position = np.asarray([random.uniform(window_size[0] / 2 - 40, window_size[0] / 2 + 40),
-                                       random.uniform(window_size[1] / 2 - 40, window_size[1] / 2 + 40), 0])
-            # set initial velocity to 0
-            velocity = np.asarray([0, 0, 0])
+            rnd_position = np.asarray([np.random.normal(window_size[0] / 2, 50),
+                                       np.random.normal(window_size[1] / 2, 50),
+                                       np.random.normal(3, 0.5)
+                                       ])
+            # set random initial velocity
+            velocity = np.asarray([np.random.normal(mean_speed, mean_speed / 2),
+                                   np.random.normal(mean_speed, mean_speed / 2),
+                                   np.random.normal(0, 0.2)
+                                   ])
             # random orientation
-            rnd_angle = np.asarray([random.uniform(0, 2 * np.pi), random.uniform(0, 2 * np.pi), 0])
+            rnd_angle = np.asarray([np.random.normal(np.pi, 1),
+                                    np.random.normal(np.pi, 1),
+                                    np.random.normal(np.pi, 1)
+                                    ])
             # substrate cell adhesion, in cartesian coordinates
-            adhesion_force = np.asarray([0, 0, self.constants.MAX_CELL_SUBSTRATE_ADHESION])
+            adhesion_force = np.asarray([np.random.normal(1E-9, 0.5 * 1E-9),
+                                         np.random.normal(1E-9, 0.5 * 1E-9),
+                                         self.constants.MAX_CELL_SUBSTRATE_ADHESION
+                                         ])
+
             bac = Bacterium(position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force,
                             attached_to_surface=True, constants=self.constants, strain=self.constants.bac_type)
             self.bacteria.append(bac)
@@ -106,29 +118,40 @@ class Biofilm(object):
         for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
             old_number_bacteria = len(self.bacteria)
             new_number_bacteria = 0
+            count = 0
             for bacterium in self.bacteria:
                 # Grow Bacterium
                 bacterium.grow()
+
                 # Split Bacterium
+                bacterium.update_mass()
                 if bacterium.is_split_ready() and bacterium.living:
                     daughter = bacterium.split()
                     self.bacteria.append(daughter)
 
                 # Forces on bacterium because of drag, adhesion force, gravity
                 bacterium.update_acting_force()
+                if count < 2:
+                    print("\n * No. ", count)
+                    print(f"Forces {bacterium.force} ")
                 # Add cell- cell interaction force, based on soft-repulsive potential
                 for _bacterium in self.bacteria:
                     # check if bacterium is not itself and distance is smaller than 2 times the bacterium length
                     if bacterium != _bacterium \
                             and (np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
                         # add interaction force
-                        bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium, exact=True)
-                if bacterium.moving is True:
-                    bacterium.update_velocity()
-                    bacterium.update_position()
-                else:
-                    bacterium.moving = random.choices([True, False], weights=[0.9, 0.1])[0]
+                        bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium, exact=False)
 
+                bacterium.update_acceleration()
+                if count < 2:
+                    print(f"Acc {bacterium.acceleration} ")
+                bacterium.update_velocity()
+                if count < 2:
+                    print(f"Velocity {bacterium.velocity} ")
+                bacterium.update_position()
+                if count < 2:
+                    print(f"Position {bacterium.position} ")
+                    count += 1
                 if bacterium.living is True:
                     bacterium.random_cell_death()
                 else:
@@ -138,7 +161,7 @@ class Biofilm(object):
 
             self.write_to_log(log_name=save_name)
             if old_number_bacteria != new_number_bacteria:
-                print(self)
+                print("\n", self)
 
     @staticmethod
     def distance_vector(self: Bacterium, other: Bacterium):
@@ -173,25 +196,25 @@ class Biofilm(object):
          of the lennard- jones potential at this distance
         """
 
-        def lennard_jones_force(r, epsilon, r_min):
-            return - epsilon * (12 * (r_min ** 12 / r ** 13) - 12 * (r_min ** 6 / r ** 7))
+        def lennard_jones_force(r, epsilon, sigma):
+            return 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) - 24 * epsilon * np.power(sigma, 6) / np.power(
+                r, 7)
 
         if exact:
             bac1_pos = bacterium1.get_position()
             bac2_pos = bacterium2.get_position()
-            repulsive_force = 0
             for i in range(0, len(bac1_pos)):
                 distance_vector = bac1_pos[i] - bac2_pos[i]
                 distance = np.linalg.norm(distance_vector) * 1E6
                 repulsive_force += lennard_jones_force(distance,
                                                        epsilon=10 * bacterium1.constants.MAX_CELL_CELL_ADHESION,
-                                                       r_min=2 * bacterium1.width)
+                                                       sigma=2 * bacterium1.length)
         else:
             # only calculate for the center of the bacteria
             distance_vector = bacterium1.position - bacterium2.position
             distance = np.linalg.norm(distance_vector) * 1E6
             repulsive_force = lennard_jones_force(distance, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
-                                                  r_min=bacterium1.length)
+                                                  sigma=bacterium1.length)
         return repulsive_force
 
     @staticmethod

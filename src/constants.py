@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import numpy as np
 # ********************************************************************************************
 # imports
 import os
@@ -8,8 +9,6 @@ from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog
 from typing import Dict
-
-import numpy as np
 
 
 class Constants:
@@ -127,11 +126,11 @@ class Constants:
             "LENGTH": np.random.normal(loc=2.5, scale=2.5 * 0.14),
             "WIDTH": 1,  # [um] https://en.wikipedia.org/wiki/Bacillus_subtilis
             "MASS": 10 ** (-15),  # [kg]
-            "MORTALITY_RATE": 0.01,
+            "MORTALITY_RATE": 0.0,
             "CRITICAL_LENGTH": 4.7,  # [um]
-            "FREE_MEAN_SPEED": 50,  # [um / s]
+            "FREE_MEAN_SPEED": 2,  # [um / s] TODO
             "DOUBLING_TIME": 7200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
-            "GROWTH_RATE": 2.2 / 7200,  # [um / s]
+            "GROWTH_RATE": 2.2 / 1200,  # [um / s]
             "MOTION_ACTIVATION_PROBABILITY": 0.005,
             "MOTION_DEACTIVATION_PROBABILITY": 0.01
         }

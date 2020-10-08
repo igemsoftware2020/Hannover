@@ -11,7 +11,7 @@ import tqdm
 
 # custom libraries
 from src.bacteria import Bacterium, get_bacteria_dict
-from src.constants import Constants as C
+from src.constants import Constants
 from src.utils import write_log_template, read_in_log, save_dict_as_json, simulation_duration
 
 
@@ -25,23 +25,26 @@ class Biofilm(object):
     def __init__(self):
         self.bacteria = []
         self.num_bacteria = len(self.bacteria)
+        self.constants = Constants(bac_type="B.Sub.")
 
     def spawn(self):
         """ spawn an initial number of bacteria.
          Bacteria are randomly distributed on a plane with aspect ratios specified in the Constants class
          """
-        for _ in range(C.NUM_INITIAL_BACTERIA):
+        num_initial_bacteria = self.constants.get_simulation_constants(key="num_initial")
+        window_size = self.constants.get_simulation_constants(key="window_size")
+        for _ in range(num_initial_bacteria):
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
-            rnd_position = np.asarray([random.uniform(C.WINDOW_SIZE[0] / 2 - 40, C.WINDOW_SIZE[0] / 2 + 40),
-                                       random.uniform(C.WINDOW_SIZE[1] / 2 - 40, C.WINDOW_SIZE[1] / 2 + 40), 0])
+            rnd_position = np.asarray([random.uniform(window_size[0] / 2 - 40, window_size[0] / 2 + 40),
+                                       random.uniform(window_size[1] / 2 - 40, window_size[1] / 2 + 40), 0])
             # set initial velocity to 0
             velocity = np.asarray([0, 0, 0])
             # random orientation
             rnd_angle = np.asarray([random.uniform(0, 2 * np.pi), random.uniform(0, 2 * np.pi), 0])
             # substrate cell adhesion, in cartesian coordinates
-            adhesion_force = np.asarray([0, 0, C.MAX_CELL_SUBSTRATE_ADHESION])
+            adhesion_force = np.asarray([0, 0, self.constants.MAX_CELL_SUBSTRATE_ADHESION])
             bac = Bacterium(position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force,
-                            attached_to_surface=True)
+                            attached_to_surface=True, constants=self.constants, strain=self.constants.bac_type)
             self.bacteria.append(bac)
 
     def write_to_log(self, log_name):
@@ -50,10 +53,10 @@ class Biofilm(object):
         with the name log_name. If no json file exits it will create a template. No entries are overwritten,
         instead the parameter lists are updated accordingly
         """
-        info_file_path = C.OUTPUT_PATH / log_name
+        info_file_path = self.constants.get_paths(key="output") / log_name
         if not log_name.is_file():
             # create json template and save
-            write_log_template(log_name)
+            write_log_template(log_name, self.constants)
 
         # read in current log
         data = read_in_log(info_file_path)
@@ -88,18 +91,21 @@ class Biofilm(object):
         save_dict_as_json(data, info_file_path)
 
     @simulation_duration
-    def simulate(self, duration_in_min: int, save_name: Path):
+    def simulate(self, save_name: Path):
         """
         Sets up and runs simulation.
         Iterates over all Bacteria and updates parameters, based on euler- forward scheme.
         All units are SI, expect lengths, which are measured in um
         """
+        time_step = self.constants.get_simulation_constants(key="time_step")
+        duration = self.constants.get_simulation_constants(key="duration")
         self.spawn()
-        print(self)
-        print("\nSTARTING MODELLING")
-        print(f"SIMULATION TIME INTERVAL {duration_in_min} min in steps of {C.TIME_STEP} s.")
-        for _ in tqdm.tqdm(range(0, round(duration_in_min * 60 / C.TIME_STEP))):
 
+        print("\n ********* STARTING MODELLING  ********* ")
+        print(f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s.")
+        for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
+            old_number_bacteria = len(self.bacteria)
+            new_number_bacteria = 0
             for bacterium in self.bacteria:
                 # Grow Bacterium
                 bacterium.grow()
@@ -121,15 +127,18 @@ class Biofilm(object):
                     bacterium.update_velocity()
                     bacterium.update_position()
                 else:
-                    bacterium.moving = random.choices([True, False], weights=[0.5, 0.5])[0]
+                    bacterium.moving = random.choices([True, False], weights=[0.9, 0.1])[0]
 
                 if bacterium.living is True:
                     bacterium.random_cell_death()
                 else:
                     # add increase overall LPS concentration
                     pass
+                new_number_bacteria = len(self.bacteria)
 
             self.write_to_log(log_name=save_name)
+            if old_number_bacteria != new_number_bacteria:
+                print(self)
 
     @staticmethod
     def distance_vector(self: Bacterium, other: Bacterium):
@@ -144,12 +153,13 @@ class Biofilm(object):
         Force value based on Lennard-Jones Potential / Soft-repulsive potential
         """
         if exact:
-            return Biofilm.abs_force_lennard_jones_potential(self, other, exact=True) * Biofilm.distance_vector(self,
-                                                                                                                other)
-        return Biofilm.abs_force_lennard_jones_potential(self, other) * Biofilm.distance_vector(self, other)
+            return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other, exact=True) \
+                   * Biofilm.distance_vector(self, other)
+        return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) \
+               * Biofilm.distance_vector(self, other)
 
     def __repr__(self):
-        return f'Biofilm currently consisting of {len(self.bacteria)} bacteria'
+        return f'Biofilm consisting of {len(self.bacteria)} bacteria'
 
     def sort_by_depth(self, axis, _reverse):
         sorted_bacteria = self.bacteria
@@ -173,13 +183,15 @@ class Biofilm(object):
             for i in range(0, len(bac1_pos)):
                 distance_vector = bac1_pos[i] - bac2_pos[i]
                 distance = np.linalg.norm(distance_vector) * 1E6
-                repulsive_force += lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION,
-                                                       r_min=bacterium1.width)
+                repulsive_force += lennard_jones_force(distance,
+                                                       epsilon=10 * bacterium1.constants.MAX_CELL_CELL_ADHESION,
+                                                       r_min=2 * bacterium1.width)
         else:
             # only calculate for the center of the bacteria
             distance_vector = bacterium1.position - bacterium2.position
             distance = np.linalg.norm(distance_vector) * 1E6
-            repulsive_force = lennard_jones_force(distance, epsilon=C.MAX_CELL_CELL_ADHESION, r_min=bacterium1.width)
+            repulsive_force = lennard_jones_force(distance, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
+                                                  r_min=bacterium1.length)
         return repulsive_force
 
     @staticmethod

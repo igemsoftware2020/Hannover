@@ -20,23 +20,17 @@ from scipy.spatial.transform import Rotation as R
 from sklearn.linear_model import LinearRegression
 
 # custom libraries
-from src.constants import Constants as C
+import src.constants as Constants
 
 
 # ********************************************************************************************
 
 
-def write_log_template(info_file_path):
+def write_log_template(info_file_path, constants: Constants):
     """ saves a json template for saving bacteria parameters"""
-    constants = C()
     with open(info_file_path, 'w+') as json_file:
         data = {'BACTERIA': {}, 'CONSTANTS': {}}
-        members = [attr for attr in dir(constants) if
-                   not callable(getattr(constants, attr)) and not attr.startswith("__")]
-        constants_dic = {}
-        for constant in members:
-            constants_dic.update({constant: str(getattr(constants, constant))})
-        data['CONSTANTS'].update(constants_dic)
+        data['CONSTANTS'].update(constants.get_simulation_constants())
         json.dump(data, json_file, indent=4)
 
 
@@ -251,7 +245,6 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Distance in um')
     ax2.plot(means)
-    ax2.set_ylim((0, C.WINDOW_SIZE[1]))
     ax2.set_title('Mean position')
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('Mean distance in um')
@@ -328,18 +321,7 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         plt.show()
 
 
-def get_info_file_path():
-    date_time = str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min_' + \
-                str(datetime.now().day) + str(datetime.now().month) + \
-                str(datetime.now().year)
-
-    path_out = C.OUTPUT_PATH / f'log_{date_time}'
-    path_out.mkdir()
-    info_file_name = path_out / f'log_{date_time}.json'
-    return info_file_name
-
-
-def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity=C.EFFECTIVE_VISCOSITY_EPS) -> np.ndarray:
+def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity: float) -> np.ndarray:
     # Calculates Stokes' drag for a sphere with Reynolds number < 1.
     # [um * Pa * s 1/1E-6 * um / s] = [um * kg / (um * s **2) * s  * um / s] = [um kg / (s ** 2)]
     return - 6 * np.pi * radius * viscosity * 1E-12 * velocity
@@ -501,18 +483,13 @@ def last_pos(data):
     return last_cord_x, last_cord_y, last_cord_z
 
 
-def prompt_log_at_start(save_dir: str):
+def prompt_log_at_start(constants: Constants):
     """ Log printed in terminal at start """
-    return (f"********************* BIOFILM MODELING *********************\n"
-            "NUMBER OF INITIAL BACTERIA\t {number_bacteria}\n"
-            "==================================================\n"
-            "INITIAL DIMENSIONS (LENGTH, WIDTH)\t {BSUB_LENGTH},\t{BSUB_WIDTH}\n"
-            "MASS\t {BSUB_MASS}\n"
-            "GROWTH FACTOR\t {BSUB_GROWTH_FACTOR}\n"
-            "CRITICAL LENGTH\t {BSUB_CRITICAL_LENGTH}\n\n"
-            "SAVING AS \t {saving_dir}"
-            .format(number_bacteria=C.NUM_INITIAL_BACTERIA,
-                    type="B. subtilius", BSUB_LENGTH=C.BSUB_LENGTH,
-                    BSUB_WIDTH=C.BSUB_WIDTH, BSUB_MASS=C.BSUB_MASS,
-                    BSUB_CRITICAL_LENGTH=C.BSUB_CRITICAL_LENGTH,
-                    BSUB_GROWTH_FACTOR=C.BSUB_GROWTH_FACTOR, saving_dir=save_dir))
+    print(f" ************ BIOFILM MODELING ************ \n"
+          " A project of the iGEM Teams Hannover x Darmstadt\n")
+    print(constants)
+
+
+def print_dic(dic: Dict):
+    for key, item in dic.items():
+        print(f"  {key} :  {item}")

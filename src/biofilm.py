@@ -35,13 +35,13 @@ class Biofilm(object):
         mean_speed = self.constants.get_bac_constants(key="FREE_MEAN_SPEED")
         for _ in range(num_initial_bacteria):
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
-            rnd_position = np.asarray([np.random.normal(window_size[0] / 2, 50),
-                                       np.random.normal(window_size[1] / 2, 50),
+            rnd_position = np.asarray([np.random.normal(window_size[0] / 2, window_size[0] * 0.1),
+                                       np.random.normal(window_size[1] / 2, window_size[1] * 0.1),
                                        np.random.normal(3, 0.5)
                                        ])
             # set random initial velocity
-            velocity = np.asarray([np.random.normal(mean_speed, mean_speed / 2),
-                                   np.random.normal(mean_speed, mean_speed / 2),
+            velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),
+                                   np.random.normal(mean_speed, mean_speed * 0.01),
                                    np.random.normal(0, 0.2)
                                    ])
             # random orientation
@@ -177,9 +177,9 @@ class Biofilm(object):
         """
         if exact:
             return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other, exact=True) \
-                   * Biofilm.distance_vector(self, other)
+                   * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
         return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) \
-               * Biofilm.distance_vector(self, other)
+               * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
 
     def __repr__(self):
         return f'Biofilm consisting of {len(self.bacteria)} bacteria'

@@ -35,8 +35,8 @@ class Biofilm(object):
         mean_speed = self.constants.get_bac_constants(key="FREE_MEAN_SPEED")
         for _ in range(num_initial_bacteria):
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
-            rnd_position = np.asarray([np.random.normal(window_size[0] / 2, window_size[0] * 0.1),
-                                       np.random.normal(window_size[1] / 2, window_size[1] * 0.1),
+            rnd_position = np.asarray([np.random.randint(300, 400),
+                                       np.random.randint(300, 400),
                                        np.random.normal(3, 0.5)
                                        ])
             # set random initial velocity
@@ -45,14 +45,14 @@ class Biofilm(object):
                                    np.random.normal(0, 0.2)
                                    ])
             # random orientation
-            rnd_angle = np.asarray([np.random.normal(np.pi, 1),
-                                    np.random.normal(np.pi, 1),
-                                    np.random.normal(np.pi, 1)
+            rnd_angle = np.asarray([np.random.randint(0, 360),
+                                    np.random.normal(0, 360),
+                                    np.random.normal(0, 360)
                                     ])
             # substrate cell adhesion, in cartesian coordinates
-            adhesion_force = np.asarray([np.random.normal(1E-9, 0.5 * 1E-9),
-                                         np.random.normal(1E-9, 0.5 * 1E-9),
-                                         self.constants.MAX_CELL_SUBSTRATE_ADHESION
+            adhesion_force = np.asarray([0,
+                                         0,
+                                         -self.constants.MAX_CELL_SUBSTRATE_ADHESION
                                          ])
 
             bac = Bacterium(position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force,
@@ -113,55 +113,45 @@ class Biofilm(object):
         duration = self.constants.get_simulation_constants(key="duration")
         self.spawn()
 
-        print("\n ********* STARTING MODELLING  ********* ")
-        print(f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s.")
+        print(f"\n ********* STARTING MODELLING  ********* \n "
+              f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s."
+              )
         for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
-            old_number_bacteria = len(self.bacteria)
-            new_number_bacteria = 0
-            count = 0
+            cp_bacteria = np.copy(self.bacteria)
             for bacterium in self.bacteria:
+
                 # Grow Bacterium
                 bacterium.grow()
-
-                # Split Bacterium
                 bacterium.update_mass()
+                # Split Bacterium
                 if bacterium.is_split_ready() and bacterium.living:
                     daughter = bacterium.split()
                     self.bacteria.append(daughter)
+                    cp_bacteria = np.append(cp_bacteria, daughter)
 
                 # Forces on bacterium because of drag, adhesion force, gravity
-                bacterium.update_acting_force()
-                if count < 2:
-                    print("\n * No. ", count)
-                    print(f"Forces {bacterium.force} ")
+                self.force = bacterium.update_acting_force()
+
                 # Add cell- cell interaction force, based on soft-repulsive potential
-                for _bacterium in self.bacteria:
-                    # check if bacterium is not itself and distance is smaller than 2 times the bacterium length
+                for _bacterium in cp_bacteria:
+                    # check if bacterium is not itself and distance is smaller than 2 * bacterium length
                     if bacterium != _bacterium \
                             and (np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
                         # add interaction force
-                        bacterium.force += Biofilm.cell_cell_interaction(bacterium, _bacterium, exact=False)
+                        force_vector = Biofilm.cell_cell_interaction(bacterium, _bacterium, exact=False)
+                        bacterium.force = np.add(bacterium.force, force_vector)
+                        _bacterium.force = np.subtract(_bacterium.force, force_vector)
+                        # delete bacteria from interaction iteration
+                        cp_bacteria = np.delete(cp_bacteria,
+                                                np.argwhere((cp_bacteria == _bacterium) & (cp_bacteria == bacterium)))
 
                 bacterium.update_acceleration()
-                if count < 2:
-                    print(f"Acc {bacterium.acceleration} ")
                 bacterium.update_velocity()
-                if count < 2:
-                    print(f"Velocity {bacterium.velocity} ")
                 bacterium.update_position()
-                if count < 2:
-                    print(f"Position {bacterium.position} ")
-                    count += 1
+
                 if bacterium.living is True:
                     bacterium.random_cell_death()
-                else:
-                    # add increase overall LPS concentration
-                    pass
-                new_number_bacteria = len(self.bacteria)
-
             self.write_to_log(log_name=save_name)
-            if old_number_bacteria != new_number_bacteria:
-                print("\n", self)
 
     @staticmethod
     def distance_vector(self: Bacterium, other: Bacterium):

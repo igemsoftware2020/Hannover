@@ -19,9 +19,10 @@ class Constants:
 
     # Global parameters
     # ADHESION FORCES and VISCOSITY
-    MAX_CELL_SUBSTRATE_ADHESION = 5.08 * 1E-9  # [N] DOI 10.1016/S0167-7012(99)00137-2
+    MAX_CELL_SUBSTRATE_ADHESION = 2 * 1E-10  # 5.08 * 1E-9  # [N] DOI 10.1016/S0167-7012(99)00137-2
     MAX_CELL_CELL_ADHESION = 6.81 * 1E-9  # [N] DOI 10.1016/S0167-7012(99)00137-2
-    EFFECTIVE_VISCOSITY_EPS = np.log(1E3)  # [Pa * s] : of bacterial P. aeruginosa PAO1 10.1103/PhysRevLett.93.098102
+    EFFECTIVE_VISCOSITY_EPS = np.log(1E3)  # # [Pa * s] : of bacterial P. aeruginosa PAO1 10.1103/PhysRevLett.93.098102
+    EFFECTIVE_VISCOSITY_H2O = 0.7805 * 1E-3  # [Pa * s]: at ~ 30 °C https://wiki.anton-paar.com/en/water/
 
     def __init__(self, bac_type: str):
         # FILE PATHS
@@ -32,7 +33,7 @@ class Constants:
         # SIMULATION PARAMETERS
         self.num_initial_bac = 3
         self.time_step = 1
-        self.window_size = (500, 750)
+        #self.window_size = (450, 900)
         self.duration = 60  # simulation time in minutes
         self.sim_dict = {}
 
@@ -125,12 +126,12 @@ class Constants:
         bsub_dic = {
             "LENGTH": np.random.normal(loc=2.5, scale=2.5 * 0.14),
             "WIDTH": 1,  # [um] https://en.wikipedia.org/wiki/Bacillus_subtilis
-            "MASS": 10 ** (-15),  # [kg]
+            "MASS": 10 ** (-12),  # [kg]
             "MORTALITY_RATE": 0.0,
             "CRITICAL_LENGTH": 4.7,  # [um]
             "FREE_MEAN_SPEED": 2,  # [um / s] TODO
             "DOUBLING_TIME": 7200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
-            "GROWTH_RATE": 2.2 / 1200,  # [um / s]
+            "GROWTH_RATE": 2.2 / 120000,  # [um / s]
             "MOTION_ACTIVATION_PROBABILITY": 0.005,
             "MOTION_DEACTIVATION_PROBABILITY": 0.01
         }
@@ -144,7 +145,7 @@ class Constants:
         ecoli_dic = {
             "LENGTH": np.random.normal(loc=1, scale=1 * 0.14),  # [um] https://en.wikipedia.org/wiki/Escherichia_coli
             "WIDTH": 0.5,  # [um] https://en.wikipedia.org/wiki/Escherichia_coli
-            "MASS": 10 ** (-15),  # [kg]
+            "MASS": 10 ** (-12),  # [kg]
             "MORTALITY_RATE": 0.01,
             "CRITICAL_LENGTH": 2,  # [um]
             "FREE_MEAN_SPEED": 50,  # [um / s]

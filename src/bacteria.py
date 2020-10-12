@@ -85,31 +85,97 @@ class Bacterium:
         self.update_translation_energy()
         self.total_energy = self.translation_energy + self.rotational_energy
 
+    def __eq__(self, other):
+        """ new __eq__ based on bacteria parameters """
+        if get_bacteria_dict(self) == get_bacteria_dict(other):
+            return True
+        return False
+
+    def update_velocity(self):
+        """
+        Update velocity direction and value based on the acting force.
+        Add Brownian movement in x,y,z direction
+        Add random angle movement
+        """
+        dt = self.constants.get_simulation_constants(key="time_step")
+        # if self.at_boundary() == 'X':
+        #    apply_rotation(self.velocity, rotation_matrix_x(theta=np.pi))
+
+        # elif self.at_boundary() == 'Y':
+        #    apply_rotation(self.velocity, rotation_matrix_y(theta=np.pi))
+
+        # update velocities
+        self.velocity[0] += self.acceleration[0] * dt
+        self.velocity[1] += self.acceleration[1] * dt
+        self.velocity[2] += self.acceleration[2] * dt
+
+        self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
+        self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
+
+        # add brownian movement, up to 10 % of absolute value
+        self.velocity[0] = np.random.normal(loc=self.velocity[0], scale=np.abs(self.velocity[0]) * 0.02)
+        self.velocity[1] = np.random.normal(loc=self.velocity[1], scale=np.abs(self.velocity[1]) * 0.02)
+        self.velocity[2] = np.random.normal(loc=self.velocity[2], scale=np.abs(self.velocity[2]) * 0.02)
+
+        # self.velocity[2] += np.random.normal(loc=0, scale=np.abs(self.velocity[2]) * 0.01)
+        if self.position[2] == 0:
+            self.velocity[2] = 0
+
+        # update angular velocity
+        # 3D  instantaneous angular velocity vector w = r x v / |r|^2
+        self.velocity_angular = np.cross(self.position, self.velocity) / np.linalg.norm(self.position) ** 2
+        # add random rotational velocity
+        self.velocity_angular[0] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[0]) / 2)
+        self.velocity_angular[1] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[1]) / 2)
+        self.velocity_angular[2] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[2]) / 2)
+
+    def update_position(self):
+        """ update bacterium position based on velocity """
+        dt = self.constants.get_simulation_constants(key="time_step")
+        ##self.position[0] += self.velocity[0] * dt + 1 / 2 * self.acceleration[0] * dt ** 2
+        # self.position[1] += self.velocity[1] * dt + 1 / 2 * self.acceleration[1] * dt ** 2
+        # self.position[2] += self.velocity[2] * dt + 1 / 2 * self.acceleration[2] * dt ** 2
+
+        self.position[0] = np.random.normal(loc=self.position[0], scale=2)
+        self.position[0] = np.random.normal(loc=self.position[1], scale=2)
+        self.position[0] = np.random.normal(loc=self.position[2], scale=2)
+
+        if self.position[2] < 0.5:
+            self.position[2] = 0
+
+        # update orientation
+        self.angle[0] = np.random.normal(loc=self.angle[0], scale=10)
+        self.angle[1] = np.random.normal(loc=self.angle[1], scale=10)
+        self.angle[2] = np.random.normal(loc=self.angle[2], scale=10)
+
+    def update_acting_force(self):
+        """ Calculates all forces acting on the bacteria
+        and updates the according parameter of the bacteria.
+        Forces included:
+         Stokes drag force, bacterium- bacterium adhesion,
+        bacterium-Substrate adhesion, gravitation
+        """
+        # offset
+        # self.force = self.mass * self.acceleration * 1E6
+        # Stokes drag force
+        self.force = np.add(self.force, stokes_drag_force(radius=self.length, velocity=self.velocity,
+                                                          viscosity=self.constants.EFFECTIVE_VISCOSITY_H2O)
+                            )
+
+        if (self.position[2] < 4) and self.attached_to_surface:
+            # if distance from surface smaller than 4 µm, add adhesion force
+            self.force = np.add(self.force, self.constants.MAX_CELL_SUBSTRATE_ADHESION * np.asarray([0, 0, -1]))
+
+        # add gravitational force
+        self.force = np.add(self.force, gravitational_force(self.mass))
+
+    def update_acceleration(self):
+        self.acceleration = self.force / self.mass * 1E-6
+
     def update_rotational_energy(self):
         """ updates the rotational energy """
         moment_of_inertia = self.mass / 6 * (3 * self.width ** 2 + self.length) + self.mass / 2 * self.width ** 2
         self.rotational_energy = 1 / 2 * moment_of_inertia * np.dot(self.velocity_angular, self.velocity_angular)
-
-    def update_translation_energy(self):
-        """ updates the translation energy """
-        self.translation_energy = 1 / 2 * self.mass * np.dot(self.velocity, self.velocity)
-
-    def get_volume(self):
-        """ gives out the cubic volume equivalent """
-        return self.width * self.width * self.length
-
-    def grow(self):
-        """
-        grow bacteria for 1 second with speed growth_rate
-        """
-        # Make the bacteria grow
-        # using a constant growth rate
-        # TODO Make volume per time
-        if self.living is True:
-            self.length = self.length * (self.growth_rate + 1)
-        else:
-            # if cell is dead, constant length
-            pass
 
     def update_mass(self):
         """update mass of bacteria on based on volume"""
@@ -120,17 +186,9 @@ class Bacterium:
         volume = np.pi * 1 ** 2 * self.length
         self.mass = ratio * volume
 
-    def random_cell_death(self):
-        """ random cell dying """
-        if random.random() > 1.0 - self.mortality_rate:
-            self.living = False
-            self.moving = False
-
-    def __eq__(self, other):
-        """ new __eq__ based on bacteria parameters """
-        if get_bacteria_dict(self) == get_bacteria_dict(other):
-            return True
-        return False
+    def update_translation_energy(self):
+        """ updates the translation energy """
+        self.translation_energy = 1 / 2 * self.mass * np.dot(self.velocity, self.velocity)
 
     def split(self):
         """
@@ -146,7 +204,7 @@ class Bacterium:
             offset = (split_distance * math.sin(angle[0]) * math.cos(angle[1]),
                       split_distance * math.cos(angle[0]) * math.cos(angle[1]),
                       split_distance * math.sin(angle[1]))
-            position = position + np.asarray(offset) * 2
+            position = position + np.asarray(offset) * 5
             return position
 
         # Create daughter bacterium from self
@@ -171,6 +229,29 @@ class Bacterium:
         self.force = self.force / 2
         return daughter_bac
 
+    def get_volume(self):
+        """ gives out the cubic volume equivalent """
+        return self.width * self.width * self.length
+
+    def grow(self):
+        """
+        grow bacteria for 1 second with speed growth_rate
+        """
+        # Make the bacteria grow
+        # using a constant growth rate
+        # TODO Make volume per time
+        if self.living is True:
+            self.length = self.length * (self.growth_rate + 1)
+        else:
+            # if cell is dead, constant length
+            pass
+
+    def random_cell_death(self):
+        """ random cell dying """
+        if random.random() > 1.0 - self.mortality_rate:
+            self.living = False
+            self.moving = False
+
     def get_position(self) -> np.ndarray:
         positions = []
         dx_length = self.length * math.sin(self.angle[0]) * math.cos(self.angle[1])
@@ -185,57 +266,6 @@ class Bacterium:
         positions.append((self.position[0] + int(0.1 * dx_length), self.position[1] + int(0.1 * dy_length),
                           self.position[2] + int(0.1 * dz_length)))
         return np.asarray(positions)
-
-    def update_velocity(self):
-        """
-        Update velocity direction and value based on the acting force.
-        Add Brownian movement in x,y,z direction
-        Add random angle movement
-        """
-        dt = self.constants.get_simulation_constants(key="time_step")
-        if self.at_boundary() == 'X':
-            apply_rotation(self.velocity, rotation_matrix_x(theta=np.pi))
-        elif self.at_boundary() == 'Y':
-            apply_rotation(self.velocity, rotation_matrix_y(theta=np.pi))
-
-        # update velocities
-        self.velocity[0] += self.acceleration[0] * dt
-        self.velocity[1] += self.acceleration[1] * dt
-        self.velocity[2] += self.acceleration[2] * dt
-
-        if self.position[2] < 1E-1:
-            self.position[2] = 0
-
-        # self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
-        # self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
-
-        # add brownian movement, up to 5 % of absolute value
-        self.velocity[0] += np.random.normal(loc=0, scale=np.abs(self.velocity[0]) / 2)
-        self.velocity[1] += np.random.normal(loc=0, scale=np.abs(self.velocity[1]) / 2)
-        self.velocity[2] += np.random.normal(loc=0, scale=np.abs(self.velocity[2]) / 2)
-
-        # update angular velocity
-        # 3D  instantaneous angular velocity vector w = r x v / |r|^2
-        self.velocity_angular = np.cross(self.position, self.velocity) / np.linalg.norm(self.position) ** 2
-        # add random rotational velocity
-        self.velocity_angular[0] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[0]) / 2)
-        self.velocity_angular[1] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[1]) / 2)
-        self.velocity_angular[2] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[2]) / 2)
-
-    def update_position(self):
-        """ update bacterium position based on velocity """
-        dt = self.constants.get_simulation_constants(key="time_step")
-        self.position[0] += self.velocity[0] * dt
-        self.position[1] += self.velocity[1] * dt
-        self.position[2] += self.velocity[2] * dt
-
-        if self.position[2] < 0.5:
-            self.position[2] = 0
-
-        # update orientation
-        self.angle[0] += self.velocity_angular[0] * dt
-        self.angle[1] += self.velocity_angular[1] * dt
-        self.angle[2] += self.velocity_angular[2] * dt
 
     def at_boundary(self):
         """ checks if bacteria is at the edge of the simulation plane"""
@@ -257,31 +287,6 @@ class Bacterium:
         probability = scipy.stats.norm.pdf(self.length, loc=self.critical_length, scale=self.critical_length * 0.12)
         return np.random.choice([True, False], p=[probability, 1 - probability])
 
-    def update_acting_force(self):
-        """ Calculates all forces acting on the bacteria
-        and updates the according parameter of the bacteria.
-        Forces included:
-         Stokes drag force, bacterium- bacterium adhesion,
-        bacterium-Substrate adhesion, gravitation
-        """
-        # offset
-        self.force = self.mass * self.acceleration * 1E6
-        # Stokes drag force
-        self.force += stokes_drag_force(radius=self.length, velocity=self.velocity,
-                                        viscosity=self.constants.EFFECTIVE_VISCOSITY_EPS)
-
-        if (self.position[2] < 4) and self.attached_to_surface:
-            # if distance from surface smaller than 4 µm, add adhesion force
-            # self.force += self.constants.MAX_CELL_SUBSTRATE_ADHESION * np.asarray([0, 0, -1])
-            pass
-        # add gravitational force
-        self.force += gravitational_force(self.mass)
-
-        # self.force = self.force * np.asarray([1, 1, 1E-2])
-
-    def update_acceleration(self):
-        self.acceleration = self.force / self.mass * 1E-6
-
 
 def get_bacteria_dict(bacterium: Bacterium) -> Dict:
     """ returns the dict entry of a bacteria """
@@ -291,6 +296,7 @@ def get_bacteria_dict(bacterium: Bacterium) -> Dict:
         angle=[bacterium.angle.tolist()],
         force=[bacterium.force.tolist()],
         total_force=[bacterium.total_force],
+        acceleration=[bacterium.acceleration.tolist()],
         total_energy=[bacterium.total_energy],
         living=[bacterium.living],
         moving=[bacterium.moving],

@@ -250,7 +250,7 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     plt.show()
 
     if save_fig:
-        path = Path(save_path).parent / 'positions_plot.png'
+        path = Path(save_path.parent) / 'positions_plot.png'
         fig.savefig(path)
     else:
         plt.show()
@@ -362,19 +362,19 @@ def rotate(origin, point, angle):
 
 def rotation_matrix_x(theta: float):
     # return numpy array with rotation matrix around x axis with angle theta
-    r = R.from_euler('x', theta)
+    r = R.from_euler('x', theta, degrees=True)
     return r
 
 
 def rotation_matrix_y(theta: float):
     # return numpy array with rotation matrix around y axis with angle theta
-    r = R.from_euler('y', theta)
+    r = R.from_euler('y', theta, degrees=True)
     return r
 
 
 def rotation_matrix_z(theta: float):
     # return numpy array with rotation matrix around z axis with angle theta
-    r = R.from_euler('z', theta)
+    r = R.from_euler('z', theta, degrees=True)
     return r
 
 

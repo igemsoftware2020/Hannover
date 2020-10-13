@@ -169,20 +169,32 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     Plots positions (as lengths of location vectors) of each bacteria and the mean position of all bacteria
     over the iteration step.
     """
-    plot_data = get_data_to_parameter(data, 'position')
-    means = plot_data.mean(axis=1, skipna=True)
-    fig, (ax1, ax2) = plt.subplots(1, 2)
-    fig.tight_layout()
-    for bacteria in plot_data:
-        ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
+    position_data = get_data_to_parameter(data, 'position')
+    position_means = position_data.mean(axis=1, skipna=True)
+    height_data = get_data_to_parameter(data, 'height')
+    height_means = height_data.mean(axis=1, skipna=True)
 
-    ax1.set_title('Position')
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
+
+    for bacteria in position_data:
+        ax1.plot(position_data.loc[:, bacteria], '--', alpha=0.3)
+        ax2.plot(height_data.loc[:, bacteria.replace('position', 'height')], '--', alpha=0.3)
+
+    ax1.set_title('Distance from origin')
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Distance in um')
-    ax2.plot(means)
-    ax2.set_title('Mean position')
+
+    ax2.set_title('Distance from surface')
     ax2.set_xlabel('Time in s')
-    ax2.set_ylabel('Mean distance in um')
+    ax2.set_ylabel('Height in um')
+
+    ax3.plot(position_means)
+    ax3.set_xlabel('Time in s')
+    ax3.set_ylabel('Mean distance in um')
+
+    ax4.plot(height_means)
+    ax4.set_xlabel('Time in s')
+    ax4.set_ylabel('Mean height in um')
 
     plt.ioff()
     if save_fig:
@@ -199,20 +211,30 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     over the iteration step.
     """
     plot_data = get_data_to_parameter(data, 'total_force')
-    means = plot_data.mean(axis=1, skipna=True)
-    fig, (ax1, ax2) = plt.subplots(1, 2)
-    fig.tight_layout()
+    acc_data = get_data_to_parameter(data, 'acceleration')
+    force_mean = plot_data.mean(axis=1, skipna=True)
+    acc_mean = acc_data.mean(axis=1, skipna=True)
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
+
     for bacteria in plot_data:
-        ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
+        ax1.plot(plot_data.loc[:, bacteria], '.', alpha=0.3)
 
     ax1.set_title('Total force')
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Force in N')
-    # ax1.set_yscale('log')
-    ax2.plot(means)
-    ax2.set_title('Mean force')
+
+    ax2.plot(acc_data)
+    ax2.set_title('Total acceleration')
     ax2.set_xlabel('Time in s')
-    ax2.set_ylabel('Force in N')
+    ax2.set_ylabel('Acceleration in um/s²')
+
+    ax3.plot(force_mean, '.')
+    ax3.set_xlabel('Time in s')
+    ax3.set_ylabel('mean force in N')
+
+    ax4.plot(acc_mean, '-')
+    ax4.set_xlabel('Time in s')
+    ax4.set_ylabel('mean acceleration in um/s²')
 
     plt.ioff()
     if save_fig:
@@ -223,32 +245,35 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         plt.show()
 
 
-def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     """
     Plots force acting on each bacteria and the mean force acting on all bacteria
     over the iteration step.
     """
-    width_data = get_data_to_parameter(data, 'width')
+    mass_data = get_data_to_parameter(data, 'mass')
+    mass_mean = mass_data.mean(axis=1, skipna=True)
     length_data = get_data_to_parameter(data, 'length')
-    width_means = width_data.mean(axis=1, skipna=True)
     length_means = length_data.mean(axis=1, skipna=True)
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-    fig.tight_layout()
-    for bacteria in width_data:
-        ax1.plot(width_data.loc[:, bacteria], '--', alpha=0.3)
-        ax2.plot(length_data.loc[:, bacteria.replace('width', 'length')], '--', alpha=0.3)
-    ax1.set_title('width')
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
+
+    for bacteria in mass_data:
+        ax1.plot(mass_data.loc[:, bacteria], '.', alpha=0.3)
+        ax2.plot(length_data.loc[:, bacteria.replace('mass', 'length')], '.', alpha=0.3)
+    ax1.set_title('Masses')
     ax1.set_xlabel('Time in s')
-    ax1.set_ylabel('width in um')
-    ax2.set_title('length')
+    ax1.set_ylabel('Mass in kg')
+
+    ax2.set_title('Lengths')
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('length in um')
-    ax3.plot(width_means)
-    ax4.plot(length_means)
-    ax3.set_title('width mean')
+
+    ax3.plot(mass_mean, '.')
+    ax3.set_title('Mean of bacteria masses')
     ax3.set_xlabel('Time in s')
-    ax3.set_ylabel('mean width in um')
-    ax4.set_title('length mean')
+    ax3.set_ylabel('Mass in kg')
+
+    ax4.plot(length_means, '.')
+    ax4.set_title('Mean of bacteria lengths')
     ax4.set_xlabel('Time in s')
     ax4.set_ylabel('mean length in um')
 
@@ -323,6 +348,24 @@ def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool =
         plt.show()
 
 
+def get_z(data):
+    x = []
+    y = []
+    z = []
+    for bac in data['position'].index:
+        x.append(data['position'][bac][-1][0])
+        y.append(data['position'][bac][-1][1])
+        z.append(data['position'][bac][-1][2])
+    a = np.vstack((x, y, z)).T
+    pos = pd.DataFrame(a, columns=['x', 'y', 'z'])
+    pos = pos.sort_values('z', ascending=False)
+    pos = pos[0:int(np.round((len(pos) * 0.1)))].values
+    x = pos[:, 0]
+    y = pos[:, 1]
+    z = pos[:, 2]
+    return x, y, z
+
+
 # ********************************************************************************************
 # Data handling
 
@@ -378,7 +421,7 @@ def get_data_to_parameter(data: pd.DataFrame, key: str, exact: bool = False):
     for index, bacteria in data.iterrows():
         df_bac = pd.DataFrame(bacteria).loc[key, :]
         for vectors in df_bac:
-            if (key == 'velocity' or key == 'position') and (exact is False):
+            if (key == 'velocity' or key == 'position' or key == 'acceleration') & (exact is False):
                 # calculate norm for velocity and position
                 vectors = get_euclid_norm(vectors)
             dic.update({str(index) + '_' + key: vectors})
@@ -394,24 +437,6 @@ def get_data_to_parameter(data: pd.DataFrame, key: str, exact: bool = False):
 
     df = df.transform(lambda x: sorted(x, key=isnan, reverse=True))
     return df
-
-
-def get_z(data):
-    x = []
-    y = []
-    z = []
-    for bac in data['position'].index:
-        x.append(data['position'][bac][-1][0])
-        y.append(data['position'][bac][-1][1])
-        z.append(data['position'][bac][-1][2])
-    a = np.vstack((x, y, z)).T
-    pos = pd.DataFrame(a, columns=['x', 'y', 'z'])
-    pos = pos.sort_values('z', ascending=False)
-    pos = pos[0:int(np.round((len(pos) * 0.1)))].values
-    x = pos[:, 0]
-    y = pos[:, 1]
-    z = pos[:, 2]
-    return x, y, z
 
 
 # ********************************************************************************************

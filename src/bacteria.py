@@ -42,6 +42,8 @@ class Bacterium:
             self.angle = angle
 
         self.position = position
+        # have to add this here, so it will be stored in the log file
+        self.height = self.position[2]
         self.velocity: np.ndarray = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.int64)
         # rotate velocity in direction of orientation
         self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
@@ -295,12 +297,15 @@ def get_bacteria_dict(bacterium: Bacterium) -> Dict:
     return dict(
         position=[bacterium.position.tolist()],
         velocity=[bacterium.velocity.tolist()],
+        acceleration=[bacterium.acceleration.tolist()],
+        height=[bacterium.height],
         angle=[bacterium.angle.tolist()],
         force=[bacterium.force.tolist()],
         total_force=[bacterium.total_force],
-        acceleration=[bacterium.acceleration.tolist()],
         total_energy=[bacterium.total_energy],
         living=[bacterium.living],
         moving=[bacterium.moving],
         length=[bacterium.length],
-        width=[bacterium.width])
+        width=[bacterium.width],
+        mass=[bacterium.mass]
+    )

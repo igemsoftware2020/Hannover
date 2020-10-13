@@ -9,8 +9,8 @@ from pathlib import Path
 # custom libraries
 from src.biofilm import Biofilm
 from src.constants import Constants
-from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, \
-    prompt_log_at_start, plot_num, dens_map, animate_positions, animate_3d
+from src.utils import plot_sizes, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, \
+    prompt_log_at_start, animate_positions, animate_3d
 
 
 def start_run(constant: Constants):
@@ -35,12 +35,12 @@ def start_run(constant: Constants):
 
 def plotting(info_file_path):
     data = bacteria_as_pandas(info_file_path)
-    plot_num(data, info_file_path, save_fig=True)
-    dens_map(data, info_file_path, save_fig=True)
+    # plot_num(data, info_file_path, save_fig=True)
+    # dens_map(data, info_file_path, save_fig=True)
     plot_velocities(data, info_file_path, save_fig=True)
     plot_positions(data, info_file_path, save_fig=True)
     plot_force(data, info_file_path, save_fig=True)
-    plot_size(data, info_file_path, save_fig=True)
+    plot_sizes(data, info_file_path, save_fig=True)
     data = bacteria_as_pandas(info_file_path)
     animate_positions(data, info_file_path, save_fig=True)
     animate_3d(data, info_file_path, save_fig=True)

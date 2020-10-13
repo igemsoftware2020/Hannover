@@ -122,7 +122,6 @@ class Bacterium:
         if self.position[2] == 0:
             self.velocity[2] = 0
 
-
     def update_position(self):
         """ update bacterium position based on velocity """
         dt = self.constants.get_simulation_constants(key="time_step")

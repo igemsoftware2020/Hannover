@@ -14,7 +14,7 @@ import numpy as np
 
 class Constants:
     """
-    This class is for managing and storing different biological and physical constants,
+    This class is for managing and storing the different biological and physical constant,
     which are used in the simulation
     """
 
@@ -41,7 +41,7 @@ class Constants:
         self.duration = 60  # simulation time in minutes
         self.sim_dict = {}
 
-        # Bacteria constants
+        # Bacteria constant
         self.bac_type = bac_type
         self.bac_constants = {}
 
@@ -60,7 +60,7 @@ class Constants:
         repr_str += f"\n ******  CONSTANTS   ******\n "
         repr_str += f"* Constants of {self.bac_type} *\n"
         repr_str = append_dic_str(repr_str, bac_dict)
-        repr_str += f"\n * Simulation constants *\n"
+        repr_str += f"\n * Simulation constant *\n"
         repr_str = append_dic_str(repr_str, sim_dict)
         return repr_str
 

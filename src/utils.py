@@ -344,7 +344,7 @@ def bacteria_as_pandas(info_file_path) -> pd.DataFrame:
 
 
 def constants_as_pandas(info_file_path):
-    """ sorts all saved constants into a Dataframe and returns"""
+    """ sorts all saved constant into a Dataframe and returns"""
     data = read_in_log(info_file_path)
     return pd.DataFrame(data['CONSTANTS']).transpose()
 

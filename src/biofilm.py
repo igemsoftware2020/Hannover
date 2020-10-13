@@ -26,6 +26,9 @@ class Biofilm(object):
         self.num_bacteria = len(self.bacteria)
         self.constants = Constants(bac_type="B.Sub.")
 
+    def __repr__(self):
+        return f'Biofilm consisting of {len(self.bacteria)} bacteria'
+
     def spawn(self):
         """ spawn an initial number of bacteria.
          Bacteria are randomly distributed on a plane with aspect ratios specified in the Constants class
@@ -147,16 +150,12 @@ class Biofilm(object):
 
                 bacterium.update_acceleration()
                 bacterium.update_velocity()
+                bacterium.update_orientation()
                 bacterium.update_position()
 
                 if bacterium.living is True:
                     bacterium.random_cell_death()
             self.write_to_log(log_name=save_name)
-
-    @staticmethod
-    def distance_vector(self: Bacterium, other: Bacterium):
-        """ return distance vector between two bacteria """
-        return self.position - other.position
 
     @staticmethod
     def cell_cell_interaction(self: Bacterium, other: Bacterium, exact=False):
@@ -170,14 +169,6 @@ class Biofilm(object):
                    * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
         return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) * \
                Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
-
-    def __repr__(self):
-        return f'Biofilm consisting of {len(self.bacteria)} bacteria'
-
-    def sort_by_depth(self, axis, _reverse):
-        sorted_bacteria = self.bacteria
-        # To return a new list, use the sorted() built-in function...
-        return sorted(sorted_bacteria, key=lambda x: x.position[axis], reverse=_reverse)
 
     @staticmethod
     def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium):
@@ -196,6 +187,11 @@ class Biofilm(object):
         repulsive_force = lennard_jones_force(distance, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
                                               sigma=bacterium1.length)
         return repulsive_force
+
+    @staticmethod
+    def distance_vector(self: Bacterium, other: Bacterium):
+        """ return distance vector between two bacteria """
+        return self.position - other.position
 
     @staticmethod
     def check_energy_conservation(bacterium1: Bacterium, bacterium2: Bacterium, total_energy_before):

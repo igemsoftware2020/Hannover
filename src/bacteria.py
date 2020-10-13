@@ -122,13 +122,6 @@ class Bacterium:
         if self.position[2] == 0:
             self.velocity[2] = 0
 
-        # update angular velocity
-        # 3D  instantaneous angular velocity vector w = r x v / |r|^2
-        self.velocity_angular = np.cross(self.position, self.velocity) / np.linalg.norm(self.position) ** 2
-        # add random rotational velocity
-        self.velocity_angular[0] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[0]) / 2)
-        self.velocity_angular[1] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[1]) / 2)
-        self.velocity_angular[2] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[2]) / 2)
 
     def update_position(self):
         """ update bacterium position based on velocity """
@@ -144,13 +137,23 @@ class Bacterium:
         if self.position[2] < 0.5:
             self.position[2] = 0
 
-        # update orientation
+    def update_orientation(self):
+        """ update bacterium orientation """
+        # update angular velocity
+        # 3D  instantaneous angular velocity vector w = r x v / |r|^2
+        self.velocity_angular = np.cross(self.position, self.velocity) / np.linalg.norm(self.position) ** 2
+        # add random rotational velocity
+        self.velocity_angular[0] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[0]) / 2)
+        self.velocity_angular[1] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[1]) / 2)
+        self.velocity_angular[2] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[2]) / 2)
+
         self.angle[0] = np.random.normal(loc=self.angle[0], scale=10)
         self.angle[1] = np.random.normal(loc=self.angle[1], scale=10)
         self.angle[2] = np.random.normal(loc=self.angle[2], scale=10)
 
     def update_acting_force(self):
-        """ Calculates all forces acting on the bacteria
+        """
+        Calculates all forces acting on the bacteria
         and updates the according parameter of the bacteria.
         Forces included:
          Stokes drag force, bacterium- bacterium adhesion,

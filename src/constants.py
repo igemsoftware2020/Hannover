@@ -33,7 +33,7 @@ class Constants:
         # SIMULATION PARAMETERS
         self.num_initial_bac = 3
         self.time_step = 1
-        #self.window_size = (450, 900)
+        self.window_size = (450, 900)
         self.duration = 60  # simulation time in minutes
         self.sim_dict = {}
 
@@ -129,9 +129,9 @@ class Constants:
             "MASS": 10 ** (-12),  # [kg]
             "MORTALITY_RATE": 0.0,
             "CRITICAL_LENGTH": 4.7,  # [um]
-            "FREE_MEAN_SPEED": 2,  # [um / s] TODO
+            "FREE_MEAN_SPEED": 1.5,  # [um / s] TODO
             "DOUBLING_TIME": 7200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
-            "GROWTH_RATE": 2.2 / 120000,  # [um / s]
+            "GROWTH_RATE": 2.2 / 3124,  # [um / s]
             "MOTION_ACTIVATION_PROBABILITY": 0.005,
             "MOTION_DEACTIVATION_PROBABILITY": 0.01
         }

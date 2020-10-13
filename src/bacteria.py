@@ -132,13 +132,13 @@ class Bacterium:
     def update_position(self):
         """ update bacterium position based on velocity """
         dt = self.constants.get_simulation_constants(key="time_step")
-        ##self.position[0] += self.velocity[0] * dt + 1 / 2 * self.acceleration[0] * dt ** 2
-        # self.position[1] += self.velocity[1] * dt + 1 / 2 * self.acceleration[1] * dt ** 2
-        # self.position[2] += self.velocity[2] * dt + 1 / 2 * self.acceleration[2] * dt ** 2
+        self.position[0] += self.velocity[0] * dt + 1 / 2 * self.acceleration[0] * dt ** 2
+        self.position[1] += self.velocity[1] * dt + 1 / 2 * self.acceleration[1] * dt ** 2
+        self.position[2] += self.velocity[2] * dt + 1 / 2 * self.acceleration[2] * dt ** 2
 
         self.position[0] = np.random.normal(loc=self.position[0], scale=2)
-        self.position[0] = np.random.normal(loc=self.position[1], scale=2)
-        self.position[0] = np.random.normal(loc=self.position[2], scale=2)
+        self.position[1] = np.random.normal(loc=self.position[1], scale=2)
+        self.position[2] = np.random.normal(loc=self.position[2], scale=2)
 
         if self.position[2] < 0.5:
             self.position[2] = 0

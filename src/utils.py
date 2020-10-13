@@ -33,6 +33,7 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
     plot_data = get_data_to_parameter(data, 'velocity')
     means = plot_data.mean(axis=1, skipna=True)
     fig, (ax1, ax2) = plt.subplots(1, 2)
+    fig.tight_layout()
     for bacteria in plot_data:
         ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
@@ -145,6 +146,7 @@ def plot_as_ellipse(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
     angle_data = get_data_to_parameter(data, 'angle')
     length_data = get_data_to_parameter(data, 'length')
     fig, ax = plt.subplots(1, 1)
+    fig.tight_layout()
     ells = []
     for bacteria in pos_data:
         patch = Ellipse(xy=pos_data.loc[0, bacteria], width=1,
@@ -170,6 +172,7 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     plot_data = get_data_to_parameter(data, 'position')
     means = plot_data.mean(axis=1, skipna=True)
     fig, (ax1, ax2) = plt.subplots(1, 2)
+    fig.tight_layout()
     for bacteria in plot_data:
         ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
@@ -182,7 +185,6 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.set_ylabel('Mean distance in um')
 
     plt.ioff()
-
     if save_fig:
         path = Path(save_path.parent) / 'positions_plot.png'
         fig.savefig(path)
@@ -199,13 +201,14 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     plot_data = get_data_to_parameter(data, 'total_force')
     means = plot_data.mean(axis=1, skipna=True)
     fig, (ax1, ax2) = plt.subplots(1, 2)
+    fig.tight_layout()
     for bacteria in plot_data:
         ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
 
     ax1.set_title('Total force')
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Force in N')
-    ax1.set_yscale('log')
+    # ax1.set_yscale('log')
     ax2.plot(means)
     ax2.set_title('Mean force')
     ax2.set_xlabel('Time in s')
@@ -230,6 +233,7 @@ def plot_size(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     width_means = width_data.mean(axis=1, skipna=True)
     length_means = length_data.mean(axis=1, skipna=True)
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+    fig.tight_layout()
     for bacteria in width_data:
         ax1.plot(width_data.loc[:, bacteria], '--', alpha=0.3)
         ax2.plot(length_data.loc[:, bacteria.replace('width', 'length')], '--', alpha=0.3)
@@ -263,6 +267,7 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     x, y_fit, slope, generation_time = get_gent(data)
     '''plot data'''
     fig, (ax1, ax2) = plt.subplots(2, 1)
+    fig.tight_layout()
     ax1.plot(num, color='b')
     ax1.set(xlabel='Time in s', ylabel='Bacteria Number', title='Bacteria Growth')
     ax2.plot(num, label='log curve')
@@ -273,7 +278,6 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.text(0.1, 0.8, 'generation time: ' + str(round(generation_time, 5)), transform=ax2.transAxes)
     ax2.set_yscale('log')
 
-    plt.tight_layout()
     plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'growth_plot.png'
@@ -286,6 +290,7 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     x, y, z = last_pos(data)
     fig, (ax1, ax2) = plt.subplots(1, 2)
+    fig.tight_layout()
     ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
     sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=False, cmap='mako', levels=200, thresh=0)
     plt.ioff()

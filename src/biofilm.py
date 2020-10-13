@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# ********************************************************************************************
+# imports
 from pathlib import Path
 
 import numpy as np
-# ********************************************************************************************
-# imports
 import tqdm
 
 # custom libraries

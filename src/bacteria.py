@@ -4,10 +4,11 @@
 # ********************************************************************************************
 # imports
 import math
-import numpy as np
 import random
-import scipy.stats
 from typing import Dict
+
+import numpy as np
+import scipy.stats
 
 import src.constants as Constants
 # custom libraries
@@ -180,9 +181,9 @@ class Bacterium:
     def update_mass(self):
         """update mass of bacteria on based on volume"""
         # Mass / Volume ration for grown bacteria
-        ratio = self.constants.get_bac_constants(key="MASS") / \
-                (np.pi * self.constants.get_bac_constants(key="WIDTH") ** 2
-                 * self.constants.get_bac_constants(key="LENGTH"))
+        ratio = self.constants.get_bac_constants(key="MASS") / (
+                    np.pi * self.constants.get_bac_constants(key="WIDTH") ** 2
+                    * self.constants.get_bac_constants(key="LENGTH"))
         volume = np.pi * 1 ** 2 * self.length
         self.mass = ratio * volume
 
@@ -239,7 +240,6 @@ class Bacterium:
         """
         # Make the bacteria grow
         # using a constant growth rate
-        # TODO Make volume per time
         if self.living is True:
             self.length = self.length * (self.growth_rate + 1)
         else:

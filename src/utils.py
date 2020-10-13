@@ -4,19 +4,19 @@
 # ********************************************************************************************
 # imports
 import json
+import time
+from pathlib import Path
+from typing import Dict
+
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import time
-from datetime import datetime
 from matplotlib.patches import Ellipse
-from pathlib import Path
 from scipy.spatial.transform import Rotation as R
 from sklearn.linear_model import LinearRegression
-from typing import Dict
 
 # custom libraries
 import src.constants as Constants

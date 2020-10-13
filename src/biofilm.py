@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
 import numpy as np
 # ********************************************************************************************
 # imports
-import random
 import tqdm
-from pathlib import Path
 
 # custom libraries
 from src.bacteria import Bacterium, get_bacteria_dict
@@ -130,7 +130,7 @@ class Biofilm(object):
                     cp_bacteria = np.append(cp_bacteria, daughter)
 
                 # Forces on bacterium because of drag, adhesion force, gravity
-                self.force = bacterium.update_acting_force()
+                bacterium.update_acting_force()
 
                 # Add cell- cell interaction force, based on soft-repulsive potential
                 for _bacterium in cp_bacteria:
@@ -168,8 +168,8 @@ class Biofilm(object):
         if exact:
             return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other, exact=True) \
                    * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
-        return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) \
-               * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
+        return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) * \
+               Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
 
     def __repr__(self):
         return f'Biofilm consisting of {len(self.bacteria)} bacteria'
@@ -180,7 +180,7 @@ class Biofilm(object):
         return sorted(sorted_bacteria, key=lambda x: x.position[axis], reverse=_reverse)
 
     @staticmethod
-    def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium, exact=False):
+    def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium):
         """ return absolute interaction force with one bacteria.
          Interaction force is calculated from the distance and gradient value
          of the lennard- jones potential at this distance
@@ -190,21 +190,11 @@ class Biofilm(object):
             return 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) - 24 * epsilon * np.power(sigma, 6) / np.power(
                 r, 7)
 
-        if exact:
-            bac1_pos = bacterium1.get_position()
-            bac2_pos = bacterium2.get_position()
-            for i in range(0, len(bac1_pos)):
-                distance_vector = bac1_pos[i] - bac2_pos[i]
-                distance = np.linalg.norm(distance_vector) * 1E6
-                repulsive_force += lennard_jones_force(distance,
-                                                       epsilon=10 * bacterium1.constants.MAX_CELL_CELL_ADHESION,
-                                                       sigma=2 * bacterium1.length)
-        else:
-            # only calculate for the center of the bacteria
-            distance_vector = bacterium1.position - bacterium2.position
-            distance = np.linalg.norm(distance_vector) * 1E6
-            repulsive_force = lennard_jones_force(distance, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
-                                                  sigma=bacterium1.length)
+        # only calculate for the center of the bacteria
+        distance_vector = bacterium1.position - bacterium2.position
+        distance = np.linalg.norm(distance_vector) * 1E6
+        repulsive_force = lennard_jones_force(distance, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
+                                              sigma=bacterium1.length)
         return repulsive_force
 
     @staticmethod

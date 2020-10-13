@@ -64,6 +64,9 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     living_data = get_data_to_parameter(data, 'living')
 
     fig, ax = plt.subplots()
+    ax.set_xlabel("x / um")
+    ax.set_ylabel("y / um")
+
     lines = []
     data = []
     living = []
@@ -78,16 +81,17 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     def update(num, line_plots, dataLines, living_data):
         for line, dataLine, alive in zip(line_plots, dataLines, living_data):
             # update data for line plot: dataLine[0] = x data, dataLine[1] y data
-            line[0].set_data(dataLine[0][:num], dataLine[1][:num])
+            line[0].set_data(dataLine[0][num - 2:num], dataLine[1][num - 2:num])
             if alive[0] is False:
                 line[0].set_color('black')
-                line[0].set_alpha(0.5)
+                line[0].set_alpha(0.8)
+            ax.set_title(f"Trajectory of bacteria\npassed time: {round(num / 60, 2)} min")
 
         return lines,
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
 
-                                   interval=200, repeat=False, fargs=[lines, data, living])
+                                   interval=1000, repeat=False, fargs=[lines, data, living])
 
     plt.ioff()
 
@@ -110,6 +114,10 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
     fig = plt.figure()
     ax = p3.Axes3D(fig)
+    ax.set_xlabel("x / um")
+    ax.set_ylabel("y / um")
+    ax.set_zlabel("z / um")
+
     lines = []
     data = []
     for bacteria in plot_data:
@@ -124,12 +132,13 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     def update(num, line_plots, dataLines):
         for line, dataLine in zip(line_plots, dataLines):
             # update data for line plot: dataLine[0] = x data, dataLine[1] y data
-            line[0].set_data(dataLine[0][:num], dataLine[1][:num])
-            line[0].set_3d_properties(dataLine[2][:num])
+            line[0].set_data(dataLine[0][num - 2:num], dataLine[1][num - 2:num])
+            line[0].set_3d_properties(dataLine[2][num - 2:num])
+            ax.set_title(f"Trajectory of bacteria\npassed time: {round(num / 60, 2)} min")
         return lines,
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
-                                   interval=200, repeat=False, fargs=[lines, data])
+                                   interval=100, repeat=False, fargs=[lines, data])
 
     plt.ioff()
     if save_fig:
@@ -166,8 +175,7 @@ def plot_as_ellipse(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
 
 def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     """
-    Plots positions (as lengths of location vectors) of each bacteria and the mean position of all bacteria
-    over the iteration step.
+    Plots positions (as lengths of location vectors) of each bacteria and the distance over the surface.
     """
     position_data = get_data_to_parameter(data, 'position')
     position_means = position_data.mean(axis=1, skipna=True)
@@ -208,7 +216,7 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     """
     Plots force acting on each bacteria and the mean force acting on all bacteria
-    over the iteration step.
+    over the iteration step. Also plots accelerations.
     """
     plot_data = get_data_to_parameter(data, 'total_force')
     acc_data = get_data_to_parameter(data, 'acceleration')
@@ -313,9 +321,9 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
 
 def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    """Scatters the last positions of the bacteria and plots the density of bacteria. """
     x, y, z = last_pos(data)
-    fig, (ax1, ax2) = plt.subplots(1, 2)
-    fig.tight_layout()
+    fig, (ax1, ax2) = plt.subplots(1, 2, constrained_layout=True)
     ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
     sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=False, cmap='mako', levels=200, thresh=0)
     plt.ioff()

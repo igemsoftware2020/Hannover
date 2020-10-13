@@ -513,9 +513,7 @@ def simulation_duration(func):
     def inner1(*args, **kwargs):
         # storing time before function execution
         begin = time.time()
-
         func(*args, **kwargs)
-
         # storing time after function execution
         end = time.time()
         print(f'Duration of {func.__name__} : {end - begin} s')
@@ -541,6 +539,7 @@ def get_gent(data: pd.DataFrame):
 
 
 def last_pos(data):
+    """ returns last coordinates of each bacteria in data"""
     last_cord_x = []
     last_cord_y = []
     last_cord_z = []

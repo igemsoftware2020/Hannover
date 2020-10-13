@@ -30,8 +30,9 @@ class Biofilm(object):
         return f'Biofilm consisting of {len(self.bacteria)} bacteria'
 
     def spawn(self):
-        """ spawn an initial number of bacteria.
-         Bacteria are randomly distributed on a plane with aspect ratios specified in the Constants class
+        """
+        spawn an initial number of bacteria.
+         Bacteria are randomly distributed on a plane with aspect ratios specified in the c class
          """
         num_initial_bacteria = self.constants.get_simulation_constants(key="num_initial")
         window_size = self.constants.get_simulation_constants(key="window_size")
@@ -165,10 +166,10 @@ class Biofilm(object):
         Force value based on Lennard-Jones Potential / Soft-repulsive potential
         """
         if exact:
-            return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other, exact=True) \
+            return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) \
                    * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
-        return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) * \
-               Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
+        return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) \
+               * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
 
     @staticmethod
     def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium):

@@ -10,7 +10,7 @@ from typing import Dict
 import numpy as np
 import scipy.stats
 
-import src.constants as Constants
+import src.constants as c
 # custom libraries
 from src.utils import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x
 
@@ -20,7 +20,7 @@ from src.utils import stokes_drag_force, gravitational_force, apply_rotation, ro
 
 class Bacterium:
 
-    def __init__(self, constants: Constants, strain: str = "E.Coli.", position: np.ndarray = None,
+    def __init__(self, constants: c, strain: str = None, position: np.ndarray = None,
                  velocity: np.ndarray = np.asarray([np.random.normal(0, 0.5),
                                                     np.random.normal(0, 0.5),
                                                     np.random.normal(0, 0.5)]),
@@ -29,31 +29,42 @@ class Bacterium:
                  attached_to_surface: bool = False, length: float = None):
         """
         initialize a instance of the Bacteria class
+        :param constants: c used for the bacterium. Object of c class
+        :param strain:  str can be set to "E.Coli" or "B.Sub.". Default uses Bacteria type selected in constants
         :param position: position of bacteria center [x_pox, y_pos, z_pos]
-        :param width: width of ellipse in meter
-        :param length:  length of ellipse in meter, default value 2 µm for B. subtilis
         :param velocity: velocity of bacteria [v_x, v_y, v_z] in m/s
-        :param angle: angle of bacteria  measured to x axis in radian
+        :param angle: angle of bacteria  measured to x axis in degree
+        :param force: acting force of bacteria in each direction in N
+        :param living: True if bacteria is alive, false else
+        :param moving: True if bacteria is moving, false else
+        :param attached_to_surface: True if bacteria is attached to surface, false else
+        :param length:  length of ellipse in meter, default value 2 µm for B. sub
         """
+        self.constants = constants
+        # initial position
+        self.position = position
+        # have to add this here, so it will be stored in the log file
+        self.height = self.position[2]
+        self.velocity: np.ndarray = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.int64)
 
+        # initial orientation
         if angle is None:
             self.angle = [random.randint(0, 360), random.randint(0, 360)]
         else:
             self.angle = angle
 
-        self.position = position
-        # have to add this here, so it will be stored in the log file
-        self.height = self.position[2]
-        self.velocity: np.ndarray = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.int64)
         # rotate velocity in direction of orientation
         self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
         self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
-        self.constants = constants
         self.mass = self.constants.get_bsub_constants(key="MASS")
         self.length = length
 
-        self.strain = strain
+        if strain is None:
+            self.strain = constants.bac_type
+        else:
+            self.strain = strain
+        # set remaining parameters according to selected bacteria strain
         if self.strain == "B.Sub.":
             self.width = self.constants.get_bsub_constants(key="WIDTH")
             if length is None:
@@ -175,6 +186,7 @@ class Bacterium:
         self.force = np.add(self.force, gravitational_force(self.mass))
 
     def update_acceleration(self):
+        """ calculates and sets acceleration """
         self.acceleration = self.force / self.mass * 1E-6
 
     def update_rotational_energy(self):

@@ -34,6 +34,7 @@ def start_run(constant: Constants):
 
 
 def plotting(info_file_path):
+    """ reads in data from info_file_path and plots data """
     data = bacteria_as_pandas(info_file_path)
     plot_num(data, info_file_path, save_fig=True)
     dens_map(data, info_file_path, save_fig=True)

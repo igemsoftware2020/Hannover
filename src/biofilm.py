@@ -117,7 +117,7 @@ class Biofilm(object):
         self.spawn()
 
         print(f"\n ********* STARTING MODELLING  ********* \n "
-              f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s."
+              f" * Simulation running for {duration} min in steps of {time_step} s."
               )
         for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
             cp_bacteria = np.copy(self.bacteria)

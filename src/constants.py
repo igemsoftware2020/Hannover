@@ -57,7 +57,7 @@ class Constants:
 
         repr_str = f"\n ******  PATHS   ******\n "
         repr_str = append_dic_str(repr_str, paths)
-        repr_str += f"\n ******  CONSTANTS   ******\n "
+        repr_str += f"\n ******  CONSTANTS   ******\n   (check documentation for units)\n\n "
         repr_str += f"* Constants of {self.bac_type} *\n"
         repr_str = append_dic_str(repr_str, bac_dict)
         repr_str += f"\n * Simulation constant *\n"

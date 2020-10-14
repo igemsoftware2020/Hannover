@@ -154,9 +154,9 @@ class Constants:
             "MASS": 10 ** (-12),  # [kg]
             "MORTALITY_RATE": 0.0,
             "CRITICAL_LENGTH": 4.7,  # [um]
-            "FREE_MEAN_SPEED": 1.5,  # [um / s]
+            "FREE_MEAN_SPEED": 1.5 / 60,  # [um / s]
             "DOUBLING_TIME": 7200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
-            "GROWTH_RATE": 2.2 / 3124,  # [um / s]
+            "GROWTH_RATE": 2.2 / 60,  # [um / s]
             "MOTION_ACTIVATION_PROBABILITY": 0.005,
             "MOTION_DEACTIVATION_PROBABILITY": 0.01
         }

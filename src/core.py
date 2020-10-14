@@ -54,13 +54,12 @@ def plotting(info_file_path):
 if __name__ == "__main__":
     # Set constant for modelling run
     constants = Constants(bac_type="B.Sub.")
-    constants.num_initial_bac = 5
-    constants.duration = 15
+    constants.num_initial_bac = 40
+    constants.duration = 5
     constants.window_size = (2000, 2000)
     constants.set_bacteria_constants()
     constants.set_simulation_constants()
     constants.set_paths(default=True)
 
     path = start_run(constants)
-
     plotting(Path(path))

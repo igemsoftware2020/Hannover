@@ -25,7 +25,7 @@ import src.constants as Constants
 # ********************************************************************************************
 # Functions for plotting data
 
-def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+def plot_velocities(data: pd.DataFrame, save_path: Path = None, save_fig: bool = False):
     """
     Plots velocities of each bacteria and the mean velocity of all bacteria
     over the iteration step.
@@ -47,7 +47,7 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False)
 
     plt.ioff()
 
-    if save_fig:
+    if save_fig and save_path:
         path = Path(save_path).parent / 'velocity_plot.png'
         fig.savefig(str(path))
         plt.close(fig)

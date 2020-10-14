@@ -175,7 +175,7 @@ class Bacterium:
         # self.force = self.mass * self.acceleration * 1E6
         # Stokes drag force
         self.force = np.add(self.force, stokes_drag_force(radius=self.length, velocity=self.velocity,
-                                                          viscosity=self.constants.EFFECTIVE_VISCOSITY_H2O)
+                                                          viscosity=self.constants.EFFECTIVE_VISCOSITY_EPS)
                             )
 
         if (self.position[2] < 4) and self.attached_to_surface:
@@ -218,16 +218,16 @@ class Bacterium:
         #                       radial component sum of two radii*0.8
 
         def get_daughter_position(position, split_distance, angle):
-            offset = (split_distance * math.sin(angle[0]) * math.cos(angle[1]),
-                      split_distance * math.cos(angle[0]) * math.cos(angle[1]),
-                      split_distance * math.sin(angle[1]))
+            offset = (split_distance * math.sin(math.radians(angle[0])) * math.cos(math.radians(angle[1])),
+                      split_distance * math.cos(math.radians(angle[0])) * math.cos(math.radians(angle[1])),
+                      split_distance * math.sin(math.radians(angle[1])))
             position = position + np.asarray(offset) * 5
             return position
 
         # Create daughter bacterium from self
         # Update parameters of daughter and mother bacterium
         daughter_bac_length = 0.5 * self.length
-        daughter_bac_angle = self.angle  # same orientation?
+        daughter_bac_angle = self.angle
         daughter_bac_position = get_daughter_position(position=self.position, split_distance=self.length * 0.2,
                                                       angle=daughter_bac_angle)
         daughter_bac_velocity = - (self.velocity / 2)
@@ -257,7 +257,7 @@ class Bacterium:
         # Make the bacteria grow
         # using a constant growth rate
         if self.living is True:
-            self.length = self.length * (self.growth_rate + 1)
+            self.length = self.length + self.growth_rate * self.constants.get_simulation_constants(key="time_step")
         else:
             # if cell is dead, constant length
             pass

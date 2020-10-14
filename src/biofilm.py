@@ -199,3 +199,36 @@ class Biofilm(object):
         """ checks if energy is conserved in the splitting process"""
         if bacterium1.total_energy + bacterium2.total_energy != total_energy_before:
             raise ValueError("Energy conversation broken while splitting.")
+
+
+def get_dict_from_bacteria(bacteria_list, data):
+    bacteria_dic = {}
+    if sum(map(len, data['BACTERIA'].keys())) == 0:
+        # if no entry in BACTERIA, create the first one.
+        for bacteria, counter in zip(bacteria_list, range(0, len(bacteria_list))):
+            bacteria_dic.update({'bacteria_%s' % str(counter): get_bacteria_dict(bacteria)})
+
+    else:
+        # copy already existing one and add to entries
+        bacteria_dic = data['BACTERIA'].copy()
+        for bacteria, counter in zip(bacteria_list, range(0, len(bacteria_list))):
+            bacteria_name = 'bacteria_%s' % str(counter)
+            # iterate over all entries in BACTERIA, append next iteration step to key values
+            if bacteria_name not in bacteria_dic.keys():
+                # Add bacteria to BACTERIUM keys, because it's not in there
+                bacteria_dic.update({'bacteria_%s' % str(counter): get_bacteria_dict(bacteria)})
+            else:
+                for entry in data['BACTERIA'][bacteria_name].keys():
+                    # If entry already exists : Append info from next iteration step to corresponding entry
+                    for attr in dir(bacteria):
+                        if not callable(getattr(bacteria, attr)) and not attr.startswith("__") and entry == attr:
+                            attribute = getattr(bacteria, entry)
+                            if isinstance(attribute, np.ndarray):
+                                attribute = attribute.tolist()
+                            bacteria_dic[bacteria_name][entry].append(attribute)
+
+        # Maybe for checking integrity : len(data['BACTERIA']) - sum(map(len, data['BACTERIA'].keys()))
+    data['BACTERIA'] = bacteria_dic
+    return data
+# Copy list before simulate -> Call simulate on each bacteria in list -> return bacteria and sort again in list
+# Works not for the interaction part ...

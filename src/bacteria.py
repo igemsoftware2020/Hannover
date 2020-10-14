@@ -9,7 +9,6 @@ from typing import Dict
 
 import numpy as np
 import scipy.stats
-
 import src.constants as c
 # custom libraries
 from src.utils import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x
@@ -161,13 +160,21 @@ class Bacterium:
         # 3D  instantaneous angular velocity vector w = r x v / |r|^2
         self.velocity_angular = np.cross(self.position, self.velocity) / np.linalg.norm(self.position) ** 2
         # add random rotational velocity
-        self.velocity_angular[0] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[0]) / 2)
-        self.velocity_angular[1] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[1]) / 2)
-        self.velocity_angular[2] += np.random.normal(loc=0, scale=np.abs(self.velocity_angular[2]) / 2)
+        local_rnd_1 = np.random.RandomState()
+        local_rnd_2 = np.random.RandomState()
+        local_rnd_3 = np.random.RandomState()
 
-        self.angle[0] = np.random.normal(loc=self.angle[0], scale=10)
-        self.angle[1] = np.random.normal(loc=self.angle[1], scale=10)
-        self.angle[2] = np.random.normal(loc=self.angle[2], scale=10)
+        self.velocity_angular[0] += local_rnd_1.normal(loc=0, scale=np.abs(self.velocity_angular[0]) / 2)
+        self.velocity_angular[1] += local_rnd_2.normal(loc=0, scale=np.abs(self.velocity_angular[1]) / 2)
+        self.velocity_angular[2] += local_rnd_3.normal(loc=0, scale=np.abs(self.velocity_angular[2]) / 2)
+
+        local_rnd_1 = np.random.RandomState()
+        local_rnd_2 = np.random.RandomState()
+        local_rnd_3 = np.random.RandomState()
+
+        self.angle[0] = local_rnd_1.normal(loc=self.angle[0], scale=10)
+        self.angle[1] = local_rnd_2.normal(loc=self.angle[1], scale=10)
+        self.angle[2] = local_rnd_3.normal(loc=self.angle[2], scale=10)
 
     def update_acting_force(self):
         """

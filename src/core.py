@@ -27,7 +27,6 @@ def start_run(constant: Constants):
     prompt_log_at_start(biofilm.constants)
     # Save log file for
     info_file_path = constant.get_paths(key="info")
-    biofilm.simulate(save_name=info_file_path)
 
     info_file_path = constants.get_paths(key="info")
     #biofilm.simulate()

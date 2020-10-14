@@ -3,13 +3,11 @@
 
 # ********************************************************************************************
 # imports
-from pathlib import Path
 from itertools import repeat
 from multiprocessing import Pool, cpu_count
 
 import numpy as np
 import tqdm
-
 # custom libraries
 from src.bacteria import Bacterium, get_bacteria_dict
 from src.constants import Constants
@@ -144,7 +142,7 @@ class Biofilm(object):
                     if bacterium != _bacterium \
                             and (np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
                         # add interaction force
-                        force_vector = Biofilm.cell_cell_interaction(bacterium, _bacterium, exact=False)
+                        force_vector = Biofilm.cell_cell_interaction(bacterium, _bacterium)
                         bacterium.force = np.add(bacterium.force, force_vector)
                         _bacterium.force = np.subtract(_bacterium.force, force_vector)
                         # delete bacteria from interaction iteration
@@ -182,7 +180,6 @@ class Biofilm(object):
                 with Pool(processes=num_threads) as pool:
                     cp_bacteria_list = self.bacteria
                     self.bacteria = pool.starmap(bac_bac_interaction, zip(self.bacteria, repeat(cp_bacteria_list)))
-                    self.bacteria = cp_bacteria_list
 
                 with Pool(processes=num_threads) as pool:
                     self.bacteria = pool.map(update_movement, self.bacteria)
@@ -201,15 +198,12 @@ class Biofilm(object):
         return self.constants.get_paths(key="info")
 
     @staticmethod
-    def cell_cell_interaction(self: Bacterium, other: Bacterium, exact=False):
+    def cell_cell_interaction(self: Bacterium, other: Bacterium):
         """
         returns force vector of cell- cell interaction.
         Force direction is in direction of the distance vector between the bacteria.
         Force value based on Lennard-Jones Potential / Soft-repulsive potential
         """
-        if exact:
-            return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) \
-                   * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
         return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) \
                * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
 
@@ -273,6 +267,6 @@ def bac_bac_interaction(bacterium: Bacterium, bac_list: list):
                 and (
                 np.linalg.norm(Biofilm.distance_vector(bacterium, other_bacterium)) < 2 * bacterium.length):
             # add interaction force
-            force_vector = Biofilm.cell_cell_interaction(bacterium, other_bacterium, exact=False)
+            force_vector = Biofilm.cell_cell_interaction(bacterium, other_bacterium)
             bacterium.force = np.add(bacterium.force, force_vector)
     return bacterium

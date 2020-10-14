@@ -10,7 +10,7 @@ from pathlib import Path
 from src.biofilm import Biofilm
 from src.constants import Constants
 from src.utils import plot_size, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, \
-    prompt_log_at_start, plot_num, dens_map, animate_3d, animate_positions
+    prompt_log_at_start, animate_3d, animate_positions
 
 
 # ********************************************************************************************
@@ -19,8 +19,8 @@ from src.utils import plot_size, plot_force, plot_velocities, plot_positions, ba
 def blind_run():
     # Set constants for modelling run
     constants = Constants(bac_type="B.Sub.")
-    constants.num_initial_bac = 10
-    constants.duration = 1
+    constants.num_initial_bac = 30
+    constants.duration = 5
     constants.window_size = (2000, 2000)
     constants.set_bacteria_constants()
     constants.set_simulation_constants()
@@ -41,8 +41,8 @@ def blind_run():
 
 def plotting(info_file_path):
     data = bacteria_as_pandas(info_file_path)
-    plot_num(data, info_file_path, save_fig=True)
-    dens_map(data, info_file_path, save_fig=True)
+    #plot_num(data, info_file_path, save_fig=True)
+    #dens_map(data, info_file_path, save_fig=True)
     plot_velocities(data, info_file_path, save_fig=True)
     plot_positions(data, info_file_path, save_fig=True)  # this one messes with data
     plot_force(data, info_file_path, save_fig=True)

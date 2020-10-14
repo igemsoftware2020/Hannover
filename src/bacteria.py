@@ -9,7 +9,6 @@ from typing import Dict
 
 import numpy as np
 import scipy.stats
-
 import src.constants as Constants
 # custom libraries
 from src.utils import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x
@@ -113,10 +112,13 @@ class Bacterium:
         self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
         self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
+        local_rnd_1 = np.random.RandomState()
+        local_rnd_2 = np.random.RandomState()
+        local_rnd_3 = np.random.RandomState()
         # add brownian movement, up to 10 % of absolute value
-        self.velocity[0] = np.random.normal(loc=self.velocity[0], scale=np.abs(self.velocity[0]) * 0.02)
-        self.velocity[1] = np.random.normal(loc=self.velocity[1], scale=np.abs(self.velocity[1]) * 0.02)
-        self.velocity[2] = np.random.normal(loc=self.velocity[2], scale=np.abs(self.velocity[2]) * 0.02)
+        self.velocity[0] = local_rnd_1.normal(loc=self.velocity[0], scale=np.abs(self.velocity[0]) * 0.02)
+        self.velocity[1] = local_rnd_2.normal(loc=self.velocity[1], scale=np.abs(self.velocity[1]) * 0.02)
+        self.velocity[2] = local_rnd_3.normal(loc=self.velocity[2], scale=np.abs(self.velocity[2]) * 0.02)
 
         # self.velocity[2] += np.random.normal(loc=0, scale=np.abs(self.velocity[2]) * 0.01)
         if self.position[2] == 0:
@@ -137,9 +139,12 @@ class Bacterium:
         self.position[1] += self.velocity[1] * dt + 1 / 2 * self.acceleration[1] * dt ** 2
         self.position[2] += self.velocity[2] * dt + 1 / 2 * self.acceleration[2] * dt ** 2
 
-        self.position[0] = np.random.normal(loc=self.position[0], scale=2)
-        self.position[1] = np.random.normal(loc=self.position[1], scale=2)
-        self.position[2] = np.random.normal(loc=self.position[2], scale=2)
+        local_rnd_1 = np.random.RandomState()
+        local_rnd_2 = np.random.RandomState()
+        local_rnd_3 = np.random.RandomState()
+        self.position[0] = local_rnd_1.normal(loc=self.position[0], scale=2)
+        self.position[1] = local_rnd_2.normal(loc=self.position[1], scale=2)
+        self.position[2] = local_rnd_3.normal(loc=self.position[2], scale=2)
 
         if self.position[2] < 0.5:
             self.position[2] = 0
@@ -205,13 +210,13 @@ class Bacterium:
             offset = (split_distance * math.sin(angle[0]) * math.cos(angle[1]),
                       split_distance * math.cos(angle[0]) * math.cos(angle[1]),
                       split_distance * math.sin(angle[1]))
-            position = position + np.asarray(offset) * 5
+            position = position + np.asarray(offset)
             return position
 
         # Create daughter bacterium from self
         # Update parameters of daughter and mother bacterium
         daughter_bac_length = 0.5 * self.length
-        daughter_bac_angle = self.angle  # same orientation?
+        daughter_bac_angle = self.angle
         daughter_bac_position = get_daughter_position(position=self.position, split_distance=self.length * 0.2,
                                                       angle=daughter_bac_angle)
         daughter_bac_velocity = - (self.velocity / 2)

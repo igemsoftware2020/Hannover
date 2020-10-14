@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from itertools import product
-from multiprocessing import Pool as ThreadPool
+from itertools import repeat
+from multiprocessing import Pool, cpu_count
 
 import numpy as np
 # ********************************************************************************************
@@ -33,18 +33,19 @@ class Biofilm(object):
         num_initial_bacteria = self.constants.get_simulation_constants(key="num_initial")
         window_size = self.constants.get_simulation_constants(key="window_size")
         mean_speed = self.constants.get_bac_constants(key="FREE_MEAN_SPEED")
-        for _ in range(num_initial_bacteria):
+        for _ in range(num_initial_bacteria - 1):
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
             rnd_position = np.asarray([np.random.randint(300, 400),
                                        np.random.randint(300, 400),
                                        np.random.normal(3, 0.5)
                                        ])
             # set random initial velocity
-            velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),
-                                   np.random.normal(mean_speed, mean_speed * 0.01),
-                                   np.random.normal(0, 0.2)
-                                   ])
+            #velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),
+            #                       np.random.normal(mean_speed, mean_speed * 0.01),
+            #                       np.random.normal(0, 0.2)
+            #                       ])
             # random orientation
+            velocity = np.asarray([0, 0, 0])
             rnd_angle = np.asarray([np.random.randint(0, 360),
                                     np.random.normal(0, 360),
                                     np.random.normal(0, 360)
@@ -164,23 +165,21 @@ class Biofilm(object):
               f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s."
               )
         for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
-            print("Step : ", _)
             try:
-                cp_bac_list = self.bacteria
-                with ThreadPool(processes=4) as pool:
-                    self.bacteria = pool.map(grow_bacterium, cp_bac_list)
+                num_threads = cpu_count()
+                with Pool(processes=num_threads) as pool:
+                    self.bacteria = pool.map(grow_bacterium, self.bacteria)
 
-                with ThreadPool(processes=4) as pool:
-                    cp_bac_list = self.bacteria
-                    self.bacteria = pool.map(forces_on_bacterium, cp_bac_list)
+                with Pool(processes=num_threads) as pool:
+                    self.bacteria = pool.map(forces_on_bacterium, self.bacteria)
 
-                with ThreadPool(processes=4) as pool:
-                    cp_bac_list = self.bacteria
-                    self.bacteria = pool.starmap(bac_bac_interaction, product(cp_bac_list, repeat=2))
+                with Pool(processes=num_threads) as pool:
+                    cp_bacteria_list = self.bacteria
+                    self.bacteria = pool.starmap(bac_bac_interaction, zip(self.bacteria, repeat(cp_bacteria_list)))
+                    self.bacteria = cp_bacteria_list
 
-                with ThreadPool(processes=4) as pool:
-                    cp_bac_list = self.bacteria
-                    self.bacteria = pool.map(update_movement, cp_bac_list)
+                with Pool(processes=num_threads) as pool:
+                    self.bacteria = pool.map(update_movement, self.bacteria)
 
                 for bacterium in self.bacteria:
                     if bacterium.is_split_ready() and bacterium.living:
@@ -208,7 +207,7 @@ class Biofilm(object):
         Force value based on Lennard-Jones Potential / Soft-repulsive potential
         """
         if exact:
-            return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other, exact=True) \
+            return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) \
                    * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
         return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) * \
                Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
@@ -247,29 +246,35 @@ class Biofilm(object):
 
 
 def grow_bacterium(bacterium: Bacterium):
-            # Grow Bacterium
-            bacterium.grow()
-            bacterium.update_mass()
-            return bacterium
+    # Grow Bacterium
+    bacterium.grow()
+    bacterium.update_mass()
+    return bacterium
+
 
 def forces_on_bacterium(bacterium: Bacterium):
-            bacterium.update_acting_force()
-            return bacterium
+    bacterium.update_acting_force()
+    return bacterium
+
 
 def update_movement(bacterium: Bacterium):
-            bacterium.update_acceleration()
-            bacterium.update_velocity()
-            bacterium.update_position()
+    bacterium.update_acceleration()
+    bacterium.update_velocity()
+    bacterium.update_position()
 
-            if bacterium.living is True:
-                bacterium.random_cell_death()
+    if bacterium.living is True:
+        bacterium.random_cell_death()
 
-            return bacterium
+    return bacterium
 
-def bac_bac_interaction(bacterium: Bacterium, other_bacterium):
-                if bacterium != other_bacterium \
-                        and (np.linalg.norm(Biofilm.distance_vector(bacterium, other_bacterium)) < 2 * bacterium.length):
-                    # add interaction force
-                    force_vector = Biofilm.cell_cell_interaction(bacterium, other_bacterium, exact=False)
-                    bacterium.force = np.add(bacterium.force, force_vector)
-                return bacterium
+
+def bac_bac_interaction(bacterium: Bacterium, bac_list: list):
+    for other_bacterium in bac_list:
+        # this is the bacteria i want to update the interaction force on
+        if bacterium != other_bacterium \
+                and (
+                np.linalg.norm(Biofilm.distance_vector(bacterium, other_bacterium)) < 2 * bacterium.length):
+            # add interaction force
+            force_vector = Biofilm.cell_cell_interaction(bacterium, other_bacterium, exact=False)
+            bacterium.force = np.add(bacterium.force, force_vector)
+    return bacterium

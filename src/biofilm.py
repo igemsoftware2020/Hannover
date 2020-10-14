@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# ********************************************************************************************
+# imports
+from pathlib import Path
 from itertools import repeat
 from multiprocessing import Pool, cpu_count
 
 import numpy as np
-# ********************************************************************************************
-# imports
 import tqdm
+
 # custom libraries
 from src.bacteria import Bacterium, get_bacteria_dict
 from src.constants import Constants
@@ -26,9 +28,13 @@ class Biofilm(object):
         self.num_bacteria = len(self.bacteria)
         self.constants = Constants(bac_type="B.Sub.")
 
+    def __repr__(self):
+        return f'Biofilm consisting of {len(self.bacteria)} bacteria'
+
     def spawn(self):
-        """ spawn an initial number of bacteria.
-         Bacteria are randomly distributed on a plane with aspect ratios specified in the Constants class
+        """
+        spawn an initial number of bacteria.
+         Bacteria are randomly distributed on a plane with aspect ratios specified in the c class
          """
         num_initial_bacteria = self.constants.get_simulation_constants(key="num_initial")
         window_size = self.constants.get_simulation_constants(key="window_size")
@@ -40,12 +46,11 @@ class Biofilm(object):
                                        np.random.normal(3, 0.5)
                                        ])
             # set random initial velocity
-            #velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),
-            #                       np.random.normal(mean_speed, mean_speed * 0.01),
-            #                       np.random.normal(0, 0.2)
-            #                       ])
+            velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),
+                                   np.random.normal(mean_speed, mean_speed * 0.01),
+                                   np.random.normal(0, 0.2)
+                                   ])
             # random orientation
-            velocity = np.asarray([0, 0, 0])
             rnd_angle = np.asarray([np.random.randint(0, 360),
                                     np.random.normal(0, 360),
                                     np.random.normal(0, 360)
@@ -115,7 +120,7 @@ class Biofilm(object):
         self.spawn()
 
         print(f"\n ********* STARTING MODELLING  ********* \n "
-              f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s."
+              f" * Simulation running for {duration} min in steps of {time_step} s."
               )
         for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
             cp_bacteria = np.copy(self.bacteria)
@@ -148,6 +153,7 @@ class Biofilm(object):
 
                 bacterium.update_acceleration()
                 bacterium.update_velocity()
+                bacterium.update_orientation()
                 bacterium.update_position()
 
                 if bacterium.living is True:
@@ -195,11 +201,6 @@ class Biofilm(object):
         return self.constants.get_paths(key="info")
 
     @staticmethod
-    def distance_vector(self: Bacterium, other: Bacterium):
-        """ return distance vector between two bacteria """
-        return self.position - other.position
-
-    @staticmethod
     def cell_cell_interaction(self: Bacterium, other: Bacterium, exact=False):
         """
         returns force vector of cell- cell interaction.
@@ -209,16 +210,8 @@ class Biofilm(object):
         if exact:
             return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) \
                    * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
-        return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) * \
-               Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
-
-    def __repr__(self):
-        return f'Biofilm consisting of {len(self.bacteria)} bacteria'
-
-    def sort_by_depth(self, axis, _reverse):
-        sorted_bacteria = self.bacteria
-        # To return a new list, use the sorted() built-in function...
-        return sorted(sorted_bacteria, key=lambda x: x.position[axis], reverse=_reverse)
+        return Biofilm.abs_force_lennard_jones_potential(bacterium1=self, bacterium2=other) \
+               * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
 
     @staticmethod
     def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium):
@@ -237,6 +230,11 @@ class Biofilm(object):
         repulsive_force = lennard_jones_force(distance, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
                                               sigma=bacterium1.length)
         return repulsive_force
+
+    @staticmethod
+    def distance_vector(self: Bacterium, other: Bacterium):
+        """ return distance vector between two bacteria """
+        return self.position - other.position
 
     @staticmethod
     def check_energy_conservation(bacterium1: Bacterium, bacterium2: Bacterium, total_energy_before):

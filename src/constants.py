@@ -13,7 +13,7 @@ from typing import Dict
 
 class Constants:
     """
-    This class is for managing and storing different biological and physical constants,
+    This class is for managing and storing the different biological and physical constant,
     which are used in the simulation
     """
 
@@ -40,7 +40,7 @@ class Constants:
         self.duration = 60  # simulation time in minutes
         self.sim_dict = {}
 
-        # Bacteria constants
+        # Bacteria constant
         self.bac_type = bac_type
         self.bac_constants = {}
 
@@ -56,20 +56,22 @@ class Constants:
 
         repr_str = f"\n ******  PATHS   ******\n "
         repr_str = append_dic_str(repr_str, paths)
-        repr_str += f"\n ******  CONSTANTS   ******\n "
+        repr_str += f"\n ******  CONSTANTS   ******\n   (check documentation for units)\n\n "
         repr_str += f"* Constants of {self.bac_type} *\n"
         repr_str = append_dic_str(repr_str, bac_dict)
-        repr_str += f"\n * Simulation constants *\n"
+        repr_str += f"\n * Simulation constant *\n"
         repr_str = append_dic_str(repr_str, sim_dict)
         return repr_str
 
     def set_bacteria_constants(self, default=True):
+        """ set constants according to selected bacteria strain """
         if self.bac_type == "B.Sub." and default:
             self.bac_constants = Constants.get_bsub_constants()
         elif self.bac_type == "E.Coli." and default:
             self.bac_constants = Constants.get_ecoli_constants()
 
     def get_bac_constants(self, key: str = None):
+        """ return used constants as dict. If key is given, returns the respective constants."""
         dict_constants = self.bac_constants
         if key and (key in dict_constants.keys()):
             return dict_constants[key]
@@ -77,6 +79,10 @@ class Constants:
             return dict_constants
 
     def get_paths(self, key=None):
+        """
+        returns root, output and path of info file in a dictionary.
+        If key is given, return respective path from dictionary
+        """
         paths_dir = {
             "root": self.root_dir,
             "output": self.output_path,
@@ -91,6 +97,10 @@ class Constants:
             return paths_dir
 
     def set_paths(self, default: bool = True):
+        """
+        Sets paths used for storing log file and plots.
+        Default root path is the working directory
+         """
         if not default:
             path = Path(filedialog.askdirectory())
             os.chdir(path)
@@ -111,6 +121,10 @@ class Constants:
         self.info_path = path_out / f'log_{date_time}.json'
 
     def get_simulation_constants(self, key: str = None):
+        """
+        returns simulation constants in a dictionary.
+        If key is given, return respective path from dictionary
+        """
         dict_constants = self.sim_dict
         if key and (key in dict_constants.keys()):
             return dict_constants[key]
@@ -118,6 +132,9 @@ class Constants:
             return dict_constants
 
     def set_simulation_constants(self):
+        """
+        sets the simulation constants fix.
+        """
         sim_dict = {
             "num_initial": self.num_initial_bac,
             "time_step": self.time_step,
@@ -128,15 +145,19 @@ class Constants:
 
     @staticmethod
     def get_bsub_constants(key: str = None):
+        """
+        returns constants regarding Bacillus subtilis strain
+        If key is given, return respective path from dictionary
+        """
         bsub_dic = {
             "LENGTH": np.random.normal(loc=2.5, scale=2.5 * 0.14),
             "WIDTH": 1,  # [um] https://en.wikipedia.org/wiki/Bacillus_subtilis
             "MASS": 10 ** (-12),  # [kg]
             "MORTALITY_RATE": 0.0,
             "CRITICAL_LENGTH": 4.7,  # [um]
-            "FREE_MEAN_SPEED": 1.5,  # [um / s]
+            "FREE_MEAN_SPEED": 1.5 / 60,  # [um / s]
             "DOUBLING_TIME": 7200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
-            "GROWTH_RATE": 2.2 / 3124,  # [um / s]
+            "GROWTH_RATE": 2.2 / 60,  # [um / s]
             "MOTION_ACTIVATION_PROBABILITY": 0.005,
             "MOTION_DEACTIVATION_PROBABILITY": 0.01
         }
@@ -147,6 +168,10 @@ class Constants:
 
     @staticmethod
     def get_ecoli_constants(key: str = None):
+        """
+         returns constants regarding Escherichia coli strain
+         If key is given, return respective path from dictionary
+        """
         ecoli_dic = {
             "LENGTH": np.random.normal(loc=1, scale=1 * 0.14),  # [um] https://en.wikipedia.org/wiki/Escherichia_coli
             "WIDTH": 0.5,  # [um] https://en.wikipedia.org/wiki/Escherichia_coli

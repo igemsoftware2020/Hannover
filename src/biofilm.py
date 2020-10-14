@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
-
 import numpy as np
 # ********************************************************************************************
 # imports
@@ -59,16 +57,16 @@ class Biofilm(object):
                             attached_to_surface=True, constants=self.constants, strain=self.constants.bac_type)
             self.bacteria.append(bac)
 
-    def write_to_log(self, log_name):
+    def write_to_log(self):
         """
         Saves the current parameters of all bacteria in "self.bacteria" as a dictionary in a json file
         with the name log_name. If no json file exits it will create a template. No entries are overwritten,
         instead the parameter lists are updated accordingly
         """
-        info_file_path = self.constants.get_paths(key="output") / log_name
-        if not log_name.is_file():
+        info_file_path = self.constants.get_paths(key="info")
+        if not info_file_path.is_file():
             # create json template and save
-            write_log_template(log_name, self.constants)
+            write_log_template(info_file_path, self.constants)
 
         # read in current log
         data = read_in_log(info_file_path)
@@ -103,7 +101,7 @@ class Biofilm(object):
         save_dict_as_json(data, info_file_path)
 
     @simulation_duration
-    def simulate(self, save_name: Path):
+    def simulate(self):
         """
         Sets up and runs simulation.
         Iterates over all Bacteria and updates parameters, based on euler- forward scheme.
@@ -151,7 +149,7 @@ class Biofilm(object):
 
                 if bacterium.living is True:
                     bacterium.random_cell_death()
-            self.write_to_log(log_name=save_name)
+            self.write_to_log()
 
     @staticmethod
     def distance_vector(self: Bacterium, other: Bacterium):

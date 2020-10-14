@@ -20,7 +20,7 @@ def blind_run():
     # Set constants for modelling run
     constants = Constants(bac_type="B.Sub.")
     constants.num_initial_bac = 10
-    constants.duration = 3
+    constants.duration = 1
     constants.window_size = (2000, 2000)
     constants.set_bacteria_constants()
     constants.set_simulation_constants()
@@ -34,7 +34,8 @@ def blind_run():
     prompt_log_at_start(biofilm.constants)
     # Save log file for
     info_file_path = constants.get_paths(key="info")
-    biofilm.simulate()
+    #biofilm.simulate()
+    biofilm.simulate_multiprocessing()
     return info_file_path
 
 

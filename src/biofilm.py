@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from itertools import product
+from multiprocessing import Pool as ThreadPool
+
 import numpy as np
 # ********************************************************************************************
 # imports
 import tqdm
-
 # custom libraries
 from src.bacteria import Bacterium, get_bacteria_dict
 from src.constants import Constants
@@ -151,6 +153,48 @@ class Biofilm(object):
                     bacterium.random_cell_death()
             self.write_to_log()
 
+    @simulation_duration
+    def simulate_multiprocessing(self):
+
+        time_step = self.constants.get_simulation_constants(key="time_step")
+        duration = self.constants.get_simulation_constants(key="duration")
+        self.spawn()
+
+        print(f"\n ********* STARTING MODELLING  USING MULTIPROCESSING ********* \n "
+              f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s."
+              )
+        for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
+            print("Step : ", _)
+            try:
+                cp_bac_list = self.bacteria
+                with ThreadPool(processes=4) as pool:
+                    self.bacteria = pool.map(grow_bacterium, cp_bac_list)
+
+                with ThreadPool(processes=4) as pool:
+                    cp_bac_list = self.bacteria
+                    self.bacteria = pool.map(forces_on_bacterium, cp_bac_list)
+
+                with ThreadPool(processes=4) as pool:
+                    cp_bac_list = self.bacteria
+                    self.bacteria = pool.starmap(bac_bac_interaction, product(cp_bac_list, repeat=2))
+
+                with ThreadPool(processes=4) as pool:
+                    cp_bac_list = self.bacteria
+                    self.bacteria = pool.map(update_movement, cp_bac_list)
+
+                for bacterium in self.bacteria:
+                    if bacterium.is_split_ready() and bacterium.living:
+                        daughter = bacterium.split()
+                        self.bacteria.append(daughter)
+
+                self.write_to_log()
+            except KeyboardInterrupt:
+                self.write_to_log()
+                return self.constants.get_paths(key="info")
+
+        self.write_to_log()
+        return self.constants.get_paths(key="info")
+
     @staticmethod
     def distance_vector(self: Bacterium, other: Bacterium):
         """ return distance vector between two bacteria """
@@ -200,3 +244,32 @@ class Biofilm(object):
         """ checks if energy is conserved in the splitting process"""
         if bacterium1.total_energy + bacterium2.total_energy != total_energy_before:
             raise ValueError("Energy conversation broken while splitting.")
+
+
+def grow_bacterium(bacterium: Bacterium):
+            # Grow Bacterium
+            bacterium.grow()
+            bacterium.update_mass()
+            return bacterium
+
+def forces_on_bacterium(bacterium: Bacterium):
+            bacterium.update_acting_force()
+            return bacterium
+
+def update_movement(bacterium: Bacterium):
+            bacterium.update_acceleration()
+            bacterium.update_velocity()
+            bacterium.update_position()
+
+            if bacterium.living is True:
+                bacterium.random_cell_death()
+
+            return bacterium
+
+def bac_bac_interaction(bacterium: Bacterium, other_bacterium):
+                if bacterium != other_bacterium \
+                        and (np.linalg.norm(Biofilm.distance_vector(bacterium, other_bacterium)) < 2 * bacterium.length):
+                    # add interaction force
+                    force_vector = Biofilm.cell_cell_interaction(bacterium, other_bacterium, exact=False)
+                    bacterium.force = np.add(bacterium.force, force_vector)
+                return bacterium

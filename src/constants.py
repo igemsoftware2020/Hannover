@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import numpy as np
 # ********************************************************************************************
 # imports
 import os
@@ -8,8 +9,6 @@ from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog
 from typing import Dict
-
-import numpy as np
 
 
 class Constants:
@@ -20,7 +19,7 @@ class Constants:
 
     # Global parameters
     # ADHESION FORCES and VISCOSITY
-    MAX_CELL_SUBSTRATE_ADHESION = 2 * 1E-10  # 5.08 * 1E-9  # [N] DOI 10.1016/S0167-7012(99)00137-2
+    MAX_CELL_SUBSTRATE_ADHESION = 7 * 1E-9  # 5.08 * 1E-9  # [N] DOI 10.1016/S0167-7012(99)00137-2
     MAX_CELL_CELL_ADHESION = 6.81 * 1E-9  # [N] DOI 10.1016/S0167-7012(99)00137-2
     EFFECTIVE_VISCOSITY_EPS = np.log(1E3)  # # [Pa * s] : of bacterial P. aeruginosa PAO1 10.1103/PhysRevLett.93.098102
     EFFECTIVE_VISCOSITY_H2O = 0.7805 * 1E-3  # [Pa * s]: at ~ 30 °C https://wiki.anton-paar.com/en/water/
@@ -156,7 +155,7 @@ class Constants:
             "MASS": 10 ** (-12),  # [kg]
             "MORTALITY_RATE": 0.0,
             "CRITICAL_LENGTH": 4.7,  # [um]
-            "FREE_MEAN_SPEED": 8 / (60),  # [um / s]
+            "FREE_MEAN_SPEED": 8 / (60 * 60),  # [um / s]
             "DOUBLING_TIME": 7200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
             "GROWTH_RATE": 2.2 / 7200,  # [um / s]
             "MOTION_ACTIVATION_PROBABILITY": 0.005,

@@ -4,11 +4,11 @@
 # ********************************************************************************************
 # imports
 import math
+import numpy as np
 import random
+import scipy.stats
 from typing import Dict
 
-import numpy as np
-import scipy.stats
 import src.constants as c
 # custom libraries
 from src.utils import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x
@@ -122,8 +122,8 @@ class Bacterium:
         self.velocity[1] += self.acceleration[1] * dt
         self.velocity[2] += self.acceleration[2] * dt
 
-        self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
-        self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
+        #self.velocity = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
+        #self.velocity = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
         local_rnd_1 = np.random.RandomState()
         local_rnd_2 = np.random.RandomState()
@@ -184,13 +184,14 @@ class Bacterium:
         # offset
         # self.force = self.mass * self.acceleration * 1E6
         # Stokes drag force
+        self.force = 0
         self.force = np.add(self.force, stokes_drag_force(radius=self.length, velocity=self.velocity,
                                                           viscosity=self.constants.EFFECTIVE_VISCOSITY_EPS)
                             )
         # add gravitational force
         self.force = np.add(self.force, gravitational_force(self.mass))
         self.force = np.add(self.force, bac_substrate_interaction_force(self))
-        self.force = - self.force
+        self.total_force = np.linalg.norm(self.force)
 
     def update_acceleration(self):
         """ calculates and sets acceleration """
@@ -239,6 +240,7 @@ class Bacterium:
         # Update parameters of daughter and mother bacterium
 
         daughter_bac_position = get_daughter_position(self)
+        daughter_bac_position[2] = self.position[2]
         daughter_bac_length = self.length / 2
         daughter_bac_velocity = self.velocity / 2
         daughter_bac_force = self.force / 2
@@ -251,6 +253,10 @@ class Bacterium:
                                  position=daughter_bac_position, length=daughter_bac_length)
 
         daughter_bac.update_mass()
+        daughter_bac.update_acting_force()
+        daughter_bac.update_acceleration()
+        daughter_bac.update_velocity()
+        daughter_bac.update_position()
         # update mother cell
         self.length = self.length / 2
         self.velocity = self.velocity / 2
@@ -344,7 +350,11 @@ def bac_substrate_interaction_force(self: Bacterium):
         return - 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) - 24 * epsilon * np.power(sigma, 6) / np.power(
             r, 7)
 
-    force = lennard_jones_force(self.position[2], epsilon=self.constants.MAX_CELL_SUBSTRATE_ADHESION, sigma=1) * np.asarray(
-        [0, 0, -1])
-
+    if self.position[2] > 5:
+        # if far away from surface, soft attractive force
+        force = lennard_jones_force(self.position[2], epsilon=self.constants.MAX_CELL_SUBSTRATE_ADHESION, sigma=1\
+                * np.asarray([0, 0, -1]))
+    else:
+        # if near surface strong attraction
+        force = self.constants.MAX_CELL_SUBSTRATE_ADHESION * np.asarray([0, 0, -1])
     return force

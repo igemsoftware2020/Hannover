@@ -66,6 +66,8 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     fig, ax = plt.subplots()
     ax.set_xlabel("x / um")
     ax.set_ylabel("y / um")
+    ax.set_xlim(1000)
+    ax.set_ylim(1000)
 
     lines = []
     data = []
@@ -81,7 +83,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     def update(num, line_plots, dataLines, living_data):
         for line, dataLine, alive in zip(line_plots, dataLines, living_data):
             # update data for line plot: dataLine[0] = x data, dataLine[1] y data
-            line[0].set_data(dataLine[0][num - 2:num], dataLine[1][num - 2:num])
+            line[0].set_data(dataLine[0][num - 5:num], dataLine[1][num - 5:num])
             if alive[0] is False:
                 line[0].set_color('black')
                 line[0].set_alpha(0.8)
@@ -116,7 +118,9 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax.set_xlabel("x / um")
     ax.set_ylabel("y / um")
     ax.set_zlabel("z / um")
-
+    ax.set_xlim(1000)
+    ax.set_ylim(1000)
+    ax.set_zlim(50)
     lines = []
     data = []
     for bacteria in plot_data:
@@ -131,10 +135,10 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     def update(num, line_plots, dataLines):
         for line, dataLine in zip(line_plots, dataLines):
             # update data for line plot: dataLine[0] = x data, dataLine[1] y data
-            line[0].set_data(dataLine[0][num:num + 2], dataLine[1][num:num + 2])
-            line[0].set_3d_properties(dataLine[2][num:num + 2])
+            line[0].set_data(dataLine[0][num - 5:num], dataLine[1][num-5 :num])
+            line[0].set_3d_properties(dataLine[2][num- 5:num])
             ax.set_title(f"Trajectory of bacteria\npassed time: {round(num / 60, 2)} min\n"
-                         )
+            )
         return lines,
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
@@ -218,7 +222,7 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     Plots force acting on each bacteria and the mean force acting on all bacteria
     over the iteration step. Also plots accelerations.
     """
-    plot_data = get_data_to_parameter(data, 'total_force')
+    plot_data = get_data_to_parameter(data, 'total_force') * 1e9
     acc_data = get_data_to_parameter(data, 'acceleration')
     force_mean = plot_data.mean(axis=1, skipna=True)
     acc_mean = acc_data.mean(axis=1, skipna=True)
@@ -229,16 +233,16 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
     ax1.set_title('Total force')
     ax1.set_xlabel('Time in s')
-    ax1.set_ylabel('Force in N')
+    ax1.set_ylabel('Force in nN')
 
-    ax2.plot(acc_data)
+    ax2.plot(acc_data, '.', alpha=0.3, markersize=1)
     ax2.set_title('Total acceleration')
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('Acceleration in um/s²')
 
     ax3.plot(force_mean, '.')
     ax3.set_xlabel('Time in s')
-    ax3.set_ylabel('mean force in N')
+    ax3.set_ylabel('mean force in nN')
 
     ax4.plot(acc_mean, '-')
     ax4.set_xlabel('Time in s')
@@ -265,8 +269,8 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
 
     for bacteria in mass_data:
-        ax1.plot(mass_data.loc[:, bacteria], '.', alpha=0.3, markersize=3)
-        ax2.plot(length_data.loc[:, bacteria.replace('mass', 'length')], '.', alpha=0.3, markersize=3)
+        ax1.plot(mass_data.loc[:, bacteria], '.', alpha=0.3, markersize=1)
+        ax2.plot(length_data.loc[:, bacteria.replace('mass', 'length')], '.', alpha=0.3, markersize=1)
     ax1.set_title('Masses')
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Mass in kg')
@@ -453,7 +457,8 @@ def get_data_to_parameter(data: pd.DataFrame, key: str, exact: bool = False):
 
 def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity: float) -> np.ndarray:
     # Calculates Stokes' drag for a sphere with Reynolds number < 1.
-    # [um * Pa * s 1/1E-6 * um / s] = [um * kg / (um * s ** 2) * s  * um / s] = [um kg / (s ** 2)]
+    # [um * Pa * s  * um / s] = [um * kg / (m * s ** 2) * s  * um / s]
+    # changed units to N
     return - 6 * np.pi * radius * viscosity * 1E-12 * velocity
 
 
@@ -461,6 +466,7 @@ def gravitational_force(mass: float) -> np.ndarray:
     # calculates gravitational force on a mass
     # F = m * g * e_z
     # [kg * um / s ** 2]
+    # changed units to N
     return mass * 9.81 * np.asarray([0, 0, -1])
 
 

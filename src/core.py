@@ -10,7 +10,7 @@ from pathlib import Path
 from src.biofilm import Biofilm
 from src.constants import Constants
 from src.utils import plot_sizes, plot_force, plot_velocities, plot_positions, bacteria_as_pandas, \
-    prompt_log_at_start, animate_positions, animate_3d, plot_num, dens_map
+    prompt_log_at_start, animate_positions, animate_3d
 
 
 def start_run(constant: Constants):
@@ -37,8 +37,8 @@ def start_run(constant: Constants):
 def plotting(info_file_path):
     """ reads in data from info_file_path and plots data """
     data = bacteria_as_pandas(info_file_path)
-    plot_num(data, info_file_path, save_fig=True)
-    dens_map(data, info_file_path, save_fig=True)
+    #plot_num(data, info_file_path, save_fig=True)
+    #dens_map(data, info_file_path, save_fig=True)
     plot_velocities(data, info_file_path, save_fig=True)
     plot_positions(data, info_file_path, save_fig=True)
     plot_force(data, info_file_path, save_fig=True)
@@ -55,12 +55,13 @@ def plotting(info_file_path):
 if __name__ == "__main__":
     # Set constant for modelling run
     constants = Constants(bac_type="B.Sub.")
-    constants.num_initial_bac = 40
-    constants.duration = 5
+    constants.num_initial_bac = 10
+    constants.duration = 4
     constants.window_size = (2000, 2000)
     constants.set_bacteria_constants()
     constants.set_simulation_constants()
     constants.set_paths(default=True)
 
     path = start_run(constants)
+    #path = '/home/david/IntelliJ_projects/iGEM-biofilm-model/output/log_14102020_17h38min/log_14102020_17h38min.json'
     plotting(Path(path))

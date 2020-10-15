@@ -133,10 +133,6 @@ class Bacterium:
         self.velocity[1] = local_rnd_2.normal(loc=self.velocity[1], scale=np.abs(self.velocity[1]) * 0.02)
         self.velocity[2] = local_rnd_3.normal(loc=self.velocity[2], scale=np.abs(self.velocity[2]) * 0.02)
 
-        # self.velocity[2] += np.random.normal(loc=0, scale=np.abs(self.velocity[2]) * 0.01)
-        if self.position[2] == 0:
-            self.velocity[2] = 0
-
     def update_position(self):
         """ update bacterium position based on velocity """
         dt = self.constants.get_simulation_constants(key="time_step")
@@ -151,8 +147,9 @@ class Bacterium:
         self.position[1] = local_rnd_2.normal(loc=self.position[1], scale=2)
         self.position[2] = local_rnd_3.normal(loc=self.position[2], scale=2)
 
-        if self.position[2] < 0.5:
-            self.position[2] = 0
+        if self.position[2] < self.length:
+            self.position[2] = self.width
+            self.attached_to_surface = True
 
     def update_orientation(self):
         """ update bacterium orientation """
@@ -190,13 +187,10 @@ class Bacterium:
         self.force = np.add(self.force, stokes_drag_force(radius=self.length, velocity=self.velocity,
                                                           viscosity=self.constants.EFFECTIVE_VISCOSITY_EPS)
                             )
-
-        if (self.position[2] < 4) and self.attached_to_surface:
-            # if distance from surface smaller than 4 µm, add adhesion force
-            self.force = np.add(self.force, self.constants.MAX_CELL_SUBSTRATE_ADHESION * np.asarray([0, 0, -1]))
-
         # add gravitational force
         self.force = np.add(self.force, gravitational_force(self.mass))
+        self.force = np.add(self.force, bac_substrate_interaction_force(self))
+        self.force = - self.force
 
     def update_acceleration(self):
         """ calculates and sets acceleration """
@@ -211,9 +205,9 @@ class Bacterium:
         """update mass of bacteria on based on volume"""
         # Mass / Volume ration for grown bacteria
         ratio = self.constants.get_bac_constants(key="MASS") / (
-                    np.pi * self.constants.get_bac_constants(key="WIDTH") ** 2
-                    * self.constants.get_bac_constants(key="LENGTH"))
-        volume = np.pi * 1 ** 2 * self.length
+                np.pi * self.constants.get_bac_constants(key="WIDTH") ** 2
+                * self.constants.get_bac_constants(key="LENGTH"))
+        volume = np.pi * self.length * self.width ** 2
         self.mass = ratio * volume
 
     def update_translation_energy(self):
@@ -230,21 +224,24 @@ class Bacterium:
         # Advanced new position: random angular component,
         #                       radial component sum of two radii*0.8
 
-        def get_daughter_position(position, split_distance, angle):
-            offset = (split_distance * math.sin(math.radians(angle[0])) * math.cos(math.radians(angle[1])),
-                      split_distance * math.cos(math.radians(angle[0])) * math.cos(math.radians(angle[1])),
-                      split_distance * math.sin(math.radians(angle[1])))
-            position = position + np.asarray(offset) * 5
-            return position
+        def get_daughter_position(mother_bac: Bacterium):
+            # offset = (split_distance * math.sin(math.radians(angle[0])) * math.cos(math.radians(angle[1])),
+            #          split_distance * math.cos(math.radians(angle[0])) * math.cos(math.radians(angle[1])),
+            #          split_distance * math.sin(math.radians(angle[1])))
+            # position = position + np.asarray(offset) * 5
+            r_mother = mother_bac.position
+            v_mother = mother_bac.velocity
+            split_distance = mother_bac.length / 2 + 0.5  # lengths in microns
+            r_daughter = r_mother + v_mother / np.linalg.norm(v_mother) * split_distance
+            return r_daughter
 
         # Create daughter bacterium from self
         # Update parameters of daughter and mother bacterium
-        daughter_bac_length = 0.5 * self.length
-        daughter_bac_angle = self.angle
-        daughter_bac_position = get_daughter_position(position=self.position, split_distance=self.length * 0.2,
-                                                      angle=daughter_bac_angle)
-        daughter_bac_velocity = - (self.velocity / 2)
-        daughter_bac_force = - self.force / 2
+
+        daughter_bac_position = get_daughter_position(self)
+        daughter_bac_length = self.length / 2
+        daughter_bac_velocity = self.velocity / 2
+        daughter_bac_force = self.force / 2
 
         daughter_bac = Bacterium(constants=self.constants, strain=self.strain,
                                  angle=self.angle, force=daughter_bac_force,
@@ -253,10 +250,12 @@ class Bacterium:
                                  velocity=daughter_bac_velocity,
                                  position=daughter_bac_position, length=daughter_bac_length)
 
+        daughter_bac.update_mass()
         # update mother cell
-        self.length = 0.5 * self.length
+        self.length = self.length / 2
         self.velocity = self.velocity / 2
         self.force = self.force / 2
+        self.update_mass()
         return daughter_bac
 
     def get_volume(self):
@@ -334,3 +333,18 @@ def get_bacteria_dict(bacterium: Bacterium) -> Dict:
         width=[bacterium.width],
         mass=[bacterium.mass]
     )
+
+
+def bac_substrate_interaction_force(self: Bacterium):
+    """
+        returns force vector of bacterium substrate interaction
+        """
+
+    def lennard_jones_force(r, epsilon, sigma):
+        return - 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) - 24 * epsilon * np.power(sigma, 6) / np.power(
+            r, 7)
+
+    force = lennard_jones_force(self.position[2], epsilon=self.constants.MAX_CELL_SUBSTRATE_ADHESION, sigma=1) * np.asarray(
+        [0, 0, -1])
+
+    return force

@@ -14,16 +14,17 @@ import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 import pandas as pd
 import seaborn as sns
+# custom libraries
+import src.constants as Constants
 from matplotlib.patches import Ellipse
 from scipy.spatial.transform import Rotation as R
 from sklearn.linear_model import LinearRegression
 
-# custom libraries
-import src.constants as Constants
-
 
 # ********************************************************************************************
 # Functions for plotting data
+
+
 
 def plot_velocities(data: pd.DataFrame, save_path: Path = None, save_fig: bool = False):
     """
@@ -72,8 +73,8 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     living = []
 
     for bacteria in plot_data:
-        x_data = [vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
-        y_data = [vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]
+        x_data = np.flip(np.asarray([vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
+        y_data = np.flip(np.asarray([vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
         lines.append(ax.plot(x_data, y_data, ), )
         data.append([x_data, y_data])
         living.append([living_data[bacteria.replace('position', 'living')]])
@@ -86,7 +87,6 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
                 line[0].set_color('black')
                 line[0].set_alpha(0.8)
             ax.set_title(f"Trajectory of bacteria\npassed time: {round(num / 60, 2)} min")
-
         return lines,
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
@@ -121,10 +121,10 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     lines = []
     data = []
     for bacteria in plot_data:
-        x_data = np.asarray([vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))])
-        y_data = np.asarray([vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))])
-        z_data = np.asarray([vector[2] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))])
-        lines.append(ax.plot(x_data, y_data, z_data, alpha=0.9), )
+        x_data = np.flip(np.asarray([vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
+        y_data = np.flip(np.asarray([vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
+        z_data = np.flip(np.asarray([vector[2] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
+        lines.append(ax.plot(x_data, y_data, z_data, alpha=0.8), )
         data.append([x_data, y_data, z_data])
     lines = np.asarray(lines)
     data = np.asarray(data)
@@ -132,9 +132,10 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     def update(num, line_plots, dataLines):
         for line, dataLine in zip(line_plots, dataLines):
             # update data for line plot: dataLine[0] = x data, dataLine[1] y data
-            line[0].set_data(dataLine[0][num - 2:num], dataLine[1][num - 2:num])
-            line[0].set_3d_properties(dataLine[2][num - 2:num])
-            ax.set_title(f"Trajectory of bacteria\npassed time: {round(num / 60, 2)} min")
+            line[0].set_data(dataLine[0][num:num + 2], dataLine[1][num:num + 2])
+            line[0].set_3d_properties(dataLine[2][num:num + 2])
+            ax.set_title(f"Trajectory of bacteria\npassed time: {round(num / 60, 2)} min\n"
+                         )
         return lines,
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),

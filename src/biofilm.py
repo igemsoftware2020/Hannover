@@ -44,19 +44,20 @@ class Biofilm(object):
                                        np.random.normal(3, 0.5)
                                        ])
             # set random initial velocity
-            velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),
-                                   np.random.normal(mean_speed, mean_speed * 0.01),
-                                   np.random.normal(0, 0.2)
-                                   ])
+            #velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),
+            #                       np.random.normal(mean_speed, mean_speed * 0.01),
+            #                       np.random.normal(0, 0.2)
+            #                       ])
             # random orientation
+            velocity = np.asarray([0 , 0, 0])
             rnd_angle = np.asarray([np.random.randint(0, 360),
-                                    np.random.normal(0, 360),
-                                    np.random.normal(0, 360)
+                                    np.random.randint(0, 360),
+                                    np.random.randint(0, 360)
                                     ])
             # substrate cell adhesion, in cartesian coordinates
             adhesion_force = np.asarray([0,
                                          0,
-                                         -self.constants.MAX_CELL_SUBSTRATE_ADHESION
+                                         0 #-self.constants.MAX_CELL_SUBSTRATE_ADHESION
                                          ])
 
             bac = Bacterium(position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force,
@@ -68,6 +69,21 @@ class Biofilm(object):
         Saves the current parameters of all bacteria in "self.bacteria" as a dictionary in a json file
         with the name log_name. If no json file exits it will create a template. No entries are overwritten,
         instead the parameter lists are updated accordingly
+        The dictionary is build like this and stored as a json
+        {
+            {BACTERIA: {bacteria_0:
+                            {
+                                position: [[] , ... ,[]],
+                                velocity: [[] , ... ,[]],
+                                ...}
+                            .
+                            .
+                            .
+                        bacteria_n:
+                                {...}
+                        },
+            CONSTANTS: { ... }
+        }
         """
         info_file_path = self.constants.get_paths(key="info")
         if not info_file_path.is_file():

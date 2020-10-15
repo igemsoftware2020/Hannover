@@ -4,26 +4,25 @@
 # ********************************************************************************************
 # imports
 import json
-import time
-from pathlib import Path
-from typing import Dict
-
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 import pandas as pd
 import seaborn as sns
-# custom libraries
-import src.constants as Constants
+import time
 from matplotlib.patches import Ellipse
+from pathlib import Path
 from scipy.spatial.transform import Rotation as R
 from sklearn.linear_model import LinearRegression
+from typing import Dict
+
+# custom libraries
+import src.constants as Constants
 
 
 # ********************************************************************************************
 # Functions for plotting data
-
 
 
 def plot_velocities(data: pd.DataFrame, save_path: Path = None, save_fig: bool = False):
@@ -73,8 +72,8 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     living = []
 
     for bacteria in plot_data:
-        x_data = np.flip(np.asarray([vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
-        y_data = np.flip(np.asarray([vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
+        x_data = np.asarray([vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))])
+        y_data = (np.asarray([vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
         lines.append(ax.plot(x_data, y_data, ), )
         data.append([x_data, y_data])
         living.append([living_data[bacteria.replace('position', 'living')]])
@@ -121,9 +120,9 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     lines = []
     data = []
     for bacteria in plot_data:
-        x_data = np.flip(np.asarray([vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
-        y_data = np.flip(np.asarray([vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
-        z_data = np.flip(np.asarray([vector[2] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
+        x_data = (np.asarray([vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
+        y_data = (np.asarray([vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
+        z_data = (np.asarray([vector[2] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
         lines.append(ax.plot(x_data, y_data, z_data, alpha=0.8), )
         data.append([x_data, y_data, z_data])
     lines = np.asarray(lines)
@@ -226,7 +225,7 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
 
     for bacteria in plot_data:
-        ax1.plot(plot_data.loc[:, bacteria], '.', alpha=0.3)
+        ax1.plot(plot_data.loc[:, bacteria], '.', alpha=0.3, markersize=3)
 
     ax1.set_title('Total force')
     ax1.set_xlabel('Time in s')
@@ -266,8 +265,8 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
 
     for bacteria in mass_data:
-        ax1.plot(mass_data.loc[:, bacteria], '.', alpha=0.3)
-        ax2.plot(length_data.loc[:, bacteria.replace('mass', 'length')], '.', alpha=0.3)
+        ax1.plot(mass_data.loc[:, bacteria], '.', alpha=0.3, markersize=3)
+        ax2.plot(length_data.loc[:, bacteria.replace('mass', 'length')], '.', alpha=0.3, markersize=3)
     ax1.set_title('Masses')
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Mass in kg')
@@ -276,12 +275,12 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('length in um')
 
-    ax3.plot(mass_mean, '.')
+    ax3.plot(mass_mean, '.', markersize=3)
     ax3.set_title('Mean of bacteria masses')
     ax3.set_xlabel('Time in s')
     ax3.set_ylabel('Mass in kg')
 
-    ax4.plot(length_means, '.')
+    ax4.plot(length_means, '.', markersize=3)
     ax4.set_title('Mean of bacteria lengths')
     ax4.set_xlabel('Time in s')
     ax4.set_ylabel('mean length in um')

@@ -4,9 +4,9 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
+
 # ********************************************************************************************
 # In this script, the formulas for the forces and rotations are stored
-
 
 def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity: float) -> np.ndarray:
     # Calculates Stokes' drag for a sphere with Reynolds number < 1.

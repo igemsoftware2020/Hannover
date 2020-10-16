@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import numpy as np
-import tqdm
-# ********************************************************************************************
-# imports
 from itertools import repeat
 from multiprocessing import Pool, cpu_count
 
+# ********************************************************************************************
+# imports
+import numpy as np
+import tqdm
 # custom libraries
 from src.bacteria import Bacterium, get_bacteria_dict
 from src.constants import Constants
-from src.utils import write_log_template, read_in_log, save_dict_as_json, simulation_duration
+from src.data_handling import write_log_template, read_in_log, save_dict_as_json
+from src.utils import simulation_duration
 
 
 class Biofilm(object):

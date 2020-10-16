@@ -3,15 +3,15 @@
 
 # ********************************************************************************************
 # imports
-
 from pathlib import Path
 
 # custom libraries
 from src.biofilm import Biofilm
 from src.constants import Constants
+from src.data_handling import bacteria_as_pandas
 from src.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, animate_positions, animate_3d, \
     plot_num, dens_map
-from src.utils import bacteria_as_pandas, prompt_log_at_start
+from src.utils import prompt_log_at_start
 
 
 def start_run(constant: Constants):

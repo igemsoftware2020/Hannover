@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from pathlib import Path
 
@@ -9,7 +11,7 @@ import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
 # custom libraries
-from src.utils import get_data_to_parameter, get_z
+from src.data_handling import get_data_to_parameter, get_z
 
 
 # ********************************************************************************************

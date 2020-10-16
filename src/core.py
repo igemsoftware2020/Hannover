@@ -60,7 +60,7 @@ if __name__ == "__main__":
     constants.set_simulation_constants()
     constants.set_paths(default=True)
 
-    path = start_run(constants)
+    start_run(constants)
 
     # path = ask_for_log_dir()
     # plotting(path)

@@ -236,8 +236,8 @@ class Bacterium:
         daughter_bac_position = get_daughter_position(self)
         daughter_bac_position[2] = self.position[2]
         daughter_bac_length = self.length / 2
-        daughter_bac_velocity = self.velocity / 2
-        daughter_bac_force = self.force / 2
+        daughter_bac_velocity = - np.asarray(self.velocity / 2)
+        daughter_bac_force = - np.asarray(self.force / 2)
 
         daughter_bac = Bacterium(constants=self.constants, strain=self.strain,
                                  angle=self.angle, force=daughter_bac_force,
@@ -246,6 +246,7 @@ class Bacterium:
                                  velocity=daughter_bac_velocity,
                                  position=daughter_bac_position, length=daughter_bac_length)
 
+        daughter_bac.acceleration = - self.acceleration / 2
         daughter_bac.update_mass()
         daughter_bac.update_acting_force()
         daughter_bac.update_acceleration()
@@ -356,9 +357,9 @@ def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacteri
          of the lennard- jones potential at this distance
         """
     # only calculate for the center of the bacteria
-    distance_vector = bacterium1.position - bacterium2.position
-    distance = np.linalg.norm(distance_vector) * 1E6
-    repulsive_force = lennard_jones_force(distance, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
+    distance = bacterium1.position - bacterium2.position
+    distance_abs = np.linalg.norm(distance) * 1E6
+    repulsive_force = lennard_jones_force(distance_abs, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
                                           sigma=2 * 1E6)
     return repulsive_force
 

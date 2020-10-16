@@ -10,6 +10,7 @@ import numpy as np
 import tqdm
 # custom libraries
 from src.bacteria import Bacterium, get_bacteria_dict
+from src.bacteria import distance_vector, bac_bac_interaction_force
 from src.constants import Constants
 from src.data_handling import write_log_template, read_in_log, save_dict_as_json
 from src.utils import simulation_duration
@@ -64,6 +65,46 @@ class Biofilm(object):
             bac = Bacterium(position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force,
                             attached_to_surface=True, constants=self.constants, strain=self.constants.bac_type)
             self.bacteria.append(bac)
+
+    @simulation_duration
+    def simulate_multiprocessing(self):
+
+        time_step = self.constants.get_simulation_constants(key="time_step")
+        duration = self.constants.get_simulation_constants(key="duration")
+        self.spawn()
+
+        print(f"\n ********* STARTING MODELLING  USING MULTIPROCESSING ********* \n "
+              f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s."
+              )
+        for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
+            try:
+                num_threads = cpu_count()
+
+                with Pool(processes=num_threads) as pool:
+                    self.bacteria = pool.map(forces_on_bacterium, self.bacteria)
+
+                with Pool(processes=num_threads) as pool:
+                    cp_bacteria_list = self.bacteria
+                    self.bacteria = pool.starmap(bac_bac_interaction, zip(self.bacteria, repeat(cp_bacteria_list)))
+
+                with Pool(processes=num_threads) as pool:
+                    self.bacteria = pool.map(update_movement, self.bacteria)
+
+                for bacterium in self.bacteria:
+                    if bacterium.is_split_ready() and bacterium.living:
+                        daughter = bacterium.split()
+                        self.bacteria.append(daughter)
+
+                with Pool(processes=num_threads) as pool:
+                    self.bacteria = pool.map(grow_bacterium, self.bacteria)
+
+                self.write_to_log()
+            except KeyboardInterrupt:
+                self.write_to_log()
+                return self.constants.get_paths(key="info")
+
+        self.write_to_log()
+        return self.constants.get_paths(key="info")
 
     def write_to_log(self):
         """
@@ -123,140 +164,8 @@ class Biofilm(object):
         data['BACTERIA'] = bacteria_dic
         save_dict_as_json(data, info_file_path)
 
-    @simulation_duration
-    def simulate(self):
-        """
-        Sets up and runs simulation.
-        Iterates over all Bacteria and updates parameters, based on euler- forward scheme.
-        All units are SI, expect lengths, which are measured in um
-        """
-        time_step = self.constants.get_simulation_constants(key="time_step")
-        duration = self.constants.get_simulation_constants(key="duration")
-        self.spawn()
 
-        print(f"\n ********* STARTING MODELLING  ********* \n "
-              f" * Simulation running for {duration} min in steps of {time_step} s."
-              )
-        for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
-            cp_bacteria = np.copy(self.bacteria)
-            for bacterium in self.bacteria:
-                # Forces on bacterium because of drag, adhesion force, gravity
-                bacterium.update_acting_force()
-
-                # Add cell- cell interaction force, based on soft-repulsive potential
-                for _bacterium in cp_bacteria:
-                    # check if bacterium is not itself and distance is smaller than 2 * bacterium length
-                    if bacterium != _bacterium \
-                            and (np.linalg.norm(Biofilm.distance_vector(bacterium, _bacterium)) < 2 * bacterium.length):
-                        # add interaction force
-                        force_vector = Biofilm.cell_cell_interaction(bacterium, _bacterium)
-                        bacterium.force = np.add(bacterium.force, force_vector)
-                        _bacterium.force = np.subtract(_bacterium.force, force_vector)
-                        # delete bacteria from interaction iteration
-                        cp_bacteria = np.delete(cp_bacteria,
-                                                np.argwhere((cp_bacteria == _bacterium) & (cp_bacteria == bacterium)))
-
-                bacterium.update_acceleration()
-                bacterium.update_velocity()
-                bacterium.update_orientation()
-                bacterium.update_position()
-
-                # Grow Bacterium
-                bacterium.grow()
-                bacterium.update_mass()
-                # Split Bacterium
-                if bacterium.is_split_ready() and bacterium.living:
-                    daughter = bacterium.split()
-                    self.bacteria.append(daughter)
-                    cp_bacteria = np.append(cp_bacteria, daughter)
-
-                if bacterium.living is True:
-                    bacterium.random_cell_death()
-            self.write_to_log()
-
-    @simulation_duration
-    def simulate_multiprocessing(self):
-
-        time_step = self.constants.get_simulation_constants(key="time_step")
-        duration = self.constants.get_simulation_constants(key="duration")
-        self.spawn()
-
-        print(f"\n ********* STARTING MODELLING  USING MULTIPROCESSING ********* \n "
-              f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s."
-              )
-        for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
-            try:
-                num_threads = cpu_count()
-
-                with Pool(processes=num_threads) as pool:
-                    self.bacteria = pool.map(forces_on_bacterium, self.bacteria)
-
-                with Pool(processes=num_threads) as pool:
-                    cp_bacteria_list = self.bacteria
-                    self.bacteria = pool.starmap(bac_bac_interaction, zip(self.bacteria, repeat(cp_bacteria_list)))
-
-                with Pool(processes=num_threads) as pool:
-                    self.bacteria = pool.map(update_movement, self.bacteria)
-
-                for bacterium in self.bacteria:
-                    if bacterium.is_split_ready() and bacterium.living:
-                        daughter = bacterium.split()
-                        self.bacteria.append(daughter)
-
-                with Pool(processes=num_threads) as pool:
-                    self.bacteria = pool.map(grow_bacterium, self.bacteria)
-
-                self.write_to_log()
-            except KeyboardInterrupt:
-                self.write_to_log()
-                return self.constants.get_paths(key="info")
-
-        self.write_to_log()
-        return self.constants.get_paths(key="info")
-
-    @staticmethod
-    def cell_cell_interaction(self: Bacterium, other: Bacterium):
-        """
-        returns force vector of cell- cell interaction.
-        Force direction is in direction of the distance vector between the bacteria.
-        Force value based on Lennard-Jones Potential / Soft-repulsive potential
-        """
-        # TODO CHECK WHEN ATTRACTIVE / REPULSIVE
-        if np.linalg.norm(Biofilm.distance_vector(self, other) > 4):
-            return - Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other)) \
-                   * Biofilm.abs_force_lennard_jones_potential(self, other)
-        return self.constants.MAX_CELL_CELL_ADHESION * Biofilm.distance_vector(self, other) / np.linalg.norm(Biofilm.distance_vector(self, other))
-
-    @staticmethod
-    def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium):
-        """ return absolute interaction force with one bacteria.
-         Interaction force is calculated from the distance and gradient value
-         of the lennard- jones potential at this distance
-        """
-
-        def lennard_jones_force(r, epsilon, sigma):
-            return 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) - 24 * epsilon * np.power(sigma, 6) / np.power(
-                r, 7)
-
-        # only calculate for the center of the bacteria
-        distance_vector = bacterium1.position - bacterium2.position
-        distance = np.linalg.norm(distance_vector) * 1E6
-        repulsive_force = lennard_jones_force(distance, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
-                                              sigma=2*1E6)
-        return repulsive_force
-
-    @staticmethod
-    def distance_vector(self: Bacterium, other: Bacterium):
-        """ return distance vector between two bacteria """
-        return self.position - other.position
-
-    @staticmethod
-    def check_energy_conservation(bacterium1: Bacterium, bacterium2: Bacterium, total_energy_before):
-        """ checks if energy is conserved in the splitting process"""
-        if bacterium1.total_energy + bacterium2.total_energy != total_energy_before:
-            raise ValueError("Energy conversation broken while splitting.")
-
-
+# These functions are for the multithreading simulation
 def grow_bacterium(bacterium: Bacterium):
     # Grow Bacterium
     bacterium.grow()
@@ -287,9 +196,9 @@ def bac_bac_interaction(bacterium: Bacterium, bac_list):
         # this is the bacteria i want to update the interaction force on
         if bacterium != other_bacterium \
                 and (
-                np.linalg.norm(Biofilm.distance_vector(bacterium, other_bacterium)) < 2 * bacterium.length):
+                np.linalg.norm(distance_vector(bacterium, other_bacterium)) < 2 * bacterium.length):
             # add interaction force
-            force_vector = Biofilm.cell_cell_interaction(bacterium, other_bacterium)
+            force_vector = bac_bac_interaction_force(bacterium, other_bacterium)
             bacterium.force = np.add(bacterium.force, force_vector)
             bacterium.total_force = np.linalg.norm(bacterium.force)
     return bacterium

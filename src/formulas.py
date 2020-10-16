@@ -23,6 +23,11 @@ def gravitational_force(mass: float) -> np.ndarray:
     return mass * 9.81 * np.asarray([0, 0, -1])
 
 
+def lennard_jones_force(r, epsilon, sigma):
+    return 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) - 24 * epsilon * np.power(sigma, 6) / np.power(
+        r, 7)
+
+
 def get_euclid_norm(array):
     """ returns the norm of each vector in parameter array"""
     for i in range(len(array)):

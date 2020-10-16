@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-import json
-from pathlib import Path
 # imports
+import json
+import tkinter as tk
+from pathlib import Path
+from tkinter import filedialog
 from typing import Dict
 
 import numpy as np
@@ -29,6 +30,13 @@ def read_in_log(info_file_path) -> Dict:
     with open(info_file_path, "r") as json_file:
         data = json.load(json_file)
     return data
+
+
+def ask_for_log_dir():
+    root = tk.Tk()
+    root.withdraw()
+    file_path = filedialog.askopenfilename(initialdir='/')
+    return Path(file_path)
 
 
 def bacteria_as_pandas(info_file_path) -> pd.DataFrame:

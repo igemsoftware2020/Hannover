@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 
 # ********************************************************************************************
-# imports
-from pathlib import Path
-
 # custom libraries
 from src.biofilm import Biofilm
 from src.constants import Constants
@@ -30,9 +27,8 @@ def start_run(constant: Constants):
     info_file_path = constant.get_paths(key="info")
 
     info_file_path = constants.get_paths(key="info")
-    #biofilm.simulate()
     biofilm.simulate_multiprocessing()
-    return info_file_path
+    plotting(info_file_path)
 
 
 def plotting(info_file_path):
@@ -65,5 +61,6 @@ if __name__ == "__main__":
     constants.set_paths(default=True)
 
     path = start_run(constants)
-    #path = '/home/david/IntelliJ_projects/iGEM-biofilm-model/output/log_16102020_1h34min/log_16102020_1h34min.json'
-    plotting(Path(path))
+
+    # path = ask_for_log_dir()
+    # plotting(path)

@@ -141,9 +141,9 @@ class Bacterium:
         local_rnd_1 = np.random.RandomState()
         local_rnd_2 = np.random.RandomState()
         local_rnd_3 = np.random.RandomState()
-        self.position[0] = local_rnd_1.normal(loc=self.position[0], scale=2)
-        self.position[1] = local_rnd_2.normal(loc=self.position[1], scale=2)
-        self.position[2] = local_rnd_3.normal(loc=self.position[2], scale=2)
+        self.position[0] = local_rnd_1.normal(loc=self.position[0], scale=0.5)
+        self.position[1] = local_rnd_2.normal(loc=self.position[1], scale=0.5)
+        self.position[2] = local_rnd_3.normal(loc=self.position[2], scale=0.5)
 
         if self.position[2] < self.length:
             self.position[2] = self.width
@@ -159,17 +159,17 @@ class Bacterium:
         local_rnd_2 = np.random.RandomState()
         local_rnd_3 = np.random.RandomState()
 
-        self.velocity_angular[0] += local_rnd_1.normal(loc=0, scale=np.abs(self.velocity_angular[0]) / 2)
-        self.velocity_angular[1] += local_rnd_2.normal(loc=0, scale=np.abs(self.velocity_angular[1]) / 2)
-        self.velocity_angular[2] += local_rnd_3.normal(loc=0, scale=np.abs(self.velocity_angular[2]) / 2)
+        self.velocity_angular[0] += local_rnd_1.normal(loc=self.velocity_angular[0], scale=0.5)
+        self.velocity_angular[1] += local_rnd_2.normal(loc=self.velocity_angular[1], scale=0.5)
+        self.velocity_angular[2] += local_rnd_3.normal(loc=self.velocity_angular[2], scale=0.5)
 
         local_rnd_1 = np.random.RandomState()
         local_rnd_2 = np.random.RandomState()
         local_rnd_3 = np.random.RandomState()
 
-        self.angle[0] = local_rnd_1.normal(loc=self.angle[0], scale=10)
-        self.angle[1] = local_rnd_2.normal(loc=self.angle[1], scale=10)
-        self.angle[2] = local_rnd_3.normal(loc=self.angle[2], scale=10)
+        self.angle[0] = local_rnd_1.normal(loc=self.angle[0], scale=2)
+        self.angle[1] = local_rnd_2.normal(loc=self.angle[1], scale=2)
+        self.angle[2] = local_rnd_3.normal(loc=self.angle[2], scale=2)
 
     def update_acting_force(self):
         """

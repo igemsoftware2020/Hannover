@@ -6,8 +6,7 @@
 from src.biofilm import Biofilm
 from src.constants import Constants
 from src.data_handling import bacteria_as_pandas
-from src.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, animate_positions, animate_3d, \
-    plot_num, dens_map
+from src.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, animate_positions, plot_num, dens_map
 from src.utils import prompt_log_at_start
 
 
@@ -42,7 +41,7 @@ def plotting(info_file_path):
     plot_sizes(data, info_file_path, save_fig=True)
     data = bacteria_as_pandas(info_file_path)
     animate_positions(data, info_file_path, save_fig=True)
-    animate_3d(data, info_file_path, save_fig=False)
+    # animate_3d(data, info_file_path, save_fig=False)
     
 # ********************************************************************************************
 # main-method to start the program
@@ -55,6 +54,7 @@ if __name__ == "__main__":
     constants.num_initial_bac = 100
     constants.duration = 10
     constants.time_step = 0.5
+    constants.set_paths(default=False)
     constants.window_size = (2000, 2000)
     constants.set_bacteria_constants()
     constants.set_simulation_constants()

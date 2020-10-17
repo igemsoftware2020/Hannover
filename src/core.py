@@ -5,8 +5,8 @@
 # custom libraries
 from src.biofilm import Biofilm
 from src.constants import Constants
-from src.data_handling import bacteria_as_pandas
-from src.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, animate_positions, plot_num, dens_map
+from src.data_handling import bacteria_as_pandas, ask_for_log_dir
+from src.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, animate_positions, plot_num, dens_map, histo_length
 from src.utils import prompt_log_at_start
 
 
@@ -33,14 +33,15 @@ def start_run(constant: Constants):
 def plotting(info_file_path):
     """ reads in data from info_file_path and plots data """
     data = bacteria_as_pandas(info_file_path)
-    plot_num(data, info_file_path, save_fig=True)
-    dens_map(data, info_file_path, save_fig=True)
-    plot_velocities(data, info_file_path, save_fig=True)
-    plot_positions(data, info_file_path, save_fig=True)
-    plot_force(data, info_file_path, save_fig=True)
-    plot_sizes(data, info_file_path, save_fig=True)
-    data = bacteria_as_pandas(info_file_path)
-    animate_positions(data, info_file_path, save_fig=True)
+    histo_length(data, info_file_path, save_fig=False)
+    plot_num(data, info_file_path, save_fig=False)
+    #dens_map(data, info_file_path, save_fig=True)
+    #plot_velocities(data, info_file_path, save_fig=True)
+    #plot_positions(data, info_file_path, save_fig=True)
+    #plot_force(data, info_file_path, save_fig=True)
+    #plot_sizes(data, info_file_path, save_fig=True)
+    #data = bacteria_as_pandas(info_file_path)
+    #animate_positions(data, info_file_path, save_fig=True)
     # animate_3d(data, info_file_path, save_fig=False)
     
 # ********************************************************************************************
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     constants.set_simulation_constants()
     constants.set_paths(default=True)
 
-    start_run(constants)
+    #start_run(constants)
 
-    # path = ask_for_log_dir()
-    # plotting(path)
+    path = ask_for_log_dir()
+    plotting(path)

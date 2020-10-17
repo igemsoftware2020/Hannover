@@ -274,7 +274,7 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     x, y_fit, slope, generation_time = get_gent(data)
     '''plot data'''
     fig, (ax1, ax2) = plt.subplots(2, 1)
-    fig.tight_layout()
+    
     ax1.plot(num, color='b')
     ax1.set(xlabel='Time in s', ylabel='Bacteria Number', title='Bacteria Growth')
     ax2.plot(num, label='log curve')
@@ -284,7 +284,7 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.text(0.1, 0.9, 'slope: ' + str(round(slope, 5)), transform=ax2.transAxes)
     ax2.text(0.1, 0.8, 'generation time: ' + str(round(generation_time, 5)), transform=ax2.transAxes)
     ax2.set_yscale('log')
-
+    fig.tight_layout()
     plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'growth_plot.png'
@@ -357,3 +357,21 @@ def last_pos(data):
         last_cord_y.append(data['position'][bac][-1][1])
         last_cord_z.append(data['position'][bac][-1][2])
     return last_cord_x, last_cord_y, last_cord_z
+
+def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    
+
+    
+    end_length = [] # list for plotting
+    for bac in data['length'].index:
+        end_length.append(data['length'][bac][-1])
+    fig = sns.displot(end_length, kde=True ,**{'binwidth':0.25,'stat':'density'}) # the histogram with a density function
+    plt.xlabel('Bacteria length [um]') # x label 
+    
+    plt.ioff()
+    if save_fig:
+        path = Path(save_path).parent / 'histo.png'
+        plt.savefig(path)
+        plt.close(fig)
+    else:
+        plt.show()

@@ -236,8 +236,8 @@ class Bacterium:
         daughter_bac_position = get_daughter_position(self)
         daughter_bac_position[2] = self.position[2]
         daughter_bac_length = self.length / 2
-        daughter_bac_velocity = - np.asarray(self.velocity / 2)
-        daughter_bac_force = - np.asarray(self.force / 2)
+        daughter_bac_velocity = np.asarray(self.velocity / 2)
+        daughter_bac_force = np.asarray(self.force / 2)
 
         daughter_bac = Bacterium(constants=self.constants, strain=self.strain,
                                  angle=self.angle, force=daughter_bac_force,
@@ -246,7 +246,7 @@ class Bacterium:
                                  velocity=daughter_bac_velocity,
                                  position=daughter_bac_position, length=daughter_bac_length)
 
-        daughter_bac.acceleration = - self.acceleration / 2
+        daughter_bac.acceleration = self.acceleration / 2
         daughter_bac.update_mass()
         daughter_bac.update_acting_force()
         daughter_bac.update_acceleration()
@@ -310,7 +310,8 @@ class Bacterium:
     def is_split_ready(self):
         """
         checks if size of bacterium is long enough for splitting
-        If bacterium is big enough, splitting occurs with a probability of a normal distribution with mean at self.critical_length
+        If bacterium is big enough, splitting occurs with a probability
+        of a normal distribution with mean at self.critical_length
         returns True if splitting is possible, False otherwise
         """
         probability = scipy.stats.norm.pdf(self.length, loc=self.critical_length, scale=self.critical_length * 0.12)
@@ -342,8 +343,8 @@ def bac_substrate_interaction_force(self: Bacterium):
         """
     if self.position[2] > 5:
         # if far away from surface, soft attractive force
-        force = lennard_jones_force(self.position[2], epsilon=self.constants.MAX_CELL_SUBSTRATE_ADHESION, sigma=1\
-                * np.asarray([0, 0, -1]))
+        force = lennard_jones_force(self.position[2], epsilon=self.constants.MAX_CELL_SUBSTRATE_ADHESION, sigma=1) \
+                * np.asarray([0, 0, -1])
     else:
         # if near surface strong attraction
         force = self.constants.MAX_CELL_SUBSTRATE_ADHESION * np.asarray([0, 0, -1])
@@ -383,4 +384,3 @@ def bac_bac_interaction_force(self: Bacterium, other: Bacterium):
 def distance_vector(self: Bacterium, other: Bacterium):
     """ return distance vector between two bacteria """
     return self.position - other.position
-

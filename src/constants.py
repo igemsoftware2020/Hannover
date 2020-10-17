@@ -151,7 +151,7 @@ class Constants:
         If key is given, return respective path from dictionary
         """
         bsub_dic = {
-            "LENGTH": np.random.normal(loc=2.5, scale=1),
+            "LENGTH": np.random.normal(loc=1.5, scale=1),
             "WIDTH": 1,  # [um] https://en.wikipedia.org/wiki/Bacillus_subtilis
             "MASS": 10 ** (-12),  # [kg]
             "MORTALITY_RATE": 0.0,

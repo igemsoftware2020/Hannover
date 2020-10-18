@@ -158,14 +158,16 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-David Theidel - theidel AT stud dot uni-hannover dot de
+* David Theidel - theidel AT stud dot uni-hannover dot de
 
-Project Link: [https://github.com/StudDavid/biofilm_growth_modeling](https://github.com/StudDavid/biofilm_growth_modeling)
+* Project Link: [https://github.com/StudDavid/biofilm_growth_modeling](https://github.com/StudDavid/biofilm_growth_modeling)
 
 ## iGEM Competition
-To find out more abour the awesome **iGEM Comeptition** check our [https://2020.igem.org/](https://2020.igem.org/)
-More about the project of the Hannover Team can be found here: [https://2020.igem.org/Team:Hannover](https://2020.igem.org/Team:Hannover)
-Details on the used methods: [https://2020.igem.org/Team:Hannover/Software](https://2020.igem.org/Team:Hannover/Software)
+* To find out more abour the awesome **iGEM Comeptition** check our [https://2020.igem.org/](https://2020.igem.org/)
+
+* More about the project of the Hannover Team can be found here: [https://2020.igem.org/Team:Hannover](https://2020.igem.org/Team:Hannover)
+
+* Details on the used methods: [https://2020.igem.org/Team:Hannover/Software](https://2020.igem.org/Team:Hannover/Software)
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements

@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from itertools import repeat
-from multiprocessing import Pool, cpu_count
-
 # ********************************************************************************************
 # imports
 import numpy as np
 import tqdm
+from itertools import repeat
+from multiprocessing import Pool, cpu_count
+
 # custom libraries
 from src.bacteria import Bacterium, get_bacteria_dict
 from src.bacteria import distance_vector, bac_bac_interaction_force
@@ -51,7 +51,7 @@ class Biofilm(object):
             #                       np.random.normal(0, 0.2)
             #                       ])
             # random orientation
-            velocity = np.asarray([0 , 0, 0])
+            velocity = np.asarray([0, 0, 0])
             rnd_angle = np.asarray([np.random.randint(0, 360),
                                     np.random.randint(0, 360),
                                     np.random.randint(0, 360)
@@ -59,7 +59,7 @@ class Biofilm(object):
             # substrate cell adhesion, in cartesian coordinates
             adhesion_force = np.asarray([0,
                                          0,
-                                         0 #-self.constants.MAX_CELL_SUBSTRATE_ADHESION
+                                         -self.constants.MAX_CELL_SUBSTRATE_ADHESION
                                          ])
 
             bac = Bacterium(position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force,
@@ -72,30 +72,26 @@ class Biofilm(object):
         time_step = self.constants.get_simulation_constants(key="time_step")
         duration = self.constants.get_simulation_constants(key="duration")
         self.spawn()
-
+        num_threads = cpu_count()
         print(f"\n ********* STARTING MODELLING  USING MULTIPROCESSING ********* \n "
-              f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s."
+              f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s.\n"
+              f"Using {num_threads} cores."
               )
+
         for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
             try:
-                num_threads = cpu_count()
-
                 with Pool(processes=num_threads) as pool:
                     self.bacteria = pool.map(forces_on_bacterium, self.bacteria)
-
-                with Pool(processes=num_threads) as pool:
                     cp_bacteria_list = self.bacteria
                     self.bacteria = pool.starmap(bac_bac_interaction, zip(self.bacteria, repeat(cp_bacteria_list)))
-
-                with Pool(processes=num_threads) as pool:
                     self.bacteria = pool.map(update_movement, self.bacteria)
 
-                for bacterium in self.bacteria:
-                    if bacterium.is_split_ready() and bacterium.living:
-                        daughter = bacterium.split()
-                        self.bacteria.append(daughter)
+                    # TODO rewrite split function into to two function to use for multiprocessing.
+                    for mother in self.bacteria:
+                        if mother.is_split_ready() and mother.living:
+                            daughter = mother.split()
+                            self.bacteria.append(daughter)
 
-                with Pool(processes=num_threads) as pool:
                     self.bacteria = pool.map(grow_bacterium, self.bacteria)
 
                 self.write_to_log()
@@ -181,8 +177,11 @@ def forces_on_bacterium(bacterium: Bacterium):
 def update_movement(bacterium: Bacterium):
     bacterium.update_acceleration()
     if np.linalg.norm(bacterium.acceleration) > 0.1:
-        bacterium.acceleration = bacterium.acceleration / np.linalg.norm(bacterium.acceleration) * np.random.normal(0, scale=0.002)
+        bacterium.acceleration = bacterium.acceleration / np.linalg.norm(bacterium.acceleration) * np.random.normal(0,
+                                                                                                                    scale=0.002)
     bacterium.update_velocity()
+    if not np.linalg.norm(bacterium.velocity > 14):
+        bacterium.velocity = bacterium.velocity / 2
     bacterium.update_position()
 
     if bacterium.living is True:

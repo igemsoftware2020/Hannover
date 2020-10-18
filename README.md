@@ -18,7 +18,6 @@
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
 [![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
@@ -29,7 +28,6 @@
 <br />
 <p align="center">
   <a href="https://github.com/StudDavid/biofilm_growth_modeling">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">iGEM 2020 project: Biofilm growth simulation</h3>
@@ -37,14 +35,14 @@
   <p align="center">
     This is repository contains the code for simulating the growth of a Biofilm after attachment using Molecular dynamics simulation methods. The project was build as part of the iGEM 2020 Contest by the Team Hannover.
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/StudDavid/biofilm_growth_modeling"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
+    <a href="https://github.com/StudDavid/biofilm_growth_modeling">View Demo</a>
     ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Report Bug</a>
+    <a href="https://github.com/StudDavid/biofilm_growth_modeling/issues">Report Bug</a>
     ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Request Feature</a>
+    <a href=https://github.com/StudDavid/biofilm_growth_modeling/issues">Request Feature</a>
   </p>
 </p>
 
@@ -63,6 +61,7 @@
 * [Contributing](#contributing)
 * [License](#license)
 * [Contact](#contact)
+* [iGEM Competition](#iGEM Competition)
 * [Acknowledgements](#acknowledgements)
 
 

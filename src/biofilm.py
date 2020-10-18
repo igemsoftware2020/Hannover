@@ -41,12 +41,12 @@ class Biofilm(object):
         mean_speed = self.constants.get_bac_constants(key="FREE_MEAN_SPEED")
         for _ in range(num_initial_bacteria - 1):
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
-            rnd_position = np.asarray([np.random.randint(300, 400),
-                                       np.random.randint(300, 400),
+            rnd_position = np.asarray([np.random.randint(200, 400),
+                                       np.random.randint(200, 400),
                                        np.random.normal(3, 0.5)
                                        ])
             # set random initial velocity
-            #velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),
+            # velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),
             #                       np.random.normal(mean_speed, mean_speed * 0.01),
             #                       np.random.normal(0, 0.2)
             #                       ])
@@ -77,30 +77,28 @@ class Biofilm(object):
               f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s.\n"
               f"Using {num_threads} cores."
               )
-
-        for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
-            try:
-                with Pool(processes=num_threads) as pool:
+        with Pool(processes=num_threads) as pool:
+            for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
+                try:
                     self.bacteria = pool.map(forces_on_bacterium, self.bacteria)
                     cp_bacteria_list = self.bacteria
                     self.bacteria = pool.starmap(bac_bac_interaction, zip(self.bacteria, repeat(cp_bacteria_list)))
                     self.bacteria = pool.map(update_movement, self.bacteria)
 
-                    # TODO rewrite split function into to two function to use for multiprocessing.
                     for mother in self.bacteria:
                         if mother.is_split_ready() and mother.living:
                             daughter = mother.split()
                             self.bacteria.append(daughter)
 
                     self.bacteria = pool.map(grow_bacterium, self.bacteria)
+                    self.write_to_log()
 
-                self.write_to_log()
-            except KeyboardInterrupt:
-                self.write_to_log()
-                return self.constants.get_paths(key="info")
-
-        self.write_to_log()
-        return self.constants.get_paths(key="info")
+                except KeyboardInterrupt:
+                    self.write_to_log()
+                    return self.constants.get_paths(key="info")
+                # TODO: ADD random detachment
+            self.write_to_log()
+            return self.constants.get_paths(key="info")
 
     def write_to_log(self):
         """
@@ -158,6 +156,7 @@ class Biofilm(object):
 
             # Maybe for checking integrity : len(data['BACTERIA']) - sum(map(len, data['BACTERIA'].keys()))
         data['BACTERIA'] = bacteria_dic
+        save_dict_as_json(data['CONSTANTS'], str(info_file_path).replace(".json", "_Constants.json"))
         save_dict_as_json(data, info_file_path)
 
 

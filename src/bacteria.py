@@ -112,12 +112,6 @@ class Bacterium:
         Add random angle movement
         """
         dt = self.constants.get_simulation_constants(key="time_step")
-        # if self.at_boundary() == 'X':
-        #    apply_rotation(self.velocity, rotation_matrix_x(theta=np.pi))
-
-        # elif self.at_boundary() == 'Y':
-        #    apply_rotation(self.velocity, rotation_matrix_y(theta=np.pi))
-
         # update velocities
         self.velocity[0] += self.acceleration[0] * dt
         self.velocity[1] += self.acceleration[1] * dt
@@ -129,7 +123,7 @@ class Bacterium:
         # add brownian movement, up to 2% of absolute value
         self.velocity[0] = local_rnd_1.normal(loc=self.velocity[0], scale=1)
         self.velocity[1] = local_rnd_2.normal(loc=self.velocity[1], scale=1)
-        self.velocity[2] = local_rnd_3.normal(loc=self.velocity[2], scale=0.1)
+        self.velocity[2] = local_rnd_3.normal(loc=self.velocity[2], scale=0.6)
 
     def update_position(self):
         """ update bacterium position based on velocity """
@@ -281,6 +275,11 @@ class Bacterium:
         if random.random() > 1.0 - self.mortality_rate:
             self.living = False
             self.moving = False
+
+    def detach(self):
+        if (self.attached_to_surface is True) & (np.random.random() > 0.9):
+            self.attached_to_surface = False
+            self.acceleration[2] = 0.03
 
     def get_position(self) -> np.ndarray:
         positions = []

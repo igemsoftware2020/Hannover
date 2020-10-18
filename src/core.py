@@ -48,11 +48,12 @@ def plotting(info_file_path):
 # main-method to start the program
 # ********************************************************************************************
 
+
 if __name__ == "__main__":
     # Set constant for modelling run
     constants = Constants(bac_type="B.Sub.")
-    constants.num_initial_bac = 100
-    constants.duration = 3
+    constants.num_initial_bac = 3
+    constants.duration = 30
     constants.time_step = 1
     constants.window_size = (2000, 2000)
     constants.set_bacteria_constants()

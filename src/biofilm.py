@@ -96,7 +96,7 @@ class Biofilm(object):
                 except KeyboardInterrupt:
                     self.write_to_log()
                     return self.constants.get_paths(key="info")
-                # TODO: ADD random detachment
+
             self.write_to_log()
             return self.constants.get_paths(key="info")
 
@@ -185,6 +185,7 @@ def update_movement(bacterium: Bacterium):
 
     if bacterium.living is True:
         bacterium.random_cell_death()
+        bacterium.detach()
 
     return bacterium
 

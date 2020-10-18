@@ -28,14 +28,14 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/StudDavid/biofilm_growth_modeling">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">iGEM 2020 project: Biofilm growth simulation</h3>
 
   <p align="center">
-    This is repo contains code for simulating the growth of a Biofilm after attachment using Molecular dynamics simulation methods.
+    This is repository contains the code for simulating the growth of a Biofilm after attachment using Molecular dynamics simulation methods. The project was build as part of the iGEM 2020 Contest by the Team Hannover.
     <br />
     <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
     <br />
@@ -71,17 +71,11 @@
 ## About The Project
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
+The project aims to simulate the growth of a biofilm in early stages. An biofilm is an consortium of bacteria embedded in a extracelluar matrix consisting of EPS  (extracellular polymeric substances). Origin of such biofilms is the attachment of initial bacteria to a surface.
 
-There are many great README templates available on GitHub, however, I didn't find one that really suit my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need.
-
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should element DRY principles to the rest of your life :smile:
-
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue.
-
-A list of commonly used resources that I find helpful are listed in the acknowledgements.
+As part of the iGEM Competition 2020, the Hannover Team designed a sensor based on biological cell, which is capable of detecting the adhernce of a biofilm to at an early stage. The sensor can be attached to implant surfaces and used as a diagnostical tool.
+Therefore, we are interested in the growth behaviour of biofilms in an early stage.
+We use computational methods of Molecular Dynamics simulation and a biophysical approach to model the biofilm growth.
 
 ### Built With
 
@@ -93,49 +87,54 @@ A list of commonly used resources that I find helpful are listed in the acknowle
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
+This is an example of how you may set up your project locally.
 To get a local copy up and running follow these simple example steps.
 
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-```sh
-npm install npm@latest -g
-```
+### Prerequisites 
+We recommend installing anaconda on your machine. Anaconda provides many functionalities including an easy way to set up python enviroments. 
+Check out the [Anaconda installation instructions](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+You will need a few python packages to run the simulation on your local machine. You can eithercreate a conda enviroment from the 
+`conda_env.yml` file or download the packages on your own via pip.
+We provide step-by-step instructions on how to get our software running using a conda enviroment.
+
+1. Clone the repo
 ```sh
-git clone https://github.com/your_username_/Project-Name.git
+git clone https://github.com/StudDavid/biofilm_growth_modeling.git
 ```
-3. Install NPM packages
+2. Navigate in the src folder and run 
+
 ```sh
-npm install
-```
-4. Enter your API in `config.js`
-```JS
-const API_KEY = 'ENTER YOUR API';
+conda env create -f biofilm_model_env.yml
 ```
 
-
+3. Start the enviroment by running 
+```sh
+conda activate biofilm_model_env
+```
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+A usage example is provided in form of a jupyter notebook. Make sure to check it out to see the functionalities provided. 
+If you are using anaconda, jupyter will already be installed. To start the example jupyter notebook run
 
-_For more examples, please refer to the [Documentation](https://example.com)_
-
+```sh
+jupyter-notebook
+```
+Then connect to 
+```sh
+http://localhost:8888/
+```
+and navigate to the folder, in which you cloned the repository. Start the notebook by clicking on the `example.ipynb` file.
 
 
 <!-- ROADMAP -->
 ## Roadmap
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a list of proposed features (and known issues).
-
+See the [open issues](https://github.com/StudDavid/biofilm_growth_modeling/issues) for a list of proposed features (and known issues).
 
 
 <!-- CONTRIBUTING -->
@@ -161,11 +160,14 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
+David Theidel - theidel AT stud dot uni-hannover dot de
 
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
+Project Link: [https://github.com/StudDavid/biofilm_growth_modeling](https://github.com/StudDavid/biofilm_growth_modeling)
 
-
+## iGEM Competition
+To find out more abour the awesome **iGEM Comeptition** check our [https://2020.igem.org/](https://2020.igem.org/)
+More about the project of the Hannover Team can be found here: [https://2020.igem.org/Team:Hannover](https://2020.igem.org/Team:Hannover)
+Details on the used methods: [https://2020.igem.org/Team:Hannover/Software](https://2020.igem.org/Team:Hannover/Software)
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
@@ -198,5 +200,4 @@ Project Link: [https://github.com/your_username/repo_name](https://github.com/yo
 [license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=flat-square
 [license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
 [product-screenshot]: images/screenshot.png

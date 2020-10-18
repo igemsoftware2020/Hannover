@@ -4,11 +4,11 @@
 # ********************************************************************************************
 # imports
 import math
+import numpy as np
 import random
+import scipy.stats
 from typing import Dict
 
-import numpy as np
-import scipy.stats
 import src.constants as c
 # custom libraries
 from src.formulas import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x, \
@@ -127,9 +127,9 @@ class Bacterium:
         local_rnd_2 = np.random.RandomState()
         local_rnd_3 = np.random.RandomState()
         # add brownian movement, up to 2% of absolute value
-        self.velocity[0] = local_rnd_1.normal(loc=self.velocity[0], scale=np.abs(self.velocity[0]) * 0.02)
-        self.velocity[1] = local_rnd_2.normal(loc=self.velocity[1], scale=np.abs(self.velocity[1]) * 0.02)
-        self.velocity[2] = local_rnd_3.normal(loc=self.velocity[2], scale=np.abs(self.velocity[2]) * 0.02)
+        self.velocity[0] = local_rnd_1.normal(loc=self.velocity[0], scale=1)
+        self.velocity[1] = local_rnd_2.normal(loc=self.velocity[1], scale=1)
+        self.velocity[2] = local_rnd_3.normal(loc=self.velocity[2], scale=0.1)
 
     def update_position(self):
         """ update bacterium position based on velocity """
@@ -167,9 +167,9 @@ class Bacterium:
         local_rnd_2 = np.random.RandomState()
         local_rnd_3 = np.random.RandomState()
 
-        self.angle[0] = local_rnd_1.normal(loc=self.angle[0], scale=2)
-        self.angle[1] = local_rnd_2.normal(loc=self.angle[1], scale=2)
-        self.angle[2] = local_rnd_3.normal(loc=self.angle[2], scale=2)
+        self.angle[0] = local_rnd_1.normal(loc=self.angle[0], scale=0.2) + self.velocity_angular[0]
+        self.angle[1] = local_rnd_2.normal(loc=self.angle[1], scale=0.2) + self.velocity_angular[1]
+        self.angle[2] = local_rnd_3.normal(loc=self.angle[2], scale=0.2) + self.velocity_angular[2]
 
     def update_acting_force(self):
         """
@@ -252,6 +252,7 @@ class Bacterium:
         daughter_bac.update_acceleration()
         daughter_bac.update_velocity()
         daughter_bac.update_position()
+
         # update mother cell
         self.length = self.length / 2
         self.velocity = self.velocity / 2
@@ -372,7 +373,7 @@ def bac_bac_interaction_force(self: Bacterium, other: Bacterium):
         Force value based on Lennard-Jones Potential / Soft-repulsive potential
         """
 
-    if np.linalg.norm(distance_vector(self, other)) > 3.5:
+    if np.linalg.norm(distance_vector(self, other)) > 2.5:
         # attractive force
         return distance_vector(self, other) / np.linalg.norm(distance_vector(self, other)) \
                * abs_force_lennard_jones_potential(self, other)

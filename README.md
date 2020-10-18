@@ -102,7 +102,7 @@ We provide step-by-step instructions on how to get our software running using a 
 ```sh
 git clone https://github.com/StudDavid/biofilm_growth_modeling.git
 ```
-2. Navigate in the src folder and run 
+2. Navigate in the env folder and run 
 
 ```sh
 conda env create -f biofilm_model_env.yml

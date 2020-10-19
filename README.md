@@ -72,7 +72,8 @@ The project aims to simulate the growth of a biofilm in early stages. An biofilm
 
 As part of the iGEM Competition 2020, the Hannover Team designed a sensor based on biological cell, which is capable of detecting the adhernce of a biofilm to at an early stage. The sensor can be attached to implant surfaces and used as a diagnostical tool.
 Therefore, we are interested in the growth behaviour of biofilms in an early stage.
-We use computational methods of Molecular Dynamics simulation and a biophysical approach to model the biofilm growth.
+ 
+We developed a computational model from scratch, to simulate the growth on biofilms on surfaces. The model applies methods from molecular dynamics (MD) and takes into account different physical and biological effects. The software provides great flexibility by enabling the user to switch easily between sets of constants e.g. to model different bacterial strains. Furthermore, the software includes functions for visualisation of the model behaviour over time. By providing an example notebook, well documented code and a python environment, we make the software easy to adapt and accessible for other purposes.  
 
 ### Built With
 
@@ -94,7 +95,7 @@ Check out the [Anaconda installation instructions](https://docs.conda.io/project
 ### Installation
 
 You will need a few python packages to run the simulation on your local machine. You can eithercreate a conda enviroment from the 
-`conda_env.yml` file or download the packages on your own via pip.
+`biofilm_model_env.yml` file or download the packages on your own via pip.
 We provide step-by-step instructions on how to get our software running using a conda enviroment.
 
 1. Clone the repo

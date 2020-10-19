@@ -24,6 +24,7 @@ def gravitational_force(mass: float) -> np.ndarray:
 
 
 def lennard_jones_force(r, epsilon, sigma):
+    """ Careful! r_min != sigma instead pass sigma = r_min / 2 ^ (1/6) """
     return 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) - 24 * epsilon * np.power(sigma, 6) / np.power(
         r, 7)
 

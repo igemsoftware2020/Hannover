@@ -365,7 +365,7 @@ def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     for bac in data.index:
         for i in data[bac]:
             length.append(i)
-    end_length = np.array(length)    
+    end_length = np.array(length)   # the two for loops convert the dataFrame into a one dimensional array 
     
     fig = sns.displot(end_length, kde=True ,**{'binwidth':0.25,'stat':'density'}) # the histogram with a density function
     plt.xlabel('Bacteria length [um]') # x label 
@@ -381,9 +381,9 @@ def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         
 def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     data= get_data_to_parameter(data, 'velocity')
-    velocity = data.T.iloc[:,:].values.reshape(data.T.size)
+    velocity = data.T.iloc[:,:].values.reshape(data.T.size) # get the data as a one dimensional array
     
-    end_velocity = velocity[np.logical_not(np.isnan(velocity))]
+    end_velocity = velocity[np.logical_not(np.isnan(velocity))] # filter all NaN values
     
     fig = sns.displot(end_velocity, kde=True ,**{'binwidth':0.25,'stat':'density'}) # the histogram with a density function
     plt.xlabel('Bacteria velocity')  
@@ -398,17 +398,17 @@ def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         
 def histo_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     plot_data = get_data_to_parameter(data, 'total_force') * 1e9
-    print(plot_data)
-    force = plot_data.T.iloc[:,:].values.reshape(plot_data.T.size)
+  
+    force = plot_data.T.iloc[:,:].values.reshape(plot_data.T.size) # get the data as a one dimensional array
     
-    end_force = force[np.logical_not(np.isnan(force))]
+    end_force = force[np.logical_not(np.isnan(force))] # filter all NaN values  
     
     fig = sns.displot(end_force, kde=True ,**{'binwidth':0.25,'stat':'density'}) # the histogram with a density function
-    plt.xlabel('Bacteria velocity')  
+    plt.xlabel('Bacteria force')  
     
     plt.ioff()
     if save_fig:
-        path = Path(save_path).parent / 'histo_velocity.png'
+        path = Path(save_path).parent / 'histo_force.png'
         plt.savefig(path)
         plt.close(fig)
     else:

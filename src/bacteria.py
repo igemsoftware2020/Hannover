@@ -341,28 +341,13 @@ def bac_substrate_interaction_force(self: Bacterium):
     """
         returns force vector of bacterium substrate interaction
         """
-    if self.position[2] > 5:
-        # if far away from surface, soft attractive force
-        force = lennard_jones_force(self.position[2], epsilon=self.constants.MAX_CELL_SUBSTRATE_ADHESION, sigma=1) \
-                * np.asarray([0, 0, -1])
+    if self.position[2] > 4:
+        force = lennard_jones_force(self.position[2], f_min=-self.constants.MAX_CELL_SUBSTRATE_ADHESION,
+                                    r_min=1) \
+                * np.asarray([0, 0, 1])
     else:
-        # if near surface strong attraction
         force = self.constants.MAX_CELL_SUBSTRATE_ADHESION * np.asarray([0, 0, -1])
     return force
-
-
-def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacterium):
-    """
-        return absolute interaction force with one bacteria.
-         Interaction force is calculated from the distance and gradient value
-         of the lennard- jones potential at this distance
-        """
-    # only calculate for the center of the bacteria
-    distance = bacterium1.position - bacterium2.position
-    distance_abs = np.linalg.norm(distance) * 1E6
-    repulsive_force = lennard_jones_force(distance_abs, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
-                                          sigma=2 * 1E6)
-    return repulsive_force
 
 
 def bac_bac_interaction_force(self: Bacterium, other: Bacterium):
@@ -372,12 +357,11 @@ def bac_bac_interaction_force(self: Bacterium, other: Bacterium):
         Force value based on Lennard-Jones Potential / Soft-repulsive potential
         """
 
-    if np.linalg.norm(distance_vector(self, other)) > 2.5:
-        # attractive force
-        return distance_vector(self, other) / np.linalg.norm(distance_vector(self, other)) \
-               * abs_force_lennard_jones_potential(self, other)
-    # repulsive
-    return - self.constants.MAX_CELL_CELL_ADHESION * distance_vector(self, other) \
+    if np.linalg.norm(distance_vector(self, other)) > 1.9:
+        distance_abs = np.linalg.norm(distance_vector(self, other))
+        return distance_vector(self, other) / distance_abs * \
+               lennard_jones_force(distance_abs, f_min=-self.constants.MAX_CELL_CELL_ADHESION, r_min=2)
+    return self.constants.MAX_CELL_CELL_ADHESION * distance_vector(self, other) \
            / np.linalg.norm(distance_vector(self, other))
 
 

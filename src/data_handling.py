@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 # imports
 import json
+import numpy as np
+import os
+import pandas as pd
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog
 from typing import Dict
 
-import numpy as np
-import pandas as pd
 # custom libraries
 from src.constants import Constants
 from src.formulas import get_euclid_norm
@@ -35,7 +36,7 @@ def read_in_log(info_file_path) -> Dict:
 def ask_for_log_dir():
     root = tk.Tk()
     root.withdraw()
-    file_path = filedialog.askopenfilename(initialdir='/')
+    file_path = filedialog.askopenfilename(initialdir=os.getcwd())
     return Path(file_path)
 
 

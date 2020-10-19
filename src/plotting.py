@@ -375,7 +375,6 @@ def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     if save_fig:
         path = Path(save_path).parent / 'histo.png'
         plt.savefig(path)
-        plt.close(fig)
     else:
         plt.show()
 
@@ -394,7 +393,6 @@ def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     if save_fig:
         path = Path(save_path).parent / 'histo_velocity.png'
         plt.savefig(path)
-        plt.close(fig)
     else:
         plt.show()
 
@@ -414,7 +412,6 @@ def histo_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     if save_fig:
         path = Path(save_path).parent / 'histo_force.png'
         plt.savefig(path)
-        plt.close(fig)
     else:
         plt.show()
 
@@ -424,7 +421,6 @@ def lennard_jones_force_plot(r_min, f_min):
     Forces resulting from the lennard jones potential. Reparameterized with r_min with F_LJ(r_min ) = 0
     and the absolute value of the global minimum f_min
     """
-
     def ljp(r, f_min, r_min):
         epsilon = f_min * (-169 * (r_min / (2 ** (1 / 6))) / (252 * (7 / 13) ** (1 / 6) * 2 ** (5 / 6)))
         sigma = r_min / (2 ** (1 / 6))

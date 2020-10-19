@@ -341,7 +341,7 @@ def bac_substrate_interaction_force(self: Bacterium):
     """
         returns force vector of bacterium substrate interaction
         """
-    if self.position[2] > 0.9:
+    if self.position[2] > 4:
         force = lennard_jones_force(self.position[2], f_min=-self.constants.MAX_CELL_SUBSTRATE_ADHESION,
                                     r_min=1) \
                 * np.asarray([0, 0, 1])
@@ -357,7 +357,7 @@ def bac_bac_interaction_force(self: Bacterium, other: Bacterium):
         Force value based on Lennard-Jones Potential / Soft-repulsive potential
         """
 
-    if np.linalg.norm(distance_vector(self, other)) > 1.5:
+    if np.linalg.norm(distance_vector(self, other)) > 1.9:
         distance_abs = np.linalg.norm(distance_vector(self, other))
         return distance_vector(self, other) / distance_abs * \
                lennard_jones_force(distance_abs, f_min=-self.constants.MAX_CELL_CELL_ADHESION, r_min=2)

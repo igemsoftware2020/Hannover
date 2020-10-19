@@ -6,9 +6,9 @@
 from src.biofilm import Biofilm
 from src.constants import Constants
 from src.data_handling import bacteria_as_pandas, ask_for_log_dir
-from src.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, animate_positions, plot_num, dens_map, histo_length
-from src.utils import prompt_log_at_start
-
+from src.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, animate_positions, plot_num, dens_map,histo_length, histo_velocity
+from src.utils import prompt_log_at_start 
+from src.plotting import histo_force
 
 def start_run(constant: Constants):
     """
@@ -35,8 +35,10 @@ def plotting(info_file_path):
     data = bacteria_as_pandas(info_file_path)
     histo_length(data, info_file_path, save_fig=False)
     plot_num(data, info_file_path, save_fig=False)
+    histo_velocity(data, info_file_path, save_fig=False)
     #dens_map(data, info_file_path, save_fig=True)
-    #plot_velocities(data, info_file_path, save_fig=True)
+    plot_velocities(data, info_file_path, save_fig=False)
+    histo_force(data, info_file_path, save_fig=False)
     #plot_positions(data, info_file_path, save_fig=True)
     #plot_force(data, info_file_path, save_fig=True)
     #plot_sizes(data, info_file_path, save_fig=True)

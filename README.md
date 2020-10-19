@@ -68,7 +68,6 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
 The project aims to simulate the growth of a biofilm in early stages. An biofilm is an consortium of bacteria embedded in a extracelluar matrix consisting of EPS  (extracellular polymeric substances). Origin of such biofilms is the attachment of initial bacteria to a surface.
 
 As part of the iGEM Competition 2020, the Hannover Team designed a sensor based on biological cell, which is capable of detecting the adhernce of a biofilm to at an early stage. The sensor can be attached to implant surfaces and used as a diagnostical tool.

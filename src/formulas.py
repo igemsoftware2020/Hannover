@@ -23,10 +23,11 @@ def gravitational_force(mass: float) -> np.ndarray:
     return mass * 9.81 * np.asarray([0, 0, -1])
 
 
-def lennard_jones_force(r, epsilon, sigma):
+def lennard_jones_force(r, f_min, r_min):
     """ Careful! r_min != sigma instead pass sigma = r_min / 2 ^ (1/6) """
-    return 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) - 24 * epsilon * np.power(sigma, 6) / np.power(
-        r, 7)
+    epsilon = f_min * (-169 * (r_min / (2 ** (1 / 6))) / (252 * (7 / 13) ** (1 / 6) * 2 ** (5 / 6)))
+    sigma = r_min / (2 ** (1 / 6))
+    return 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) - 24 * epsilon * np.power(sigma, 6) / np.power(r, 7)
 
 
 def get_euclid_norm(array):

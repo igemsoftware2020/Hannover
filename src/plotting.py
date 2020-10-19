@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
-
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from pathlib import Path
 from sklearn.linear_model import LinearRegression
+
 # custom libraries
 from src.data_handling import get_data_to_parameter, get_z
 
@@ -358,18 +358,19 @@ def last_pos(data):
         last_cord_z.append(data['position'][bac][-1][2])
     return last_cord_x, last_cord_y, last_cord_z
 
-def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
+def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     data = data['length']
     length = []
     for bac in data.index:
         for i in data[bac]:
             length.append(i)
-    end_length = np.array(length)   # the two for loops convert the dataFrame into a one dimensional array 
-    
-    fig = sns.displot(end_length, kde=True ,**{'binwidth':0.25,'stat':'density'}) # the histogram with a density function
-    plt.xlabel('Bacteria length [um]') # x label 
-    
+    end_length = np.array(length)  # the two for loops convert the dataFrame into a one dimensional array
+
+    fig = sns.displot(end_length, kde=True,
+                      **{'binwidth': 0.25, 'stat': 'density'})  # the histogram with a density function
+    plt.xlabel('Bacteria length [um]')  # x label
+
     plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'histo.png'
@@ -377,17 +378,18 @@ def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         plt.close(fig)
     else:
         plt.show()
-        
-        
+
+
 def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
-    data= get_data_to_parameter(data, 'velocity')
-    velocity = data.T.iloc[:,:].values.reshape(data.T.size) # get the data as a one dimensional array
-    
-    end_velocity = velocity[np.logical_not(np.isnan(velocity))] # filter all NaN values
-    
-    fig = sns.displot(end_velocity, kde=True ,**{'binwidth':0.25,'stat':'density'}) # the histogram with a density function
-    plt.xlabel('Bacteria velocity')  
-    
+    data = get_data_to_parameter(data, 'velocity')
+    velocity = data.T.iloc[:, :].values.reshape(data.T.size)  # get the data as a one dimensional array
+
+    end_velocity = velocity[np.logical_not(np.isnan(velocity))]  # filter all NaN values
+
+    fig = sns.displot(end_velocity, kde=True,
+                      **{'binwidth': 0.25, 'stat': 'density'})  # the histogram with a density function
+    plt.xlabel('Bacteria velocity')
+
     plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'histo_velocity.png'
@@ -395,17 +397,19 @@ def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         plt.close(fig)
     else:
         plt.show()
-        
+
+
 def histo_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     plot_data = get_data_to_parameter(data, 'total_force') * 1e9
-  
-    force = plot_data.T.iloc[:,:].values.reshape(plot_data.T.size) # get the data as a one dimensional array
-    
-    end_force = force[np.logical_not(np.isnan(force))] # filter all NaN values  
-    
-    fig = sns.displot(end_force, kde=True ,**{'binwidth':0.25,'stat':'density'}) # the histogram with a density function
-    plt.xlabel('Bacteria force')  
-    
+
+    force = plot_data.T.iloc[:, :].values.reshape(plot_data.T.size)  # get the data as a one dimensional array
+
+    end_force = force[np.logical_not(np.isnan(force))]  # filter all NaN values
+
+    fig = sns.displot(end_force, kde=True,
+                      **{'binwidth': 0.25, 'stat': 'density'})  # the histogram with a density function
+    plt.xlabel('Bacteria force')
+
     plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'histo_force.png'
@@ -413,3 +417,22 @@ def histo_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         plt.close(fig)
     else:
         plt.show()
+
+
+def lennard_jones_force_plot(r_min, f_min):
+    """
+    Forces resulting from the lennard jones potential. Reparameterized with r_min with F_LJ(r_min ) = 0
+    and the absolute value of the global minimum f_min
+    """
+
+    def ljp(r, f_min, r_min):
+        epsilon = f_min * (-169 * (r_min / (2 ** (1 / 6))) / (252 * (7 / 13) ** (1 / 6) * 2 ** (5 / 6)))
+        sigma = r_min / (2 ** (1 / 6))
+        return 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) \
+               - 24 * epsilon * np.power(sigma, 6) / np.power(r, 7)
+
+    r = np.linspace(0.9999, 2, 1000)
+    plt.plot(r, ljp(r, f_min, r_min))
+    plt.xlabel('Distance in µm')
+    plt.ylabel('Force in nN')
+    plt.show()

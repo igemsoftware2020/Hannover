@@ -4,11 +4,11 @@
 # ********************************************************************************************
 # imports
 import math
+import numpy as np
 import random
+import scipy.stats
 from typing import Dict
 
-import numpy as np
-import scipy.stats
 import src.constants as c
 # custom libraries
 from src.formulas import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x, \
@@ -343,7 +343,8 @@ def bac_substrate_interaction_force(self: Bacterium):
         """
     if self.position[2] > 5:
         # if far away from surface, soft attractive force
-        force = lennard_jones_force(self.position[2], epsilon=self.constants.MAX_CELL_SUBSTRATE_ADHESION, sigma=1) \
+        force = lennard_jones_force(self.position[2], epsilon=self.constants.MAX_CELL_SUBSTRATE_ADHESION,
+                                    sigma=1 / (2 ** (1 / 6))) \
                 * np.asarray([0, 0, -1])
     else:
         # if near surface strong attraction
@@ -361,7 +362,7 @@ def abs_force_lennard_jones_potential(bacterium1: Bacterium, bacterium2: Bacteri
     distance = bacterium1.position - bacterium2.position
     distance_abs = np.linalg.norm(distance) * 1E6
     repulsive_force = lennard_jones_force(distance_abs, epsilon=bacterium1.constants.MAX_CELL_CELL_ADHESION,
-                                          sigma=2 * 1E6)
+                                          sigma=2 * 1E6 / (2 ** (1 / 6)))
     return repulsive_force
 
 

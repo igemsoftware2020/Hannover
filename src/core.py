@@ -63,6 +63,6 @@ if __name__ == "__main__":
     constants.set_bacteria_constants()
     constants.set_simulation_constants()
     constants.set_paths()
-    # start_run(constants)
+    start_run(constants)
     # path = ask_for_log_dir()
     # plotting(path)

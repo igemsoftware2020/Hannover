@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import numpy as np
 # ********************************************************************************************
 # imports
 import os
@@ -9,13 +10,11 @@ from pathlib import Path
 from tkinter import filedialog
 from typing import Dict
 
-import numpy as np
-
 
 class Constants:
     """
     This class is for managing and storing the different biological and physical constant,
-    which are used in the simulation
+    which are used in the simulation.
     """
 
     # Global parameters
@@ -151,14 +150,14 @@ class Constants:
         If key is given, return respective path from dictionary
         """
         bsub_dic = {
-            "LENGTH": np.random.normal(loc=1.5, scale=1),
+            "LENGTH": np.abs(np.random.normal(loc=1.5, scale=1)),
             "WIDTH": 1,  # [um] https://en.wikipedia.org/wiki/Bacillus_subtilis
             "MASS": 10 ** (-12),  # [kg]
             "MORTALITY_RATE": 0.0,
             "CRITICAL_LENGTH": 4.7,  # [um]
             "FREE_MEAN_SPEED": 8 / (60 * 60),  # [um / s]
-            "DOUBLING_TIME": 7200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
-            "GROWTH_RATE": 2.2 / 7200,  # [um / s]
+            "DOUBLING_TIME": 4200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
+            "GROWTH_RATE": 2.2 / 4200,  # [um / s]
             "MOTION_ACTIVATION_PROBABILITY": 0.00,
             "MOTION_DEACTIVATION_PROBABILITY": 0.01
         }
@@ -174,7 +173,8 @@ class Constants:
          If key is given, return respective path from dictionary
         """
         ecoli_dic = {
-            "LENGTH": np.random.normal(loc=1, scale=1 * 0.14),  # [um] https://en.wikipedia.org/wiki/Escherichia_coli
+            "LENGTH": np.abs(np.random.normal(loc=1, scale=1 * 0.14)),
+            # [um] https://en.wikipedia.org/wiki/Escherichia_coli
             "WIDTH": 0.5,  # [um] https://en.wikipedia.org/wiki/Escherichia_coli
             "MASS": 10 ** (-12),  # [kg]
             "MORTALITY_RATE": 0.01,

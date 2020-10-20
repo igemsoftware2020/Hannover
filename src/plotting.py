@@ -38,7 +38,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
 
     for bacteria in plot_data:
         x_data = np.asarray([vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))])
-        y_data = (np.asarray([vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))]))
+        y_data = np.asarray([vector[1] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))])
         lines.append(ax.plot(x_data, y_data, ), )
         data.append([x_data, y_data])
         living.append([living_data[bacteria.replace('position', 'living')]])
@@ -50,12 +50,11 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
             if alive[0] is False:
                 line[0].set_color('black')
                 line[0].set_alpha(0.8)
-            ax.set_title(f"Trajectory of bacteria\npassed time: {round(num / 60, 2)} min")
+            ax.set_title(f"Trajectory of bacteria\npassed time: - {round(num / 60, 2)} min")
         return lines,
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
-
-                                   interval=1000, repeat=False, fargs=[lines, data, living])
+                                   interval=500, repeat=False, fargs=[lines, data, living])
 
     plt.ioff()
 

@@ -5,12 +5,10 @@
 # custom libraries
 from src.biofilm import Biofilm
 from src.constants import Constants
-from src.data_handling import bacteria_as_pandas
-from src.plotting import histo_force
-from src.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, animate_positions, plot_num, dens_map, \
-    histo_length, histo_velocity
+from src.data_handling import bacteria_as_pandas, ask_for_log_dir
+from src.plotting import histo_length, histo_velocity, histo_force
 from src.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
-    animate_positions, plot_num, dens_map, animate_3d
+    animate_positions, plot_num, dens_map
 from src.utils import prompt_log_at_start
 
 
@@ -59,11 +57,12 @@ if __name__ == "__main__":
     # Set constant for modelling run
     constants = Constants(bac_type="B.Sub.")
     constants.num_initial_bac = 100
-    constants.duration = 7
+    constants.duration = 5
     constants.time_step = 1
     constants.window_size = (2000, 2000)
     constants.set_bacteria_constants()
     constants.set_simulation_constants()
     constants.set_paths()
-    start_run(constants)
-    # path = ask_for_log_dir()
+    # start_run(constants)
+    path = ask_for_log_dir()
+    plotting(path)

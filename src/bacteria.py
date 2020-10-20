@@ -12,7 +12,7 @@ from typing import Dict
 import src.constants as c
 # custom libraries
 from src.formulas import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x, \
-    lennard_jones_force
+    lennard_jones_force, rotation_matrix_z
 
 
 # ********************************************************************************************
@@ -121,9 +121,14 @@ class Bacterium:
         local_rnd_2 = np.random.RandomState()
         local_rnd_3 = np.random.RandomState()
         # add brownian movement, up to 2% of absolute value
-        self.velocity[0] = local_rnd_1.normal(loc=self.velocity[0], scale=1)
-        self.velocity[1] = local_rnd_2.normal(loc=self.velocity[1], scale=1)
-        self.velocity[2] = local_rnd_3.normal(loc=self.velocity[2], scale=0.6)
+        self.velocity[0] = local_rnd_1.normal(loc=self.velocity[0], scale=0.2)
+        self.velocity[1] = local_rnd_2.normal(loc=self.velocity[1], scale=0.2)
+        self.velocity[2] = local_rnd_3.normal(loc=self.velocity[2], scale=0.05)
+
+        # rotate velocity in direction of orientation
+        self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
+        self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
+        self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_z(self.angle[2]))
 
     def update_position(self):
         """ update bacterium position based on velocity """
@@ -137,7 +142,7 @@ class Bacterium:
         local_rnd_3 = np.random.RandomState()
         self.position[0] = local_rnd_1.normal(loc=self.position[0], scale=0.5)
         self.position[1] = local_rnd_2.normal(loc=self.position[1], scale=0.5)
-        self.position[2] = local_rnd_3.normal(loc=self.position[2], scale=0.5)
+        self.position[2] = local_rnd_3.normal(loc=self.position[2], scale=0.01)
 
         if self.position[2] < self.length:
             self.position[2] = self.width

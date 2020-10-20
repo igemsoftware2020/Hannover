@@ -160,7 +160,7 @@ class Biofilm(object):
         save_dict_as_json(data, info_file_path)
 
 
-# These functions are for the multithreading simulation
+# These functions are needed for the multithreading simulation
 def grow_bacterium(bacterium: Bacterium):
     # Grow Bacterium
     bacterium.grow()
@@ -175,9 +175,9 @@ def forces_on_bacterium(bacterium: Bacterium):
 
 def update_movement(bacterium: Bacterium):
     bacterium.update_acceleration()
-    if np.linalg.norm(bacterium.acceleration) > 0.1:
+    if np.linalg.norm(bacterium.acceleration) > 0.9:
         bacterium.acceleration = bacterium.acceleration / np.linalg.norm(bacterium.acceleration) * np.random.normal(0,
-                                                                                                                    scale=0.002)
+                                                                                                                    scale=0.02)
     bacterium.update_velocity()
     if not np.linalg.norm(bacterium.velocity > 14):
         bacterium.velocity = bacterium.velocity / 2

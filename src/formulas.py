@@ -24,7 +24,14 @@ def gravitational_force(mass: float) -> np.ndarray:
 
 
 def lennard_jones_force(r, f_min, r_min):
-    """ Careful! r_min != sigma instead pass sigma = r_min / 2 ^ (1/6) """
+    """
+    Calculates the lennard-jones force at r. Formula is derived by calculating the gradient of the
+     (12, 6) lennard jones potential.
+    :param r: value at which the function is evaluated
+    :param f_min: value of the global minimum/maximum
+    :param r_min: value at which the returned force is 0
+    :return: force derived from the lennard- jones potential at value r
+    """
     epsilon = f_min * (-169 * (r_min / (2 ** (1 / 6))) / (252 * (7 / 13) ** (1 / 6) * 2 ** (5 / 6)))
     sigma = r_min / (2 ** (1 / 6))
     return 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) - 24 * epsilon * np.power(sigma, 6) / np.power(r, 7)

@@ -125,7 +125,7 @@ Another option is to run
 pip install .
 ```
 in the root folder. This will run the setup.py file and also adds our BiofilmSimulation module to your enviroment.
-If the installation was succesfull the anaconda prompt will print 
+In both cases, if the installation was succesfull the anaconda prompt will print 
 ```sh
 Successfully built BiofilmSimulation
 Installing collected packages: BiofilmSimulation

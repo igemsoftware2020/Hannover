@@ -102,15 +102,15 @@ We provide step-by-step instructions on how to get our software running using a 
 ```sh
 git clone https://github.com/StudDavid/biofilm_growth_modeling.git
 ```
-2. Navigate in the env folder and run 
+2. Navigate in the root folder and run 
 
 ```sh
-conda env create -f biofilm_model_env.yml
+conda env create -f env/iGEM-biofilm-model.yml
 ```
 
 3. Start the enviroment by running 
 ```sh
-conda activate biofilm_model_env
+conda activate iGEM-biofilm-model
 ```
 
 <!-- USAGE EXAMPLES -->

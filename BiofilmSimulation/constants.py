@@ -182,7 +182,7 @@ class Constants:
             # [um] https://en.wikipedia.org/wiki/Escherichia_coli
             "WIDTH": 0.5,  # [um] https://en.wikipedia.org/wiki/Escherichia_coli
             "MASS": 10 ** (-12),  # [kg]
-            "MORTALITY_RATE": 0.01,
+            "MORTALITY_RATE": 0.01,  # [% / 100]
             "CRITICAL_LENGTH": 3.5,  # [um]
             "FREE_MEAN_SPEED": 50,  # [um / s]
             "DOUBLING_TIME": 1200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986

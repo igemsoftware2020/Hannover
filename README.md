@@ -21,6 +21,7 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
+![code-lines-shield]
 
 
 
@@ -191,10 +192,11 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=flat-square
 [contributors-url]: https://github.com/StudDavid/biofilm_growth_modeling/contributors
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo.svg?style=flat-square
+[stars-shield]: https://img.shields.io/github/stars/StudDavid/biofilm_growth_modeling?style=social
 [stars-url]: https://github.com/StudDavid/biofilm_growth_modeling/stargazers
 [forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=flat-square
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=flat-square
 [issues-url]: https://github.com/StudDavid/biofilm_growth_modeling/issues
 [license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=flat-square
 [license-url]: https://github.com/StudDavid/biofilm_growth_modeling/blob/master/LICENSE
+[code-lines-shield]: https://img.shields.io/tokei/lines/github/StudDavid/biofilm_growth_modeling

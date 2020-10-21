@@ -18,8 +18,10 @@
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
 [![Contributors][contributors-shield]][contributors-url]
+[![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
+![code-lines-shield]
 
 
 
@@ -72,8 +74,7 @@ The project aims to simulate the growth of a biofilm in early stages. An biofilm
 
 As part of the iGEM Competition 2020, the Hannover Team designed a sensor based on biological cell, which is capable of detecting the adhernce of a biofilm to at an early stage. The sensor can be attached to implant surfaces and used as a diagnostical tool.
 Therefore, we are interested in the growth behaviour of biofilms in an early stage.
- 
-We developed a computational model from scratch, to simulate the growth on biofilms on surfaces. The model applies methods from molecular dynamics (MD) and takes into account different physical and biological effects. The software provides great flexibility by enabling the user to switch easily between sets of constants e.g. to model different bacterial strains. Furthermore, the software includes functions for visualisation of the model behaviour over time. By providing an example notebook, well documented code and a python environment, we make the software easy to adapt and accessible for other purposes.  
+We use computational methods of Molecular Dynamics simulation and a biophysical approach to model the biofilm growth.
 
 ### Built With
 
@@ -95,22 +96,22 @@ Check out the [Anaconda installation instructions](https://docs.conda.io/project
 ### Installation
 
 You will need a few python packages to run the simulation on your local machine. You can eithercreate a conda enviroment from the 
-`biofilm_model_env.yml` file or download the packages on your own via pip.
+`conda_env.yml` file or download the packages on your own via pip.
 We provide step-by-step instructions on how to get our software running using a conda enviroment.
 
 1. Clone the repo
 ```sh
 git clone https://github.com/StudDavid/biofilm_growth_modeling.git
 ```
-2. Navigate in the env folder and run 
+2. Navigate in the root folder and run 
 
 ```sh
-conda env create -f biofilm_model_env.yml
+conda env create -f env/iGEM-biofilm-model.yml
 ```
 
 3. Start the enviroment by running 
 ```sh
-conda activate biofilm_model_env
+conda activate iGEM-biofilm-model
 ```
 
 <!-- USAGE EXAMPLES -->
@@ -190,9 +191,12 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=flat-square
-[contributors-url]: ttps://github.com/StudDavid/biofilm_growth_modeling/graphs/contributors
+[contributors-url]: https://github.com/StudDavid/biofilm_growth_modeling/contributors
+[stars-shield]: https://img.shields.io/github/stars/StudDavid/biofilm_growth_modeling?style=social
+[stars-url]: https://github.com/StudDavid/biofilm_growth_modeling/stargazers
 [forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=flat-square
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=flat-square
 [issues-url]: https://github.com/StudDavid/biofilm_growth_modeling/issues
 [license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=flat-square
-[license-url]: https://github.com/StudDavid/biofilm_growth_modeling/master/LICENSE.txt
+[license-url]: https://github.com/StudDavid/biofilm_growth_modeling/blob/master/LICENSE
+[code-lines-shield]: https://img.shields.io/tokei/lines/github/StudDavid/biofilm_growth_modeling

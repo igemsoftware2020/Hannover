@@ -11,7 +11,7 @@ from pathlib import Path
 from sklearn.linear_model import LinearRegression
 
 # custom libraries
-from data_handling import get_data_to_parameter, get_z
+from data_handling import get_data_to_parameter, get_z, bacteria_as_pandas
 
 
 # ********************************************************************************************
@@ -50,7 +50,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
             if alive[0] is False:
                 line[0].set_color('black')
                 line[0].set_alpha(0.8)
-            ax.set_title(f"Trajectory of bacteria\npassed time: - {round(num / 60, 2)} min")
+            ax.set_title(f"Trajectory of bacteria\npassed time: {round(num / 60, 2)} min")
         return lines,
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
@@ -61,7 +61,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     if save_fig:
         writer = animation.FFMpegWriter(fps=30, metadata=dict(artist='Me'), bitrate=-1)
         path = Path(save_path).parent / '2d_animation.mp4'
-        anim.save(path, writer=writer)
+        anim.save(str(path), writer=writer)
         plt.close(fig)
     else:
         plt.show()
@@ -277,7 +277,7 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
     '''plot data'''
     fig, (ax1, ax2) = plt.subplots(2, 1)
-
+    fig.tight_layout()
     ax1.plot(num, color='b')
     ax1.set(xlabel='Time in s', ylabel='Bacteria Number', title='Bacteria Growth')
     ax2.plot(num, label='log curve')
@@ -287,7 +287,7 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.text(0.1, 0.9, 'slope: ' + str(round(slope, 5)), transform=ax2.transAxes)
     ax2.text(0.1, 0.8, 'generation time: ' + str(round(generation_time, 5)), transform=ax2.transAxes)
     ax2.set_yscale('log')
-    fig.tight_layout()
+
     plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'growth_plot.png'

@@ -231,7 +231,7 @@ class Bacterium:
 
         # Create daughter bacterium from self
         # Update parameters of daughter and mother bacterium
-
+        # make splitting ration from normal distrbiturio
         daughter_bac_position = get_daughter_position(self)
         daughter_bac_position[2] = self.position[2]
         daughter_bac_length = self.length / 2
@@ -284,7 +284,7 @@ class Bacterium:
     def detach(self):
         if (self.attached_to_surface is True) & (np.random.random() > 0.9):
             self.attached_to_surface = False
-            self.acceleration[2] = 0.03
+            self.acceleration[2] = 0.01
 
     def get_position(self) -> np.ndarray:
         positions = []

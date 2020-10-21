@@ -103,7 +103,7 @@ We provide step-by-step instructions on how to get our software running using a 
 ```sh
 git clone https://github.com/StudDavid/biofilm_growth_modeling.git
 ```
-2. Navigate in the root folder and run 
+2. Navigate in the root folder (the folder which contains the `setup.py`) and run
 
 ```sh
 conda env create -f env/iGEM-biofilm-model.yml
@@ -114,10 +114,29 @@ conda env create -f env/iGEM-biofilm-model.yml
 conda activate iGEM-biofilm-model
 ```
 
+4. Install our software tool as locally with pip in your conda enviroment by running
+```sh
+pip install .
+```
+in the root folder. This will run the setup.py file and adds our BiofilmSimulation module to your enviroment.
+If the installation was succesfull the anaconda prompt will print 
+```sh
+Successfully built BiofilmSimulation
+Installing collected packages: BiofilmSimulation
+Successfully installed BiofilmSimulation-1.0.0
+```
+
 <!-- USAGE EXAMPLES -->
 ## Usage
+You can also directly start a simulation by running the `example_usage.py` script. 
+Activate the `iGEM-biofilm-model` enviroment as described above and navigate to the root folder. 
+Type 
+```sh
+python example/example_usage.py
+```
+This will start a dialog in the console in which you can specify the bacteria strain, the number of initial bacteria and the simulation duration.
 
-A usage example is provided in form of a jupyter notebook. Make sure to check it out to see the functionalities provided. 
+Another usage example is provided in form of a jupyter notebook. Make sure to check it out to see the functionalities provided. 
 If you are using anaconda, jupyter will already be installed. To start the example jupyter notebook run
 
 ```sh
@@ -128,6 +147,7 @@ Then connect to
 http://localhost:8888/
 ```
 and navigate to the folder, in which you cloned the repository. Start the notebook by clicking on the `example.ipynb` file.
+
 
 
 <!-- ROADMAP -->

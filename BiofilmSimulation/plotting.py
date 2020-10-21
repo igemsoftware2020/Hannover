@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from pathlib import Path
-from sklearn.linear_model import LinearRegression
-
 # custom libraries
-from data_handling import get_data_to_parameter, get_z, bacteria_as_pandas
+from BiofilmSimulation.data_handling import get_data_to_parameter, get_z
+from sklearn.linear_model import LinearRegression
 
 
 # ********************************************************************************************

@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 # ********************************************************************************************
 # custom libraries
-from biofilm import Biofilm
-from constants import Constants
-from data_handling import bacteria_as_pandas
-from plotting import histo_length, histo_velocity, histo_force
-from plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
+from BiofilmSimulation.biofilm import Biofilm
+from BiofilmSimulation.constants import Constants
+from BiofilmSimulation.data_handling import bacteria_as_pandas
+from BiofilmSimulation.plotting import histo_length, histo_velocity, histo_force
+from BiofilmSimulation.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
     animate_positions, plot_num, dens_map
-from utils import prompt_log_at_start
+from BiofilmSimulation.utils import prompt_log_at_start
 
 
 def start_run(constant: Constants):
@@ -20,11 +20,9 @@ def start_run(constant: Constants):
     biofilm = Biofilm()
     # pass constant to biofilm object
     biofilm.constants = constant
-
     # Logging at begin
     prompt_log_at_start(biofilm.constants)
     # Save log file for
-    info_file_path = constant.get_paths(key="info")
 
     info_file_path = biofilm.constants.get_paths(key="info")
     biofilm.simulate_multiprocessing()
@@ -49,7 +47,7 @@ def plotting(info_file_path):
 
 
 def default_run():
-    strain = input("Select bacteria strain (B.Sub. or E.Coli)")
+    strain = input("Select bacteria strain (B.Sub. or E.Coli.) : ")
     num_initial = int(input("Select number of initial bacteria : "))
     duration = int(input("Specify simulation duration in minutes : "))
     constants = Constants(bac_type=strain)

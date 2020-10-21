@@ -2,17 +2,17 @@
 # -*- coding: utf-8 -*-
 # imports
 import json
-import numpy as np
 import os
-import pandas as pd
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog
 from typing import Dict
 
+import numpy as np
+import pandas as pd
 # custom libraries
-from constants import Constants
-from formulas import get_euclid_norm
+from BiofilmSimulation.constants import Constants
+from BiofilmSimulation.formulas import get_euclid_norm
 
 
 # ********************************************************************************************

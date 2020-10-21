@@ -4,14 +4,15 @@
 # ********************************************************************************************
 # imports
 import math
-import numpy as np
 import random
-import scipy.stats
 from typing import Dict
 
-import constants as c
 # custom libraries
-from formulas import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x, \
+import BiofilmSimulation.constants as c
+import numpy as np
+import scipy.stats
+from BiofilmSimulation.formulas import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, \
+    rotation_matrix_x, \
     lennard_jones_force, rotation_matrix_z
 
 

@@ -7,7 +7,7 @@ import time
 from typing import Dict
 
 # custom libraries
-import constants as constants
+import BiofilmSimulation.constants as constants
 
 
 # ********************************************************************************************

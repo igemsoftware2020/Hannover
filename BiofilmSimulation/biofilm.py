@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from itertools import repeat
+from multiprocessing import Pool, cpu_count
+
 # ********************************************************************************************
 # imports
 import numpy as np
 import tqdm
-from itertools import repeat
-from multiprocessing import Pool, cpu_count
-
-# custom libraries
-from bacteria import Bacterium, get_bacteria_dict
-from bacteria import distance_vector, bac_bac_interaction_force
-from constants import Constants
-from data_handling import write_log_template, read_in_log, save_dict_as_json
-from utils import simulation_duration
+# custom librariess
+from BiofilmSimulation.bacteria import Bacterium, get_bacteria_dict
+from BiofilmSimulation.bacteria import distance_vector, bac_bac_interaction_force
+from BiofilmSimulation.constants import Constants
+from BiofilmSimulation.data_handling import write_log_template, read_in_log, save_dict_as_json
+from BiofilmSimulation.utils import simulation_duration
 
 
 class Biofilm(object):

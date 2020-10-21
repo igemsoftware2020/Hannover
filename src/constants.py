@@ -39,7 +39,6 @@ class Constants:
         self.time_step = 1
         self.window_size = (450, 900)
         self.duration = 60  # simulation time in minutes
-        self.sim_dict = {}
 
         # Bacteria constant
         self.bac_type = bac_type
@@ -157,8 +156,8 @@ class Constants:
             "MORTALITY_RATE": 0.0,
             "CRITICAL_LENGTH": 4.7,  # [um]
             "FREE_MEAN_SPEED": 8 / (60 * 60),  # [um / s]
-            "DOUBLING_TIME": 7200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
-            "GROWTH_RATE": 2.2 / 7200,  # [um / s]
+            "DOUBLING_TIME": 4200, # [s] DOI:
+            "GROWTH_RATE": 2.2 / 4200,  # [um / s]
             "MOTION_ACTIVATION_PROBABILITY": 0.00,
             "MOTION_DEACTIVATION_PROBABILITY": 0.01
         }
@@ -178,7 +177,7 @@ class Constants:
             "WIDTH": 0.5,  # [um] https://en.wikipedia.org/wiki/Escherichia_coli
             "MASS": 10 ** (-12),  # [kg]
             "MORTALITY_RATE": 0.01,
-            "CRITICAL_LENGTH": 2,  # [um]
+            "CRITICAL_LENGTH": 3.5,  # [um]
             "FREE_MEAN_SPEED": 50,  # [um / s]
             "DOUBLING_TIME": 1200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986
             "GROWTH_RATE": 1 / 1200,  # [um / s]

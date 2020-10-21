@@ -11,11 +11,31 @@ import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
 # custom libraries
-from src.data_handling import get_data_to_parameter, get_z
+from src.data_handling import get_data_to_parameter, get_z, bacteria_as_pandas
 
 
 # ********************************************************************************************
 # Functions for plotting data
+
+
+def visualize_data(info_file_path: Path, save: bool = True):
+    """ Calls all the plotting functions for the data in info_file_path"""
+    print(f" * Plotting Data from log file in {info_file_path}")
+    data = bacteria_as_pandas(info_file_path)
+    plot_num(data, info_file_path, save_fig=save)
+    dens_map(data, info_file_path, save_fig=save)
+    plot_velocities(data, info_file_path, save_fig=save)
+    plot_positions(data, info_file_path, save_fig=save)
+    plot_force(data, info_file_path, save_fig=save)
+    plot_sizes(data, info_file_path, save_fig=save)
+
+
+def animate_data(info_file_path: Path, save: bool = True):
+    """ Calls all the animation functions for the data in info_file_path"""
+    print(f" * Animating Data from log file in {info_file_path}")
+    data = bacteria_as_pandas(info_file_path)
+    animate_positions(data, info_file_path, save_fig=save)
+    animate_3d(data, info_file_path, save_fig=save)
 
 
 def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):

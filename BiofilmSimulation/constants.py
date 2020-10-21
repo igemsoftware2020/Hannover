@@ -118,6 +118,9 @@ class Constants:
             os.mkdir(self.output_path)
 
         path_out = self.output_path / f'log_{date_time}'
+
+        if not self.output_path.exists():
+            os.mkdir(self.output_path)
         if not path_out.exists():
             os.mkdir(path_out)
         self.info_path = path_out / f'log_{date_time}.json'

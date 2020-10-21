@@ -50,10 +50,11 @@ def default_run():
     strain = input("Select bacteria strain (B.Sub. or E.Coli.) : ")
     num_initial = int(input("Select number of initial bacteria : "))
     duration = int(input("Specify simulation duration in minutes : "))
+    time_step = int(input("Set simulation time step in minutes : "))
     constants = Constants(bac_type=strain)
     constants.num_initial_bac = num_initial
     constants.duration = duration
-    constants.time_step = 1
+    constants.time_step = time_step
     constants.window_size = (2000, 2000)
     constants.set_bacteria_constants()
     constants.set_simulation_constants()

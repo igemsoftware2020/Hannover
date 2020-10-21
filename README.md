@@ -34,7 +34,7 @@
   <h3 align="center">iGEM 2020 project: Biofilm growth simulation</h3>
 
   <p align="center">
-    This is repository contains the code for simulating the growth of a Biofilm after attachment using Molecular dynamics simulation methods. The project was build as part of the iGEM 2020 Contest. The numerical model and simulation were implmented by the Team Hannover. Functionalities to make the software tool more accesible were added in collaboratio with the Team TU Darmstadt.
+    This is repository contains the code for simulating the growth of a Biofilm after attachment using Molecular dynamics simulation methods. The project was build as part of the iGEM 2020 Contest. The numerical model and simulation were implmented by the Team Hannover. Functionalities to make the software tool more accesible were added in collaboratio with the Team TU Darmstadt. The BiofilmSimulation software can be accessd a a python package, documented under https://pypi.org/project/BiofilmSimulation/1.0.0/.
     <br />
     <a href="https://github.com/StudDavid/biofilm_growth_modeling"><strong>Explore the docs »</strong></a>
     <br />
@@ -114,12 +114,18 @@ conda env create -f env/iGEM-biofilm-model.yml
 conda activate iGEM-biofilm-model
 ```
 
-4. Install our software tool as locally with pip in your conda enviroment by running
+4. Install our software tool as a python package in your conda enviroment with pip (package installer for Python). The package is listed at https://pypi.org/project/BiofilmSimulation/1.0.0/ and can be installed by running 
+
+```sh
+pip install BiofilmSimulation
+```
+
+Another option is to run
 ```sh
 pip install .
 ```
-in the root folder. This will run the setup.py file and adds our BiofilmSimulation module to your enviroment.
-If the installation was succesfull the anaconda prompt will print 
+in the root folder. This will run the setup.py file and also adds our BiofilmSimulation module to your enviroment.
+In both cases, if the installation was succesfull the anaconda prompt will print 
 ```sh
 Successfully built BiofilmSimulation
 Installing collected packages: BiofilmSimulation

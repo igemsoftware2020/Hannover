@@ -50,8 +50,8 @@ def plotting(info_file_path):
 
 def default_run():
     strain = input("Select bacteria strain (B.Sub. or E.Coli)")
-    num_initial = input("Select number of initial bacteria : ")
-    duration = input("Specify simulation duration in minutes : ")
+    num_initial = int(input("Select number of initial bacteria : "))
+    duration = int(input("Specify simulation duration in minutes : "))
     constants = Constants(bac_type=strain)
     constants.num_initial_bac = num_initial
     constants.duration = duration

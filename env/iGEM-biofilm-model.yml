@@ -6,33 +6,31 @@ dependencies:
   - astroid=2.4.2=py38_0
   - ca-certificates=2020.10.14=0
   - certifi=2020.6.20=py38_0
-  - isort=5.6.4=py_0
-  - lazy-object-proxy=1.4.3=py38h7b6447c_0
-  - ld_impl_linux-64=2.33.1=h53a641e_7
-  - libedit=3.1.20191231=h14c3975_1
-  - libffi=3.3=he6710b0_2
-  - libgcc-ng=9.1.0=hdf63c60_0
-  - libstdcxx-ng=9.1.0=hdf63c60_0
   - mccabe=0.6.1=py38_1
-  - ncurses=6.2=he6710b0_1
-  - openssl=1.1.1h=h7b6447c_0
   - path=15.0.0=py38_0
   - pip=20.2.3=py38_0
   - pylint=2.6.0=py38_0
-  - python=3.8.5=h7579374_1
-  - readline=8.0=h7b6447c_0
-  - setuptools=50.3.0=py38hb0f4dca_1
   - six=1.15.0=py_0
-  - sqlite=3.33.0=h62c20be_0
-  - tk=8.6.10=hbc83047_0
   - toml=0.10.1=py_0
   - wheel=0.35.1=py_0
-  - wrapt=1.11.2=py38h7b6447c_0
-  - xz=5.2.5=h7b6447c_0
-  - zlib=1.2.11=h7b6447c_3
   - pip:
+      - sqlite=3.33.0=h62c20be_0
+      - openssl=1.1.1h=h7b6447c_0
+      - tk=8.6.10=hbc83047_0
+      - ld_impl_linux-64=2.33.1=h53a641e_7
+      - libedit=3.1.20191231=h14c3975_1
+      - zlib=1.2.11=h7b6447c_3
+      - xz=5.2.5=h7b6447c_0
+      - wrapt=1.11.2=py38h7b6447c_0
+      - setuptools=50.3.0=py38hb0f4dca_1
+      - python=3.8.5=h7579374_1
+      - lazy-object-proxy=1.4.3=py38h7b6447c_0
+      - libstdcxx-ng=9.1.0=hdf63c60_0
+      - readline=8.0=h7b6447c_0
+      - ncurses=6.2=he6710b0_1
       - argon2-cffi==20.1.0
       - async-generator==1.10
+      - libffi=3.3=he6710b0_2
       - attrs==20.2.0
       - backcall==0.2.0
       - bleach==3.2.1

@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog
 from typing import Dict
+
 import numpy as np
 
 
@@ -114,10 +115,8 @@ class Constants:
                     + '_' + str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min'
 
         path_out = self.output_path / f'log_{date_time}'
-        if not self.output_path.exists():
-            self.output_path.mkdir()
-        elif not path_out.exists():
-            path_out.mkdir()
+        if not os.path.exists(path_out):
+            os.mkdir(path_out)
         self.info_path = path_out / f'log_{date_time}.json'
 
     def get_simulation_constants(self, key: str = None):

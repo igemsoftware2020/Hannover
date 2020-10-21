@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 # ********************************************************************************************
 # custom libraries
-from src.biofilm import Biofilm
-from src.constants import Constants
-from src.data_handling import bacteria_as_pandas
-from src.plotting import histo_length, histo_velocity, histo_force
-from src.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
+from biofilm import Biofilm
+from constants import Constants
+from data_handling import bacteria_as_pandas
+from plotting import histo_length, histo_velocity, histo_force
+from plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
     animate_positions, plot_num, dens_map
-from src.utils import prompt_log_at_start
+from utils import prompt_log_at_start
 
 
 def start_run(constant: Constants):
@@ -26,7 +26,7 @@ def start_run(constant: Constants):
     # Save log file for
     info_file_path = constant.get_paths(key="info")
 
-    info_file_path = constants.get_paths(key="info")
+    info_file_path = biofilm.constants.get_paths(key="info")
     biofilm.simulate_multiprocessing()
     plotting(info_file_path)
 

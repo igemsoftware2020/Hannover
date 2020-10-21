@@ -11,8 +11,8 @@ from tkinter import filedialog
 from typing import Dict
 
 # custom libraries
-from src.constants import Constants
-from src.formulas import get_euclid_norm
+from constants import Constants
+from formulas import get_euclid_norm
 
 
 # ********************************************************************************************

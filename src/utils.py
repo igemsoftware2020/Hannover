@@ -7,7 +7,7 @@ import time
 from typing import Dict
 
 # custom libraries
-import src.constants as constants
+import constants as constants
 
 
 # ********************************************************************************************

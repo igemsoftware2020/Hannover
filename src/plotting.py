@@ -11,7 +11,7 @@ from pathlib import Path
 from sklearn.linear_model import LinearRegression
 
 # custom libraries
-from src.data_handling import get_data_to_parameter, get_z
+from data_handling import get_data_to_parameter, get_z
 
 
 # ********************************************************************************************
@@ -61,7 +61,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     if save_fig:
         writer = animation.FFMpegWriter(fps=30, metadata=dict(artist='Me'), bitrate=-1)
         path = Path(save_path).parent / '2d_animation.mp4'
-        anim.save(str(path), writer=writer)
+        anim.save(path, writer=writer)
         plt.close(fig)
     else:
         plt.show()
@@ -270,10 +270,14 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     live = get_data_to_parameter(data, 'living')
     num = live[live == True].count(axis=1)
-    x, y_fit, slope, generation_time = get_gent(data)
+    if get_gent(data) is None:
+        return
+    else:
+        x, y_fit, slope, generation_time = get_gent(data)
+
     '''plot data'''
     fig, (ax1, ax2) = plt.subplots(2, 1)
-    
+
     ax1.plot(num, color='b')
     ax1.set(xlabel='Time in s', ylabel='Bacteria Number', title='Bacteria Growth')
     ax2.plot(num, label='log curve')
@@ -334,12 +338,14 @@ def get_gent(data: pd.DataFrame):
     y = live[live == True].count(axis=1).values  # transform data and return an array
     y = y[y != y[0]]  # cut out bacteria in lag phase
     y = [np.log(value) if value > 0 else value for value in y]  # transform data
-
-    x = live.index[
-        live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy()  # get index array
+    x = live.index[live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy()  # get index array
     '''start linear regression'''
     model = LinearRegression(fit_intercept=True)
-    model.fit(x[:, np.newaxis], y)  # fit the data
+    try:
+        model.fit(x[:, np.newaxis], y)  # fit the data
+    except ValueError:
+        print("Simulation time to short to fit a regression on the bacteria number!")
+        return None
     generation_time = np.log(2) / model.coef_[0]  # compute generation time
     y_fit = model.predict(x[:, np.newaxis])  # get fitted curve
     slope = model.coef_[0]  # slope is growth coefficient

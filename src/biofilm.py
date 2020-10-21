@@ -9,11 +9,11 @@ from itertools import repeat
 from multiprocessing import Pool, cpu_count
 
 # custom libraries
-from src.bacteria import Bacterium, get_bacteria_dict
-from src.bacteria import distance_vector, bac_bac_interaction_force
-from src.constants import Constants
-from src.data_handling import write_log_template, read_in_log, save_dict_as_json
-from src.utils import simulation_duration
+from bacteria import Bacterium, get_bacteria_dict
+from bacteria import distance_vector, bac_bac_interaction_force
+from constants import Constants
+from data_handling import write_log_template, read_in_log, save_dict_as_json
+from utils import simulation_duration
 
 
 class Biofilm(object):

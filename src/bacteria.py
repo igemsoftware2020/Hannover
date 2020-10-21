@@ -9,9 +9,9 @@ import random
 import scipy.stats
 from typing import Dict
 
-import src.constants as c
+import constants as c
 # custom libraries
-from src.formulas import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x, \
+from formulas import stokes_drag_force, gravitational_force, apply_rotation, rotation_matrix_y, rotation_matrix_x, \
     lennard_jones_force, rotation_matrix_z
 
 

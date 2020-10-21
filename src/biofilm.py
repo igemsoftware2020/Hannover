@@ -39,7 +39,7 @@ class Biofilm(object):
         num_initial_bacteria = self.constants.get_simulation_constants(key="num_initial")
         window_size = self.constants.get_simulation_constants(key="window_size")
         mean_speed = self.constants.get_bac_constants(key="FREE_MEAN_SPEED")
-        for _ in range(num_initial_bacteria - 1):
+        for _ in range(num_initial_bacteria):
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
             rnd_position = np.asarray([np.random.randint(200, 400),
                                        np.random.randint(200, 400),

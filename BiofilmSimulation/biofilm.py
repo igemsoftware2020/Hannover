@@ -8,7 +8,7 @@ from multiprocessing import Pool, cpu_count
 # imports
 import numpy as np
 import tqdm
-# custom librariess
+# custom libraries
 from BiofilmSimulation.bacteria import Bacterium, get_bacteria_dict
 from BiofilmSimulation.bacteria import distance_vector, bac_bac_interaction_force
 from BiofilmSimulation.constants import Constants
@@ -37,8 +37,6 @@ class Biofilm(object):
          Bacteria are randomly distributed on a plane with aspect ratios specified in the c class
          """
         num_initial_bacteria = self.constants.get_simulation_constants(key="num_initial")
-        window_size = self.constants.get_simulation_constants(key="window_size")
-        mean_speed = self.constants.get_bac_constants(key="FREE_MEAN_SPEED")
         for _ in range(num_initial_bacteria):
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
             rnd_position = np.asarray([np.random.randint(200, 400),

@@ -4,7 +4,7 @@
 # custom libraries
 from BiofilmSimulation.biofilm import Biofilm
 from BiofilmSimulation.constants import Constants
-from BiofilmSimulation.data_handling import bacteria_as_pandas
+from BiofilmSimulation.data_handling import bacteria_as_pandas, constants_as_pandas
 from BiofilmSimulation.plotting import histo_length, histo_velocity, histo_force
 from BiofilmSimulation.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
     animate_positions, plot_num, dens_map
@@ -31,18 +31,21 @@ def start_run(constant: Constants):
 
 def plotting(info_file_path):
     """ reads in data from info_file_path and plots data """
+    constants_time_step = constants_as_pandas(info_file_path).T['time_step'][0]
+    
     data = bacteria_as_pandas(info_file_path)
     histo_length(data, info_file_path, save_fig=True)
-    plot_num(data, info_file_path, save_fig=True)
+    plot_num(data, info_file_path,constants_time_step, save_fig=True)
     histo_velocity(data, info_file_path, save_fig=True)
     dens_map(data, info_file_path, save_fig=True)
-    plot_velocities(data, info_file_path, save_fig=True)
+    
+    plot_velocities(data, info_file_path,constants_time_step, save_fig=True)
     histo_force(data, info_file_path, save_fig=True)
-    plot_positions(data, info_file_path, save_fig=True)
-    plot_force(data, info_file_path, save_fig=True)
-    plot_sizes(data, info_file_path, save_fig=True)
-    data = bacteria_as_pandas(info_file_path)
-    animate_positions(data, info_file_path, save_fig=True)
+    plot_positions(data, info_file_path,constants_time_step, save_fig=True)
+    plot_force(data, info_file_path,constants_time_step,  save_fig=True)
+    #plot_sizes(data, info_file_path, save_fig=True)
+    #data = bacteria_as_pandas(info_file_path)
+    #animate_positions(data, info_file_path, save_fig=True)
     # animate_3d(data, info_file_path, save_fig=False)
 
 
@@ -60,7 +63,7 @@ def default_run():
     constants.set_simulation_constants()
     constants.set_paths()
     start_run(constants)
-
+    
 
 # ********************************************************************************************
 # main-method to start the program
@@ -69,3 +72,6 @@ def default_run():
 
 if __name__ == "__main__":
     default_run()
+    #info_file_path = r'C:\Users\jonas\github\biofilm_growth_modeling\example\output\log_21102020_22h50min\log_21102020_22h50min.json'
+    
+    #plotting(info_file_path)

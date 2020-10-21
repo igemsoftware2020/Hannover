@@ -34,7 +34,7 @@
   <h3 align="center">iGEM 2020 project: Biofilm growth simulation</h3>
 
   <p align="center">
-    This is repository contains the code for simulating the growth of a Biofilm after attachment using Molecular dynamics simulation methods. The project was build as part of the iGEM 2020 Contest by the Team Hannover.
+    This is repository contains the code for simulating the growth of a Biofilm after attachment using Molecular dynamics simulation methods. The project was build as part of the iGEM 2020 Contest. The numerical model and simulation were implmented by the Team Hannover. Functionalities to make the software tool more accesible were added in collaboratio with the Team TU Darmstadt.
     <br />
     <a href="https://github.com/StudDavid/biofilm_growth_modeling"><strong>Explore the docs »</strong></a>
     <br />
@@ -74,7 +74,7 @@ The project aims to simulate the growth of a biofilm in early stages. An biofilm
 
 As part of the iGEM Competition 2020, the Hannover Team designed a sensor based on biological cell, which is capable of detecting the adhernce of a biofilm to at an early stage. The sensor can be attached to implant surfaces and used as a diagnostical tool.
 Therefore, we are interested in the growth behaviour of biofilms in an early stage.
-We use computational methods of Molecular Dynamics simulation and a biophysical approach to model the biofilm growth.
+We use computational methods of Molecular Dynamics simulation and a biophysical approach to model the biofilm growth. Furthermore the BiofilmSimulation module provides functions for visualization of the data generated in the simulation.
 
 ### Built With
 

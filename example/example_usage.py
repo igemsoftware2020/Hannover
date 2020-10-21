@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 # ********************************************************************************************
 # custom libraries
-from biofilm import Biofilm
-from constants import Constants
-from data_handling import bacteria_as_pandas
-from plotting import histo_length, histo_velocity, histo_force
-from plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
+from BiofilmSimulation.biofilm import Biofilm
+from BiofilmSimulation.constants import Constants
+from BiofilmSimulation.data_handling import bacteria_as_pandas
+from BiofilmSimulation.plotting import histo_length, histo_velocity, histo_force
+from BiofilmSimulation.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
     animate_positions, plot_num, dens_map
-from utils import prompt_log_at_start
+from BiofilmSimulation.utils import prompt_log_at_start
 
 
 def start_run(constant: Constants):

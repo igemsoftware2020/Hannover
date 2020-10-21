@@ -115,8 +115,7 @@ class Constants:
                     + '_' + str(datetime.now().hour) + 'h' + str(datetime.now().minute) + 'min'
 
         path_out = self.output_path / f'log_{date_time}'
-        if not os.path.exists(path_out):
-            os.mkdir(path_out)
+        os.mkdir(path_out)
         self.info_path = path_out / f'log_{date_time}.json'
 
     def get_simulation_constants(self, key: str = None):

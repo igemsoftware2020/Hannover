@@ -21,18 +21,18 @@ dependencies:
 - wheel=0.35.1=py_0
 - xz=5.2.5=h7b6447c_0
 - zlib=1.2.11=h7b6447c_3
-  - pip:
-      - numpy
-      - pandas
-      - typing
-      - scipy
-      - tqdm
-      - tk
-      - typing
-      - pathlib
-      - matplotlib
-      - seaborn
-      - sklearn
+- pip:
+    - numpy
+    - pandas
+    - typing
+    - scipy
+    - tqdm
+    - tk
+    - typing
+    - pathlib
+    - matplotlib
+    - seaborn
+    - sklearn
      
 prefix: /home/david/anaconda3/envs/iGEM-biofilm-model
 

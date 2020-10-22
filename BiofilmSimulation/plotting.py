@@ -159,7 +159,7 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False, 
     height_data = get_data_to_parameter(data, 'height')
     height_means = height_data.mean(axis=1, skipna=True)
 
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
     for bacteria in position_data:
         ax1.plot(position_data.loc[:, bacteria].index * time_step,
@@ -206,7 +206,7 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
     acc_data = get_data_to_parameter(data, 'acceleration')
     force_mean = plot_data.mean(axis=1, skipna=True)
     acc_mean = acc_data.mean(axis=1, skipna=True)
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
     for bacteria in plot_data:
         ax1.plot(plot_data.loc[:, bacteria].index * time_step,
@@ -249,7 +249,7 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
     mass_mean = mass_data.mean(axis=1, skipna=True)
     length_data = get_data_to_parameter(data, 'length')
     length_means = length_data.mean(axis=1, skipna=True)
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
     for bacteria in mass_data:
         ax1.plot(mass_data.loc[:, bacteria].index * time_step,
@@ -323,7 +323,7 @@ def plot_num(data: pd.DataFrame, save_path: Path,  save_fig: bool = False, time_
 def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     """Scatters the last positions of the bacteria and plots the density of bacteria. """
     x, y, z = last_pos(data)
-    fig, (ax1, ax2) = plt.subplots(1, 2, constrained_layout=True)
+    fig, (ax1, ax2) = plt.subplots(1, 2)
     ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
     sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=False, cmap='mako', levels=200, thresh=0)
     

@@ -18,6 +18,7 @@ from sklearn.linear_model import LinearRegression
 # Functions for plotting data
 
 
+
 def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """
     Plots or saves (as mp4) an 2d animation of the biofilm.
@@ -52,7 +53,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
             if alive[0] is False:
                 line[0].set_color('black')
                 line[0].set_alpha(0.8)
-            ax.set_title(f"Trajectory of bacteria\npassed time: {round(num / 60, 2)} min")
+            ax.set_title(f"Trajectory of bacteria\npassed time: - {round(num * time_step / 60, 2)} min")
         return lines,
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),

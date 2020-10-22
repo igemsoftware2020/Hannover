@@ -33,6 +33,7 @@ dependencies:
     - matplotlib
     - seaborn
     - sklearn
+    - ffmpeg-python
      
 prefix: /home/david/anaconda3/envs/iGEM-biofilm-model
 

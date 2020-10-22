@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='BiofilmSimulation',
-    version='1.0.0',
+    version='1.0.1',
     description='The model applies methods from molecular dynamics (MD) and takes into account different '
                 'physical and biological effects. '
                 'The software provides great flexibility by enabling the user to switch easily between sets of '

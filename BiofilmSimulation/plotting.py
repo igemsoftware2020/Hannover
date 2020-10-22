@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 from pathlib import Path
-
+from BiofilmSimulation.constants import Constants
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
@@ -10,7 +9,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 # custom libraries
-from BiofilmSimulation.data_handling import get_data_to_parameter, get_z
+from BiofilmSimulation.data_handling import get_data_to_parameter, get_z, constants_as_pandas
 from sklearn.linear_model import LinearRegression
 
 
@@ -118,7 +117,7 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
         plt.show()
 
 
-def plot_velocities(data: pd.DataFrame, save_path: Path = None, save_fig: bool = False, time_step: int = 1):
+def plot_velocities(data: pd.DataFrame, save_path: Path, time_step:int, save_fig: bool = False, time_step: int = 1):
     """
     Plots velocities of each bacteria and the mean velocity of all bacteria
     over the iteration step.
@@ -152,7 +151,7 @@ def plot_velocities(data: pd.DataFrame, save_path: Path = None, save_fig: bool =
         plt.show()
 
 
-def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
+def plot_positions(data: pd.DataFrame, save_path: Path,time_step:int, save_fig: bool = False, time_step: int = 1):
     """
     Plots positions (as lengths of location vectors) of each bacteria and the distance over the surface.
     """
@@ -181,28 +180,29 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False, 
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('Height in um')
 
-    ax3.plot(position_means.index * time_step, position_means.values)
+    ax3.plot(position_means.index * time_step, position_means)
     ax3.set_xlabel('Time in s')
     ax3.set_ylabel('Mean distance in um')
 
-    ax4.plot(height_means.index * time_step, height_means.values)
+    ax4.plot(height_means.index * time_step, height_means)
     ax4.set_xlabel('Time in s')
     ax4.set_ylabel('Mean height in um')
 
     plt.ioff()
     if save_fig:
-        path = Path(save_path.parent) / 'positions_plot.png'
+        path = Path(save_path).parent / 'positions_plot.png'
         fig.savefig(path)
         plt.close(fig)
     else:
         plt.show()
 
 
-def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
+def plot_force(data: pd.DataFrame, save_path: Path,time_step: int, save_fig: bool = False, time_step: int = 1):
     """
     Plots force acting on each bacteria and the mean force acting on all bacteria
     over the iteration step. Also plots accelerations.
     """
+
     plot_data = get_data_to_parameter(data, 'total_force') * 1e9
     acc_data = get_data_to_parameter(data, 'acceleration')
     force_mean = plot_data.mean(axis=1, skipna=True)
@@ -289,13 +289,14 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
         plt.show()
 
 
-def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
+def plot_num(data: pd.DataFrame, save_path: Path, time_step:int, save_fig: bool = False, time_step: int = 1):
+
     live = get_data_to_parameter(data, 'living')
     num = live[live == True].count(axis=1)
-    if get_gent(data) is None:
+    if get_gent(data, time_step) is None:
         return
     else:
-        x, y_fit, slope, generation_time = get_gent(data)
+        x, y_fit, slope, generation_time = get_gent(data, time_step)
 
     '''plot data'''
     fig, (ax1, ax2) = plt.subplots(2, 1)
@@ -355,13 +356,15 @@ def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool =
         plt.show()
 
 
-def get_gent(data: pd.DataFrame):
+def get_gent(data: pd.DataFrame, time_step: int):
+
     live = get_data_to_parameter(data, 'living')  # get data
+
     y = live[live == True].count(axis=1).values  # transform data and return an array
     y = y[y != y[0]]  # cut out bacteria in lag phase
     y = [np.log(value) if value > 0 else value for value in y]  # transform data
     x = live.index[
-        live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy()  # get index array
+        live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy() * time_step # get index array
     '''start linear regression'''
     model = LinearRegression(fit_intercept=True)
     try:
@@ -400,9 +403,10 @@ def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
                       **{'binwidth': 0.25, 'stat': 'density'})  # the histogram with a density function
     plt.xlabel('Bacteria length [um]')  # x label
     plt.ylabel('Normalized proportion')
+    plt.tight_layout()
     plt.ioff()
     if save_fig:
-        path = Path(save_path).parent / 'histo.png'
+        path = Path(save_path).parent / 'histo_length.png'
         plt.savefig(path)
     else:
         plt.show()
@@ -419,6 +423,7 @@ def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     plt.xlabel('Bacteria velocity')
     plt.ylabel('Normalized proportion')
 
+    plt.tight_layout()
     plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'histo_velocity.png'
@@ -437,6 +442,7 @@ def histo_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig = sns.displot(end_force, kde=True,
                       **{'binwidth': 0.1, 'stat': 'density'})  # the histogram with a density function
     plt.xlabel('Bacteria force')
+    plt.tight_layout()
     plt.ylabel('Normalized proportion')
 
     plt.ioff()

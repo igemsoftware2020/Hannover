@@ -235,7 +235,7 @@ class Bacterium:
         # make splitting ration from normal distrbiturio
         daughter_bac_position = get_daughter_position(self)
         daughter_bac_position[2] = self.position[2]
-        daughter_bac_length = self.length / 2
+        daughter_bac_length = self.length * np.random.normal(0.5, 0.5 * 0.07)
         daughter_bac_velocity = np.asarray(self.velocity / 2)
         daughter_bac_force = np.asarray(self.force / 2)
 
@@ -254,7 +254,7 @@ class Bacterium:
         daughter_bac.update_position()
 
         # update mother cell
-        self.length = self.length / 2
+        self.length = self.length  - daughter_bac_length
         self.velocity = self.velocity / 2
         self.force = self.force / 2
         self.update_mass()
@@ -320,7 +320,7 @@ class Bacterium:
         of a normal distribution with mean at self.critical_length
         returns True if splitting is possible, False otherwise
         """
-        probability = scipy.stats.norm.pdf(self.length, loc=self.critical_length, scale=self.critical_length * 0.12)
+        probability = scipy.stats.norm.cdf(self.length, loc=self.critical_length, scale=self.critical_length * 0.12)
         return np.random.choice([True, False], p=[probability, 1 - probability])
 
 

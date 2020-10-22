@@ -18,6 +18,8 @@ from BiofilmSimulation.formulas import get_euclid_norm
 # ********************************************************************************************
 # Data handling functions for storing the data as json and reading from the json file
 
+
+
 def write_log_template(info_file_path, constants: Constants):
     """ saves a json template for saving bacteria parameters"""
     with open(info_file_path, 'w+') as json_file:

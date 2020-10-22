@@ -131,6 +131,10 @@ Successfully built BiofilmSimulation
 Installing collected packages: BiofilmSimulation
 Successfully installed BiofilmSimulation-1.0.0
 ```
+To be able to save the 2D animation of the simulation, you also need the `ffmpeg - Writer`. Install it in your enviromnet with:
+```sh
+conda install -c conda-forge ffmpeg
+```
 
 <!-- USAGE EXAMPLES -->
 ## Usage

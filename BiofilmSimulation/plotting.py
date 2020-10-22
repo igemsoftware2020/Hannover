@@ -18,7 +18,7 @@ from sklearn.linear_model import LinearRegression
 # Functions for plotting data
 
 
-def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """
     Plots or saves (as mp4) an 2d animation of the biofilm.
     Animation is a top view of the biofilm and shows the trajectories of all bacteria in the simulation time.
@@ -35,6 +35,8 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     lines = []
     data = []
     living = []
+
+    path = Path(save_path).parent / Path('2d_animation.mp4')
 
     for bacteria in plot_data:
         x_data = np.asarray([vector[0] for vector in plot_data[bacteria] if not np.isnan(np.min(vector))])
@@ -60,14 +62,13 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
 
     if save_fig:
         writer = animation.FFMpegWriter(fps=30, metadata=dict(artist='Me'), bitrate=-1)
-        path = Path(save_path).parent / Path('2d_animation.mp4')
-        anim.save(str(path), writer=writer)
+        anim.save(path, writer=writer)
         plt.close(fig)
     else:
         plt.show()
 
 
-def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """
     Plots or saves (as mp4) an 3d animation of the biofilm.
     Shows the trajectories of all bacteria in the simulation time in 3 dimensions.
@@ -97,10 +98,10 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     def update(num, line_plots, dataLines):
         for line, dataLine in zip(line_plots, dataLines):
             # update data for line plot: dataLine[0] = x data, dataLine[1] y data
-            line[0].set_data(dataLine[0][num - 5:num], dataLine[1][num-5 :num])
-            line[0].set_3d_properties(dataLine[2][num- 5:num])
-            ax.set_title(f"Trajectory of bacteria\npassed time: {round(num / 60, 2)} min\n"
-            )
+            line[0].set_data(dataLine[0][num - 5:num], dataLine[1][num - 5:num])
+            line[0].set_3d_properties(dataLine[2][num - 5:num])
+            ax.set_title(f"Trajectory of bacteria\npassed time: {round(num * time_step/ 60, 2)} min\n"
+                         )
         return lines,
 
     anim = animation.FuncAnimation(fig, update, frames=len(plot_data['bacteria_0_position']),
@@ -116,7 +117,7 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         plt.show()
 
 
-def plot_velocities(data: pd.DataFrame, save_path: Path = None, save_fig: bool = False):
+def plot_velocities(data: pd.DataFrame, save_path: Path = None, save_fig: bool = False, time_step: int = 1):
     """
     Plots velocities of each bacteria and the mean velocity of all bacteria
     over the iteration step.
@@ -126,12 +127,16 @@ def plot_velocities(data: pd.DataFrame, save_path: Path = None, save_fig: bool =
     fig, (ax1, ax2) = plt.subplots(1, 2)
     fig.tight_layout()
     for bacteria in plot_data:
-        ax1.plot(plot_data.loc[:, bacteria], '--', alpha=0.3)
+        ax1.plot(plot_data.loc[:, bacteria].index * time_step,
+                 plot_data.loc[:, bacteria].values,
+                 '--', alpha=0.3
+                 )
 
     ax1.set_title('Velocities')
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Velocity in um / s')
-    ax2.plot(means)
+
+    ax2.plot(means.index * time_step, means.values)
     ax2.set_title('Mean Velocity')
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('Velocity in um / s')
@@ -146,7 +151,7 @@ def plot_velocities(data: pd.DataFrame, save_path: Path = None, save_fig: bool =
         plt.show()
 
 
-def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """
     Plots positions (as lengths of location vectors) of each bacteria and the distance over the surface.
     """
@@ -158,8 +163,14 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
 
     for bacteria in position_data:
-        ax1.plot(position_data.loc[:, bacteria], '--', alpha=0.3)
-        ax2.plot(height_data.loc[:, bacteria.replace('position', 'height')], '--', alpha=0.3)
+        ax1.plot(position_data.loc[:, bacteria].index * time_step,
+                 position_data.loc[:, bacteria].values,
+                 '--', alpha=0.3
+                 )
+        ax2.plot(height_data.loc[:, bacteria.replace('position', 'height')].index * time_step,
+                 height_data.loc[:, bacteria.replace('position', 'height')].values,
+                 '--', alpha=0.3
+                 )
 
     ax1.set_title('Distance from origin')
     ax1.set_xlabel('Time in s')
@@ -169,11 +180,11 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('Height in um')
 
-    ax3.plot(position_means)
+    ax3.plot(position_means.index * time_step, position_means.values)
     ax3.set_xlabel('Time in s')
     ax3.set_ylabel('Mean distance in um')
 
-    ax4.plot(height_means)
+    ax4.plot(height_means.index * time_step, height_means.values)
     ax4.set_xlabel('Time in s')
     ax4.set_ylabel('Mean height in um')
 
@@ -186,7 +197,7 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         plt.show()
 
 
-def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """
     Plots force acting on each bacteria and the mean force acting on all bacteria
     over the iteration step. Also plots accelerations.
@@ -198,22 +209,25 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
 
     for bacteria in plot_data:
-        ax1.plot(plot_data.loc[:, bacteria], '.', alpha=0.3, markersize=3)
+        ax1.plot(plot_data.loc[:, bacteria].index * time_step,
+                 plot_data.loc[:, bacteria].values
+                 , '.', alpha=0.3, markersize=3
+                 )
 
     ax1.set_title('Total force')
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Force in nN')
 
-    ax2.plot(acc_data, '.', alpha=0.3, markersize=1)
+    ax2.plot(acc_data.index * time_step, acc_data.values, '.', alpha=0.3, markersize=1)
     ax2.set_title('Total acceleration')
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('Acceleration in um/s²')
 
-    ax3.plot(force_mean, '.')
+    ax3.plot(force_mean.index * time_step, force_mean.values, '-')
     ax3.set_xlabel('Time in s')
     ax3.set_ylabel('mean force in nN')
 
-    ax4.plot(acc_mean, '-')
+    ax4.plot(acc_mean.index * time_step, acc_mean.values, '-')
     ax4.set_xlabel('Time in s')
     ax4.set_ylabel('mean acceleration in um/s²')
 
@@ -226,7 +240,7 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         plt.show()
 
 
-def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """
     Plots force acting on each bacteria and the mean force acting on all bacteria
     over the iteration step.
@@ -238,8 +252,15 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, constrained_layout=True)
 
     for bacteria in mass_data:
-        ax1.plot(mass_data.loc[:, bacteria], '.', alpha=0.3, markersize=1)
-        ax2.plot(length_data.loc[:, bacteria.replace('mass', 'length')], '.', alpha=0.3, markersize=1)
+        ax1.plot(mass_data.loc[:, bacteria].index * time_step,
+                 mass_data.loc[:, bacteria].values,
+                 '.', alpha=0.3, markersize=1
+                 )
+        ax2.plot(length_data.loc[:, bacteria.replace('mass', 'length')].index * time_step,
+                 length_data.loc[:, bacteria.replace('mass', 'length')].values,
+                 '.', alpha=0.3, markersize=1
+                 )
+
     ax1.set_title('Masses')
     ax1.set_xlabel('Time in s')
     ax1.set_ylabel('Mass in kg')
@@ -248,12 +269,12 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     ax2.set_xlabel('Time in s')
     ax2.set_ylabel('length in um')
 
-    ax3.plot(mass_mean, '.', markersize=3)
+    ax3.plot(mass_mean.index * time_step, mass_mean.values, '.', markersize=3)
     ax3.set_title('Mean of bacteria masses')
     ax3.set_xlabel('Time in s')
     ax3.set_ylabel('Mass in kg')
 
-    ax4.plot(length_means, '.', markersize=3)
+    ax4.plot(length_means.index * time_step, length_means.values, '.', markersize=3)
     ax4.set_title('Mean of bacteria lengths')
     ax4.set_xlabel('Time in s')
     ax4.set_ylabel('mean length in um')
@@ -267,7 +288,7 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
         plt.show()
 
 
-def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     live = get_data_to_parameter(data, 'living')
     num = live[live == True].count(axis=1)
     if get_gent(data) is None:
@@ -278,9 +299,9 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     '''plot data'''
     fig, (ax1, ax2) = plt.subplots(2, 1)
     fig.tight_layout()
-    ax1.plot(num, color='b')
+    ax1.plot(num.index * time_step, num.values, color='b')
     ax1.set(xlabel='Time in s', ylabel='Bacteria Number', title='Bacteria Growth')
-    ax2.plot(num, label='log curve')
+    ax2.plot(num.index * time_step, num.values, label='log curve')
     ax2.set(xlabel='Time in s', ylabel='Bacteria Number [log]', title='Bacteria Growth')
     ax2.plot(x, np.exp(y_fit), label='fit curve')
     ax2.legend(loc='lower right')
@@ -338,7 +359,8 @@ def get_gent(data: pd.DataFrame):
     y = live[live == True].count(axis=1).values  # transform data and return an array
     y = y[y != y[0]]  # cut out bacteria in lag phase
     y = [np.log(value) if value > 0 else value for value in y]  # transform data
-    x = live.index[live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy()  # get index array
+    x = live.index[
+        live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy()  # get index array
     '''start linear regression'''
     model = LinearRegression(fit_intercept=True)
     try:
@@ -364,6 +386,7 @@ def last_pos(data):
     return last_cord_x, last_cord_y, last_cord_z
 
 
+# Histogram PLots
 def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     data = data['length']
     length = []
@@ -391,7 +414,7 @@ def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     end_velocity = velocity[np.logical_not(np.isnan(velocity))]  # filter all NaN values
 
     fig = sns.displot(end_velocity, kde=True,
-                      **{'binwidth': 0.25, 'stat': 'density'})  # the histogram with a density function
+                      **{'binwidth': 0.01, 'stat': 'density'})  # the histogram with a density function
     plt.xlabel('Bacteria velocity')
 
     plt.ioff()
@@ -410,7 +433,7 @@ def histo_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     end_force = force[np.logical_not(np.isnan(force))]  # filter all NaN values
 
     fig = sns.displot(end_force, kde=True,
-                      **{'binwidth': 0.25, 'stat': 'density'})  # the histogram with a density function
+                      **{'binwidth': 0.1, 'stat': 'density'})  # the histogram with a density function
     plt.xlabel('Bacteria force')
 
     plt.ioff()
@@ -426,6 +449,7 @@ def lennard_jones_force_plot(r_min, f_min):
     Forces resulting from the lennard jones potential. Reparameterized with r_min with F_LJ(r_min ) = 0
     and the absolute value of the global minimum f_min
     """
+
     def ljp(r, f_min, r_min):
         epsilon = f_min * (-169 * (r_min / (2 ** (1 / 6))) / (252 * (7 / 13) ** (1 / 6) * 2 ** (5 / 6)))
         sigma = r_min / (2 ** (1 / 6))

@@ -398,7 +398,7 @@ def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig = sns.displot(end_length, kde=True,
                       **{'binwidth': 0.25, 'stat': 'density'})  # the histogram with a density function
     plt.xlabel('Bacteria length [um]')  # x label
-
+    plt.ylabel('Normalized proportion')
     plt.ioff()
     if save_fig:
         path = Path(save_path).parent / 'histo.png'
@@ -416,6 +416,7 @@ def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig = sns.displot(end_velocity, kde=True,
                       **{'binwidth': 0.01, 'stat': 'density'})  # the histogram with a density function
     plt.xlabel('Bacteria velocity')
+    plt.ylabel('Normalized proportion')
 
     plt.ioff()
     if save_fig:
@@ -435,6 +436,7 @@ def histo_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig = sns.displot(end_force, kde=True,
                       **{'binwidth': 0.1, 'stat': 'density'})  # the histogram with a density function
     plt.xlabel('Bacteria force')
+    plt.ylabel('Normalized proportion')
 
     plt.ioff()
     if save_fig:

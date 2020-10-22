@@ -27,4 +27,5 @@ dependencies:
     - seaborn
     - sklearn
     - ffmpeg-python
+    - jupyter
      

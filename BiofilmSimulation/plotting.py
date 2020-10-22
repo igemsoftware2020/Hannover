@@ -117,7 +117,7 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
         plt.show()
 
 
-def plot_velocities(data: pd.DataFrame, save_path: Path, time_step:int, save_fig: bool = False, time_step: int = 1):
+def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """
     Plots velocities of each bacteria and the mean velocity of all bacteria
     over the iteration step.
@@ -151,7 +151,7 @@ def plot_velocities(data: pd.DataFrame, save_path: Path, time_step:int, save_fig
         plt.show()
 
 
-def plot_positions(data: pd.DataFrame, save_path: Path,time_step:int, save_fig: bool = False, time_step: int = 1):
+def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """
     Plots positions (as lengths of location vectors) of each bacteria and the distance over the surface.
     """
@@ -197,7 +197,7 @@ def plot_positions(data: pd.DataFrame, save_path: Path,time_step:int, save_fig: 
         plt.show()
 
 
-def plot_force(data: pd.DataFrame, save_path: Path,time_step: int, save_fig: bool = False, time_step: int = 1):
+def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """
     Plots force acting on each bacteria and the mean force acting on all bacteria
     over the iteration step. Also plots accelerations.
@@ -289,7 +289,7 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
         plt.show()
 
 
-def plot_num(data: pd.DataFrame, save_path: Path, time_step:int, save_fig: bool = False, time_step: int = 1):
+def plot_num(data: pd.DataFrame, save_path: Path,  save_fig: bool = False, time_step: int = 1):
 
     live = get_data_to_parameter(data, 'living')
     num = live[live == True].count(axis=1)

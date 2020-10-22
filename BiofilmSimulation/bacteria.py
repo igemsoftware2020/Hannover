@@ -118,14 +118,6 @@ class Bacterium:
         self.velocity[1] += self.acceleration[1] * dt
         self.velocity[2] += self.acceleration[2] * dt
 
-        local_rnd_1 = np.random.RandomState()
-        local_rnd_2 = np.random.RandomState()
-        local_rnd_3 = np.random.RandomState()
-        # add brownian movement, up to 2% of absolute value
-        self.velocity[0] = local_rnd_1.normal(loc=self.velocity[0], scale=0.2)
-        self.velocity[1] = local_rnd_2.normal(loc=self.velocity[1], scale=0.2)
-        self.velocity[2] = local_rnd_3.normal(loc=self.velocity[2], scale=0.05)
-
         # rotate velocity in direction of orientation
         self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
         self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))

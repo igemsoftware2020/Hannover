@@ -34,12 +34,12 @@
   <h3 align="center">iGEM 2020 project: Biofilm growth simulation</h3>
 
   <p align="center">
-    This is repository contains the code for simulating the growth of a Biofilm after attachment using Molecular dynamics simulation methods. The project was build as part of the iGEM 2020 Contest. The numerical model and simulation were implmented by the Team Hannover. Functionalities to make the software tool more accesible were added in collaboratio with the Team TU Darmstadt. The BiofilmSimulation software can be accessd a a python package, documented under https://pypi.org/project/BiofilmSimulation/1.0.0/.
+    This is repository contains the code for simulating the growth of a Biofilm after attachment using Molecular dynamics simulation methods. The project was build as part of the iGEM 2020 Contest. The numerical model and simulation were implmented by the Team Hannover. Functionalities to make the software tool more accesible were added in collaboratio with the Team TU Darmstadt. The BiofilmSimulation software can be installed a a python package, documented under https://pypi.org/project/BiofilmSimulation.
     <br />
-    <a href="https://github.com/StudDavid/biofilm_growth_modeling"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/igemsoftwareadmin/Hannover"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/StudDavid/biofilm_growth_modeling">View Demo</a>
+    <a href="https://github.com/igemsoftwareadmin/Hannover">View Demo</a>
     ·
     <a href="https://github.com/StudDavid/biofilm_growth_modeling/issues">Report Bug</a>
     ·
@@ -101,7 +101,7 @@ We provide step-by-step instructions on how to get our software running using a 
 
 1. Clone the repo
 ```sh
-git clone https://github.com/StudDavid/biofilm_growth_modeling.git
+git clone https://github.com/igemsoftwareadmin/Hannover.git
 ```
 2. Navigate in the root folder (the folder which contains the `setup.py`) and run
 
@@ -114,7 +114,7 @@ conda env create -f env/iGEM-biofilm-model.yml
 conda activate iGEM-biofilm-model
 ```
 
-4. Install our software tool as a python package in your conda enviroment with pip (package installer for Python). The package is listed at https://pypi.org/project/BiofilmSimulation/1.0.0/ and can be installed by running 
+4. Install our software tool as a python package in your conda enviroment with pip (package installer for Python). The package is listed at https://pypi.org/project/BiofilmSimulation and can be installed by running 
 
 ```sh
 pip install BiofilmSimulation
@@ -191,14 +191,14 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 * David Theidel - theidel AT stud dot uni-hannover dot de
 
-* Project Link: [https://github.com/StudDavid/biofilm_growth_modeling](https://github.com/StudDavid/biofilm_growth_modeling)
+* Project Link: [https://github.com/igemsoftwareadmin/Hannover](https://github.com/igemsoftwareadmin/Hannover)
 
 ## iGEM Competition
 * To find out more abour the awesome **iGEM Comeptition** check our [https://2020.igem.org/](https://2020.igem.org/)
 
 * More about the project of the Hannover Team can be found here: [https://2020.igem.org/Team:Hannover](https://2020.igem.org/Team:Hannover)
 
-* Details on the used methods: [https://2020.igem.org/Team:Hannover/Software](https://2020.igem.org/Team:Hannover/Software)
+* Details on the used methods: [https://2020.igem.org/Team:Hannover/Model](https://2020.igem.org/Team:Hannover/Model) / [https://2020.igem.org/Team:Hannover/Software](https://2020.igem.org/Team:Hannover/Software)
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements

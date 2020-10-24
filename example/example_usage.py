@@ -4,7 +4,7 @@
 # custom libraries
 from BiofilmSimulation.biofilm import Biofilm
 from BiofilmSimulation.constants import Constants
-from BiofilmSimulation.data_handling import bacteria_as_pandas, read_in_log
+from BiofilmSimulation.data_handling import bacteria_as_pandas, read_in_log, ask_for_log_dir
 from BiofilmSimulation.plotting import histo_length, histo_velocity, histo_force
 from BiofilmSimulation.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
     plot_num, dens_map

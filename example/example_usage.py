@@ -7,7 +7,7 @@ from BiofilmSimulation.constants import Constants
 from BiofilmSimulation.data_handling import bacteria_as_pandas, read_in_log, ask_for_log_dir
 from BiofilmSimulation.plotting import histo_length, histo_velocity, histo_force
 from BiofilmSimulation.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
-    plot_num, dens_map
+    plot_num, dens_map, animate_positions
 from BiofilmSimulation.utils import prompt_log_at_start
 
 
@@ -54,7 +54,6 @@ def plotting(info_file_path):
     # Animations
     # data = bacteria_as_pandas(info_file_path)
     # animate_positions(data, info_file_path, time_step=time_step, save_fig=True)
-    # animate_3d(data, info_file_path, time_step=time_step, save_fig=False)
 
 
 def default_run():

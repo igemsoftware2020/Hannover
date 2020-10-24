@@ -29,8 +29,8 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     fig, ax = plt.subplots()
     ax.set_xlabel("x / um")
     ax.set_ylabel("y / um")
-    ax.set_xlim(1000)
-    ax.set_ylim(1000)
+    ax.set_xlim(left = 0, right=600)
+    ax.set_ylim(bottom=0, top=600)
 
     lines = []
     data = []
@@ -81,9 +81,9 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
     ax.set_xlabel("x / um")
     ax.set_ylabel("y / um")
     ax.set_zlabel("z / um")
-    ax.set_xlim(1000)
-    ax.set_ylim(1000)
-    ax.set_zlim(50)
+    ax.set_xlim(left = 0, right=600)
+    ax.set_ylim(bottom=0, top=600)
+    ax.set_zlim(15)
     lines = []
     data = []
     for bacteria in plot_data:
@@ -326,7 +326,8 @@ def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     fig, (ax1, ax2) = plt.subplots(1, 2)
     ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
     sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=False, cmap='mako', levels=200, thresh=0)
-    
+    fig.xlabel('µm')
+    fig.ylabel('µm')
     fig.tight_layout()
     plt.ioff()
     if save_fig:
@@ -423,9 +424,9 @@ def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
     fig = sns.displot(end_velocity, kde=True,
                       **{'binwidth': 0.01, 'stat': 'density'})  # the histogram with a density function
-    plt.xlabel('Bacteria velocity')
+    plt.xlabel('Bacteria velocity [µm / s]')
     plt.ylabel('Normalized proportion')
-
+    
     plt.tight_layout()
     plt.ioff()
     if save_fig:
@@ -444,7 +445,7 @@ def histo_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
     fig = sns.displot(end_force, kde=True,
                       **{'binwidth': 0.1, 'stat': 'density'})  # the histogram with a density function
-    plt.xlabel('Bacteria force')
+    plt.xlabel('Bacteria force [nN]')
     plt.tight_layout()
     plt.ylabel('Normalized proportion')
     fig.tight_layout()

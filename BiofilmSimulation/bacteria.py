@@ -119,9 +119,9 @@ class Bacterium:
         self.velocity[2] += self.acceleration[2] * dt
 
         # rotate velocity in direction of orientation
-        self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
-        self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
-        self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_z(self.angle[2]))
+        # self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
+        # self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
+        # self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_z(self.angle[2]))
 
     def update_position(self):
         """ update bacterium position based on velocity """

@@ -57,6 +57,13 @@ def plotting(info_file_path):
 
 
 def default_run():
+    """ 
+    Use this function to start a simulation with default values. 
+    Enter some simulation paramteres in the terminal, set a reasonable duration and time step
+    and automatic plotting results. 
+    Keep in mind: Depending on the selected duration, the plot ranges may be not adequate.
+    """
+    
     strain = input("Select bacteria strain (B.Sub. or E.Coli.) : ")
     num_initial = int(input("Select number of initial bacteria : "))
     duration = int(input("Specify simulation duration in minutes : "))

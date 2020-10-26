@@ -141,9 +141,9 @@ class Constants:
         sets the simulation constants fix.
         """
         sim_dict = {
+            "bacteria_strain": self.bac_type,
             "num_initial": self.num_initial_bac,
             "time_step": self.time_step,
-            "window_size": self.window_size,
             "duration": self.duration
         }
         self.sim_dict = sim_dict

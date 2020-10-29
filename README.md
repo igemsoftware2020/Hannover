@@ -34,7 +34,7 @@
   <h3 align="center">iGEM 2020 project: Biofilm growth simulation</h3>
 
   <p align="center">
-    This is repository contains the code for simulating the growth of a Biofilm after attachment using Molecular dynamics simulation methods. The project was build as part of the iGEM 2020 Contest. The numerical model and simulation were implemented by Team Hannover. Functionalities to make the software tool more accessible were added in collaboration with the Team TU Darmstadt. The BiofilmSimulation software can be installed a a python package, documented under https://pypi.org/project/BiofilmSimulation.
+    This repository contains the code for simulating the growth of a Biofilm after attachment using Molecular dynamics simulation methods. The project was build as part of the iGEM 2020 Contest. The numerical model and simulation were implemented by Team Hannover. Functionalities to make the software tool more accessible were added in collaboration with the Team TU Darmstadt. The BiofilmSimulation software can be installed a a python package, documented under https://pypi.org/project/BiofilmSimulation.
     <br />
     <a href="https://github.com/igemsoftwareadmin/Hannover"><strong>Explore the docs »</strong></a>
     <br />

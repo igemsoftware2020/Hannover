@@ -32,6 +32,9 @@ class Biofilm(object):
     def __repr__(self):
         return f'Biofilm consisting of {len(self.bacteria)} bacteria'
 
+    def __len__(self):
+        return len(self.bacteria)
+
     def spawn(self):
         """
         spawn an initial number of bacteria.

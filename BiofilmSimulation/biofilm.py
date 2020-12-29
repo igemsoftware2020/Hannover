@@ -170,18 +170,29 @@ class Biofilm(object):
         save_dict_as_json(data['CONSTANTS'], Path(str(info_file_path).replace(".json", "_Constants.json")))
         save_dict_as_json(data, info_file_path)
 
-    def place_bacterium_in_grid(self, bacteria: Bacterium):
+    def place_bacterium_in_grid(self, bacterium: Bacterium):
+        """
+        The bacterium is placed in a 3d matrix called bacteria_grid.
+        Each entry of the bacteria grid corresponds to a position in real space. The discretization of the real space
+        is defined in the coordinates_grid. The shapes of the matrices match, so that each entry in bacteria_grid
+        corresponds to a position in real space.
+        The position of the bacterium center of gravity is stored in the bacterium_grid.
+        TODO: The bacterium has an expansion, so it will occupy more than one position in the matrix.
+
+        :param bacterium: bacterium to be placed in the grid
+        :return:
+        """
         coordinates_grid = self.coordinates_grid
         bacteria_grid = self.bacteria_grid
-        x_pos, y_pos, z_pos = bacteria.position
+        x_pos, y_pos, z_pos = bacterium.position
         x_index = coordinates_grid[0].index(x_pos.round(1))
         y_index = coordinates_grid[1].index(y_pos.round(1))
         z_index = coordinates_grid[2].index(z_pos.round(1))
 
         if (bacteria_grid[0][x_index] and bacteria_grid[1][y_index]) is None:
-            bacteria_grid[0][x_index] = bacteria
-            bacteria_grid[1][y_index] = bacteria
-            bacteria_grid[2][z_index] = bacteria
+            bacteria_grid[0][x_index] = bacterium
+            bacteria_grid[1][y_index] = bacterium
+            bacteria_grid[2][z_index] = bacterium
             self.bacteria_grid = bacteria_grid
             return True
         else:

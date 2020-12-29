@@ -37,7 +37,7 @@ class Constants:
         # SIMULATION PARAMETERS
         self.num_initial_bac = 3
         self.time_step = 1
-        self.window_size = (450, 900)
+        self.window_size = (450, 900, 150)   # units in microns
         self.duration = 60  # simulation time in minutes
         self.sim_dict = {}
 

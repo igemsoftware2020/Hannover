@@ -15,6 +15,7 @@ from BiofilmSimulation.bacteria import distance_vector, bac_bac_interaction_forc
 from BiofilmSimulation.constants import Constants
 from BiofilmSimulation.data_handling import write_log_template, read_in_log, save_dict_as_json
 from BiofilmSimulation.utils import simulation_duration
+from BiofilmSimulation.grid import get_grid_coordinates, get_empty_grid
 
 
 class Biofilm(object):
@@ -28,6 +29,8 @@ class Biofilm(object):
         self.bacteria = []
         self.num_bacteria = len(self.bacteria)
         self.constants = Constants(bac_type="B.Sub.")
+        self.coordinates_grid = []
+        self.bacteria_grid = []
 
     def __repr__(self):
         return f'Biofilm consisting of {len(self.bacteria)} bacteria'
@@ -41,10 +44,14 @@ class Biofilm(object):
          Bacteria are randomly distributed on a plane with aspect ratios specified in the c class
          """
         num_initial_bacteria = self.constants.get_simulation_constants(key="num_initial")
-        for _ in range(num_initial_bacteria):
+        x_limit, y_limit, z_limit = self.constants.window_size
+        self.coordinates_grid = get_grid_coordinates(self.constants, distance=0.1)
+        self.bacteria_grid = get_empty_grid(self.coordinates_grid)
+
+        while len(self) < num_initial_bacteria:
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
-            rnd_position = np.asarray([np.random.randint(200, 400),
-                                       np.random.randint(200, 400),
+            rnd_position = np.asarray([np.random.randint(10, x_limit - 10),
+                                       np.random.randint(10, y_limit - 10),
                                        np.random.normal(3, 0.5)
                                        ])
             # set random initial velocity
@@ -66,7 +73,9 @@ class Biofilm(object):
 
             bac = Bacterium(position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force,
                             attached_to_surface=True, constants=self.constants, strain=self.constants.bac_type)
-            self.bacteria.append(bac)
+
+            if self.place_bacterium_in_grid(bac):
+                self.bacteria.append(bac)
 
     @simulation_duration
     def simulate_multiprocessing(self):
@@ -160,6 +169,23 @@ class Biofilm(object):
         data['BACTERIA'] = bacteria_dic
         save_dict_as_json(data['CONSTANTS'], Path(str(info_file_path).replace(".json", "_Constants.json")))
         save_dict_as_json(data, info_file_path)
+
+    def place_bacterium_in_grid(self, bacteria: Bacterium):
+        coordinates_grid = self.coordinates_grid
+        bacteria_grid = self.bacteria_grid
+        x_pos, y_pos, z_pos = bacteria.position
+        x_index = coordinates_grid[0].index(x_pos.round(1))
+        y_index = coordinates_grid[1].index(y_pos.round(1))
+        z_index = coordinates_grid[2].index(z_pos.round(1))
+
+        if (bacteria_grid[0][x_index] and bacteria_grid[1][y_index]) is None:
+            bacteria_grid[0][x_index] = bacteria
+            bacteria_grid[1][y_index] = bacteria
+            bacteria_grid[2][z_index] = bacteria
+            self.bacteria_grid = bacteria_grid
+            return True
+        else:
+            return False
 
 
 # These functions are needed for the multithreading simulation

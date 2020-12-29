@@ -3,6 +3,7 @@
 
 from itertools import repeat
 from multiprocessing import Pool, cpu_count
+from pathlib import Path
 
 # ********************************************************************************************
 # imports
@@ -154,7 +155,7 @@ class Biofilm(object):
 
             # Maybe for checking integrity : len(data['BACTERIA']) - sum(map(len, data['BACTERIA'].keys()))
         data['BACTERIA'] = bacteria_dic
-        save_dict_as_json(data['CONSTANTS'], str(info_file_path).replace(".json", "_Constants.json"))
+        save_dict_as_json(data['CONSTANTS'], Path(str(info_file_path).replace(".json", "_Constants.json")))
         save_dict_as_json(data, info_file_path)
 
 

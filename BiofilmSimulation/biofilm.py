@@ -210,9 +210,9 @@ class Biofilm(object):
         Updates the position matrix of the bacteria.
         It stores the bacteria position in a matrix 3xN like
         [
-        x0, x1, x2, x3, ... , xn,
-        y0, y1, y2, y3, ..., yn,
-        z0, z1, z2, z3, ..., zn
+        [x0, x1, x2, x3, ... , xn],
+        [y0, y1, y2, y3, ..., yn],
+        [z0, z1, z2, z3, ..., zn]
         ]
         The column index matches the bacterium index.
         This is assured by sorting the bacteria list first.

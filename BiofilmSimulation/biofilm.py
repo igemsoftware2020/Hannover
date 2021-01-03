@@ -9,7 +9,7 @@ from pathlib import Path
 # imports
 import numpy as np
 import tqdm
-from scipy.spatial import ConvexHull
+from scipy.spatial import ConvexHull, Delaunay
 # custom libraries
 from BiofilmSimulation.bacteria import Bacterium, get_bacteria_dict
 from BiofilmSimulation.bacteria import distance_vector, bac_bac_interaction_force
@@ -104,6 +104,10 @@ class Biofilm(object):
         pts = self.position_matrix.transpose()
         hull = ConvexHull(pts)
         return hull
+
+    def get_neighbors(self) -> np.ndarray:
+        hull = Delaunay(self.position_matrix.transpose())
+        return hull.neighbors
 
     def update_volume(self):
         hull = self.get_convex_hull()

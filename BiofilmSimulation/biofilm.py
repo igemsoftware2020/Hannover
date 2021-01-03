@@ -105,6 +105,10 @@ class Biofilm(object):
         hull = ConvexHull(pts)
         return hull
 
+    def update_volume(self):
+        hull = self.get_convex_hull()
+        self.volume = hull.volume
+
     def sort_bacteria_by_index(self):
         # sorts the bacteria list according to the bacteria indices
         self.bacteria = sorted(self.bacteria, key=lambda b: b.index)

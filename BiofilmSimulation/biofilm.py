@@ -71,11 +71,9 @@ class Biofilm(object):
                                          -self.constants.MAX_CELL_SUBSTRATE_ADHESION
                                          ])
 
-            bac = Bacterium(position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force,
+            bac = Bacterium(index=len(self)+1, position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force,
                             attached_to_surface=True, constants=self.constants, strain=self.constants.bac_type)
-
-            if self.place_bacterium_in_grid(bac):
-                self.bacteria.append(bac)
+            self.bacteria.append(bac)
 
     @simulation_duration
     def simulate_multiprocessing(self):
@@ -99,6 +97,7 @@ class Biofilm(object):
                     for mother in self.bacteria:
                         if mother.is_split_ready() and mother.living:
                             daughter = mother.split()
+                            daughter.index = len(self) + 1
                             self.bacteria.append(daughter)
 
                     self.bacteria = pool.map(grow_bacterium, self.bacteria)
@@ -143,18 +142,18 @@ class Biofilm(object):
         bacteria_dic = {}
         if sum(map(len, data['BACTERIA'].keys())) == 0:
             # if no entry in BACTERIA, create the first one.
-            for bacteria, counter in zip(self.bacteria, range(0, len(self.bacteria))):
-                bacteria_dic.update({'bacteria_%s' % str(counter): get_bacteria_dict(bacteria)})
+            for bacteria in self.bacteria:
+                bacteria_dic.update({'bacteria_%s' % str(bacteria.index): get_bacteria_dict(bacteria)})
 
         else:
             # copy already existing one and add to entries
             bacteria_dic = data['BACTERIA'].copy()
-            for bacteria, counter in zip(self.bacteria, range(0, len(self.bacteria))):
-                bacteria_name = 'bacteria_%s' % str(counter)
+            for bacteria in self.bacteria:
+                bacteria_name = 'bacteria_%s' % str(bacteria.index)
                 # iterate over all entries in BACTERIA, append next iteration step to key values
                 if bacteria_name not in bacteria_dic.keys():
                     # Add bacteria to BACTERIUM keys, because it's not in there
-                    bacteria_dic.update({'bacteria_%s' % str(counter): get_bacteria_dict(bacteria)})
+                    bacteria_dic.update({'bacteria_%s' % str(bacteria.index): get_bacteria_dict(bacteria)})
                 else:
                     for entry in data['BACTERIA'][bacteria_name].keys():
                         # If entry already exists : Append info from next iteration step to corresponding entry

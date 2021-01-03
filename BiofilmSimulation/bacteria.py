@@ -27,7 +27,7 @@ class Bacterium:
                                                     np.random.normal(0, 0.5)]),
                  angle: np.ndarray = None, force: np.ndarray = None,
                  living: bool = True, moving: bool = False,
-                 attached_to_surface: bool = False, length: float = None):
+                 attached_to_surface: bool = False, length: float = None, index: int = None):
         """
         initialize a instance of the Bacteria class
         :param constants: c used for the bacterium. Object of c class
@@ -41,6 +41,7 @@ class Bacterium:
         :param attached_to_surface: True if bacteria is attached to surface, false else
         :param length:  length of ellipse in meter, default value 2 µm for B. sub
         """
+        self.index = None
         self.constants = constants
         # initial position
         self.position = position

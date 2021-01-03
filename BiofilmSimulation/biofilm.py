@@ -74,6 +74,33 @@ class Biofilm(object):
                             attached_to_surface=True, constants=self.constants, strain=self.constants.bac_type)
             self.bacteria.append(bac)
 
+    def update_position_matrix(self):
+        """
+        Updates the position matrix of the bacteria.
+        It stores the bacteria position in a matrix 3xN like
+        [
+        [x0, x1, x2, x3, ... , xn],
+        [y0, y1, y2, y3, ..., yn],
+        [z0, z1, z2, z3, ..., zn]
+        ]
+        The column index matches the bacterium index.
+        This is assured by sorting the bacteria list first.
+        :return:
+        """
+        # sort first, so that the column index of the matrix matches the bacteria index
+        self.sort_bacteria_by_index()
+        if len(self) > 1:
+            position_matrix = np.zeros((3, 1))
+            for bacterium in self.bacteria:
+                vectors = bacterium.position
+                position_matrix = np.c_[position_matrix, vectors]
+            position_matrix = np.delete(position_matrix, 0, axis=1)
+            self.position_matrix = position_matrix
+
+    def sort_bacteria_by_index(self):
+        # sorts the bacteria list according to the bacteria indices
+        self.bacteria = sorted(self.bacteria, key=lambda b: b.index)
+
     @simulation_duration
     def simulate_multiprocessing(self):
 
@@ -167,33 +194,6 @@ class Biofilm(object):
         data['BACTERIA'] = bacteria_dic
         save_dict_as_json(data['CONSTANTS'], Path(str(info_file_path).replace(".json", "_Constants.json")))
         save_dict_as_json(data, info_file_path)
-
-    def sort_bacteria_by_index(self):
-        # sorts the bacteria list according to the bacteria indices
-        self.bacteria = sorted(self.bacteria, key=lambda b: b.index)
-
-    def update_position_matrix(self):
-        """
-        Updates the position matrix of the bacteria.
-        It stores the bacteria position in a matrix 3xN like
-        [
-        [x0, x1, x2, x3, ... , xn],
-        [y0, y1, y2, y3, ..., yn],
-        [z0, z1, z2, z3, ..., zn]
-        ]
-        The column index matches the bacterium index.
-        This is assured by sorting the bacteria list first.
-        :return:
-        """
-        # sort first, so that the column index of the matrix matches the bacteria index
-        self.sort_bacteria_by_index()
-        if len(self) > 1:
-            position_matrix = np.zeros((3, 1))
-            for bacterium in self.bacteria:
-                vectors = bacterium.position
-                position_matrix = np.c_[position_matrix, vectors]
-            position_matrix = np.delete(position_matrix, 0, axis=1)
-            self.position_matrix = position_matrix
 
 
 # These functions are needed for the multithreading simulation

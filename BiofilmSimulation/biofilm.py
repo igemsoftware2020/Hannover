@@ -9,6 +9,7 @@ from pathlib import Path
 # imports
 import numpy as np
 import tqdm
+from scipy.spatial import ConvexHull
 # custom libraries
 from BiofilmSimulation.bacteria import Bacterium, get_bacteria_dict
 from BiofilmSimulation.bacteria import distance_vector, bac_bac_interaction_force
@@ -28,7 +29,9 @@ class Biofilm(object):
         self.bacteria = []
         self.num_bacteria = len(self.bacteria)
         self.constants = Constants(bac_type="B.Sub.")
-        self.position_matrix = []
+
+        self.position_matrix = np.asarray([])
+        self.volume = 0
 
     def __repr__(self):
         return f'Biofilm consisting of {len(self.bacteria)} bacteria'
@@ -96,6 +99,11 @@ class Biofilm(object):
                 position_matrix = np.c_[position_matrix, vectors]
             position_matrix = np.delete(position_matrix, 0, axis=1)
             self.position_matrix = position_matrix
+
+    def get_convex_hull(self) -> ConvexHull:
+        pts = self.position_matrix.transpose()
+        hull = ConvexHull(pts)
+        return hull
 
     def sort_bacteria_by_index(self):
         # sorts the bacteria list according to the bacteria indices

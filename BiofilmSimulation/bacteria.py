@@ -41,7 +41,7 @@ class Bacterium:
         :param attached_to_surface: True if bacteria is attached to surface, false else
         :param length:  length of ellipse in meter, default value 2 µm for B. sub
         """
-        self.index = None
+        self.index = index
         self.constants = constants
         # initial position
         self.position = position
@@ -294,6 +294,9 @@ class Bacterium:
         positions.append((self.position[0] + int(0.1 * dx_length), self.position[1] + int(0.1 * dy_length),
                           self.position[2] + int(0.1 * dz_length)))
         return np.asarray(positions)
+
+    def get_index(self):
+        return self.index
 
     def at_boundary(self):
         """ checks if bacteria is at the edge of the simulation plane"""

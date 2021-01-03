@@ -31,6 +31,7 @@ class Biofilm(object):
         self.constants = Constants(bac_type="B.Sub.")
         self.coordinates_grid = []
         self.bacteria_grid = []
+        self.position_matrix = []
 
     def __repr__(self):
         return f'Biofilm consisting of {len(self.bacteria)} bacteria'
@@ -199,6 +200,33 @@ class Biofilm(object):
             return True
         else:
             return False
+
+    def sort_bacteria_by_index(self):
+        # sorts the bacteria list according to the bacteria indices
+        self.bacteria = sorted(self.bacteria, key=lambda b: b.index)
+
+    def update_position_matrix(self):
+        """
+        Updates the position matrix of the bacteria.
+        It stores the bacteria position in a matrix 3xN like
+        [
+        x0, x1, x2, x3, ... , xn,
+        y0, y1, y2, y3, ..., yn,
+        z0, z1, z2, z3, ..., zn
+        ]
+        The column index matches the bacterium index.
+        This is assured by sorting the bacteria list first.
+        :return:
+        """
+        # sort first, so that the column index of the matrix matches the bacteria index
+        self.sort_bacteria_by_index()
+        if len(self) > 1:
+            position_matrix = np.zeros((3, 1))
+            for bacterium in self.bacteria:
+                vectors = bacterium.position
+                position_matrix = np.c_[position_matrix, vectors]
+            position_matrix = np.delete(position_matrix, 0, axis=1)
+            self.position_matrix = position_matrix
 
 
 # These functions are needed for the multithreading simulation

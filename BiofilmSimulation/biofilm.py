@@ -36,7 +36,10 @@ class Biofilm(object):
         return f'Biofilm consisting of {len(self.bacteria)} bacteria'
 
     def __len__(self):
-        return len(self.bacteria)
+        if not self.bacteria:
+            return 0
+        else:
+            return len(self.bacteria)
 
     def spawn(self):
         """

@@ -15,7 +15,6 @@ from BiofilmSimulation.bacteria import distance_vector, bac_bac_interaction_forc
 from BiofilmSimulation.constants import Constants
 from BiofilmSimulation.data_handling import write_log_template, read_in_log, save_dict_as_json
 from BiofilmSimulation.utils import simulation_duration
-from BiofilmSimulation.grid import get_grid_coordinates, get_empty_grid
 
 
 class Biofilm(object):
@@ -29,8 +28,6 @@ class Biofilm(object):
         self.bacteria = []
         self.num_bacteria = len(self.bacteria)
         self.constants = Constants(bac_type="B.Sub.")
-        self.coordinates_grid = []
-        self.bacteria_grid = []
         self.position_matrix = []
 
     def __repr__(self):
@@ -49,8 +46,6 @@ class Biofilm(object):
          """
         num_initial_bacteria = self.constants.get_simulation_constants(key="num_initial")
         x_limit, y_limit, z_limit = self.constants.window_size
-        self.coordinates_grid = get_grid_coordinates(self.constants, distance=0.1)
-        self.bacteria_grid = get_empty_grid(self.coordinates_grid)
 
         while len(self) < num_initial_bacteria:
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
@@ -172,34 +167,6 @@ class Biofilm(object):
         data['BACTERIA'] = bacteria_dic
         save_dict_as_json(data['CONSTANTS'], Path(str(info_file_path).replace(".json", "_Constants.json")))
         save_dict_as_json(data, info_file_path)
-
-    def place_bacterium_in_grid(self, bacterium: Bacterium):
-        """
-        The bacterium is placed in a 3d matrix called bacteria_grid.
-        Each entry of the bacteria grid corresponds to a position in real space. The discretization of the real space
-        is defined in the coordinates_grid. The shapes of the matrices match, so that each entry in bacteria_grid
-        corresponds to a position in real space.
-        The position of the bacterium center of gravity is stored in the bacterium_grid.
-        TODO: The bacterium has an expansion, so it will occupy more than one position in the matrix.
-
-        :param bacterium: bacterium to be placed in the grid
-        :return:
-        """
-        coordinates_grid = self.coordinates_grid
-        bacteria_grid = self.bacteria_grid
-        x_pos, y_pos, z_pos = bacterium.position
-        x_index = coordinates_grid[0].index(x_pos.round(1))
-        y_index = coordinates_grid[1].index(y_pos.round(1))
-        z_index = coordinates_grid[2].index(z_pos.round(1))
-
-        if (bacteria_grid[0][x_index] and bacteria_grid[1][y_index]) is None:
-            bacteria_grid[0][x_index] = bacterium
-            bacteria_grid[1][y_index] = bacterium
-            bacteria_grid[2][z_index] = bacterium
-            self.bacteria_grid = bacteria_grid
-            return True
-        else:
-            return False
 
     def sort_bacteria_by_index(self):
         # sorts the bacteria list according to the bacteria indices

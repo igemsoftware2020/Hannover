@@ -12,7 +12,6 @@ from BiofilmSimulation.constants import Constants
 # ********************************************************************************************
 # Utility functions
 
-""" Test """
 
 def simulation_duration(func):
     def inner1(*args, **kwargs):

@@ -13,6 +13,8 @@ import BiofilmSimulation.constants as constants
 # ********************************************************************************************
 # Utility functions
 
+""" Test """
+
 def simulation_duration(func):
     def inner1(*args, **kwargs):
         # storing time before function execution

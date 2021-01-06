@@ -161,8 +161,8 @@ class Bacterium:
         self.total_force = np.linalg.norm(self.force)
 
     def update_acceleration(self):
-        """ calculates and sets acceleration """
-        self.acceleration = self.force / self.mass * 1E-6
+        """ calculates and sets acceleration in [um / s^2]"""
+        self.acceleration = self.force / self.mass * 1E6
 
     def update_rotational_energy(self):
         """ updates the rotational energy """
@@ -318,7 +318,7 @@ def bac_substrate_interaction_force(self: Bacterium):
         """
     if not self.attached_to_surface:
         force = lennard_jones_force(self.position[2], f_min=-self.constants.MAX_CELL_SUBSTRATE_ADHESION,
-                                    r_min= self.length / 2) \
+                                    r_min=self.length / 2) \
                 * np.asarray([0, 0, -1])
     else:
         force = self.constants.MAX_CELL_SUBSTRATE_ADHESION * np.asarray([0, 0, -1])

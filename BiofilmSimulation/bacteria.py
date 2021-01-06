@@ -98,14 +98,11 @@ class Bacterium:
         """
         dt = self.constants.get_simulation_constants(key="time_step")
         # update velocities
-        self.velocity[0] += self.acceleration[0] * dt
-        self.velocity[1] += self.acceleration[1] * dt
-        self.velocity[2] += self.acceleration[2] * dt
+        self.velocity += self.acceleration * dt
 
         # rotate velocity in direction of orientation
-        # self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
-        # self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
-        # self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_z(self.angle[2]))
+        self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
+        self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
     def update_position(self):
         """ update bacterium position based on velocity """

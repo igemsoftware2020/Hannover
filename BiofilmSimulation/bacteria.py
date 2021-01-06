@@ -93,6 +93,26 @@ class Bacterium:
     def get_index(self):
         return self.index
 
+    def get_volume(self):
+        """ gives out the cubic volume equivalent """
+        return self.width * self.width * self.length
+
+    def get_position(self) -> np.ndarray:
+        """ discretize the bacteria position in space  """
+        positions = []
+        dx_length = self.length * math.sin(self.angle[0]) * math.cos(self.angle[1])
+        dy_length = self.length * math.cos(self.angle[0]) * math.cos(self.angle[1])
+        dz_length = self.length * math.sin(self.angle[1])
+        positions.append((self.position[0] - int(0.1 * dx_length), self.position[1] - int(0.1 * dy_length),
+                          self.position[2] - int(0.1 * dz_length)))
+        for index in range(-int(self.length * 0.01), int(self.length * 0.01) + 1):
+            positions.append((self.position[0] + int(10 * index * math.sin(self.angle[0]) * math.cos(self.angle[1])),
+                              self.position[1] + int(10 * index * math.cos(self.angle[0]) * math.cos(self.angle[1])),
+                              self.position[2] + int(10 * index * math.sin(self.angle[1]))))
+        positions.append((self.position[0] + int(0.1 * dx_length), self.position[1] + int(0.1 * dy_length),
+                          self.position[2] + int(0.1 * dz_length)))
+        return np.asarray(positions)
+
     def update_velocity(self):
         """
         Update velocity direction and value based on the acting force.
@@ -186,6 +206,28 @@ class Bacterium:
         """ updates the translation energy """
         self.translation_energy = 1 / 2 * self.mass * np.dot(self.velocity, self.velocity) * 1E-12
 
+    def grow(self):
+        """
+    grow bacteria for 1 second with speed growth_rate
+    """
+        # Make the bacteria grow
+    # using a constant growth rate
+        if self.living is True:
+            self.length += self.growth_rate * self.constants.get_simulation_constants(key="time_step")
+        else:
+            # if cell is dead, constant length
+            pass
+
+    def is_split_ready(self):
+        """
+            checks if size of bacterium is long enough for splitting
+            If bacterium is big enough, splitting occurs with a probability
+            of a normal distribution with mean at self.critical_length
+            returns True if splitting is possible, False otherwise
+        """
+        probability = scipy.stats.norm.cdf(self.length, loc=self.critical_length, scale=self.critical_length * 0.12)
+        return np.random.choice([True, False], p=[probability, 1 - probability])
+
     def split(self):
         """
         split bacteria  create new daughter bacteria with new values and update the mother bacterium
@@ -231,22 +273,6 @@ class Bacterium:
 
         return daughter_bac
 
-    def get_volume(self):
-        """ gives out the cubic volume equivalent """
-        return self.width * self.width * self.length
-
-    def grow(self):
-        """
-        grow bacteria for 1 second with speed growth_rate
-        """
-        # Make the bacteria grow
-        # using a constant growth rate
-        if self.living is True:
-            self.length += self.growth_rate * self.constants.get_simulation_constants(key="time_step")
-        else:
-            # if cell is dead, constant length
-            pass
-
     def random_cell_death(self):
         """ random cell dying """
         if random.random() > 1.0 - self.mortality_rate:
@@ -258,22 +284,6 @@ class Bacterium:
             self.attached_to_surface = False
             self.acceleration[2] = 0.01
 
-    def get_position(self) -> np.ndarray:
-        """ discretize the bacteria position in space  """
-        positions = []
-        dx_length = self.length * math.sin(self.angle[0]) * math.cos(self.angle[1])
-        dy_length = self.length * math.cos(self.angle[0]) * math.cos(self.angle[1])
-        dz_length = self.length * math.sin(self.angle[1])
-        positions.append((self.position[0] - int(0.1 * dx_length), self.position[1] - int(0.1 * dy_length),
-                          self.position[2] - int(0.1 * dz_length)))
-        for index in range(-int(self.length * 0.01), int(self.length * 0.01) + 1):
-            positions.append((self.position[0] + int(10 * index * math.sin(self.angle[0]) * math.cos(self.angle[1])),
-                              self.position[1] + int(10 * index * math.cos(self.angle[0]) * math.cos(self.angle[1])),
-                              self.position[2] + int(10 * index * math.sin(self.angle[1]))))
-        positions.append((self.position[0] + int(0.1 * dx_length), self.position[1] + int(0.1 * dy_length),
-                          self.position[2] + int(0.1 * dz_length)))
-        return np.asarray(positions)
-
     def at_boundary(self):
         """ checks if bacteria is at the edge of the simulation plane"""
         x, y, z = self.position
@@ -284,16 +294,6 @@ class Bacterium:
         elif y + self.length >= window_size[1] or y - self.length <= 0:
             return "Y"
         return False
-
-    def is_split_ready(self):
-        """
-        checks if size of bacterium is long enough for splitting
-        If bacterium is big enough, splitting occurs with a probability
-        of a normal distribution with mean at self.critical_length
-        returns True if splitting is possible, False otherwise
-        """
-        probability = scipy.stats.norm.cdf(self.length, loc=self.critical_length, scale=self.critical_length * 0.12)
-        return np.random.choice([True, False], p=[probability, 1 - probability])
 
 
 # Functions, which depend on the Bacteria class

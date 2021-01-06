@@ -86,7 +86,7 @@ class Bacterium:
 
     def __eq__(self, other):
         """ new __eq__ based on bacteria parameters """
-        if get_bacteria_dict(self) == get_bacteria_dict(other):
+        if self.index == other.index:
             return True
         return False
 
@@ -308,7 +308,6 @@ def get_bacteria_dict(bacterium: Bacterium) -> Dict:
         position=[bacterium.position.tolist()],
         velocity=[bacterium.velocity.tolist()],
         acceleration=[bacterium.acceleration.tolist()],
-        height=[bacterium.height],
         angle=[bacterium.angle.tolist()],
         force=[bacterium.force.tolist()],
         total_force=[bacterium.total_force],

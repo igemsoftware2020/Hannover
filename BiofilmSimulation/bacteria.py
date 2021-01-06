@@ -41,7 +41,7 @@ class Bacterium:
         :param force: acting force of bacteria in each direction in N
         :param living: True if bacteria is alive, false else
         :param attached_to_surface: True if bacteria is attached to surface, false else
-        :param length:  length of ellipse in meter, default value 2 µm for B. sub
+        :param length:  length of ellipse in micrometer, default value 2 µm for B. sub
         """
         self.index: int = index
         self.constants: c = constants
@@ -93,8 +93,6 @@ class Bacterium:
     def update_velocity(self):
         """
         Update velocity direction and value based on the acting force.
-        Add Brownian movement in x,y,z direction
-        Add random angle movement
         """
         dt = self.constants.get_simulation_constants(key="time_step")
         # update velocities
@@ -105,44 +103,42 @@ class Bacterium:
         self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
 
     def update_position(self):
-        """ update bacterium position based on velocity """
+        """
+        update bacterium position based on velocity,
+        add brownian movement to position
+         """
         dt = self.constants.get_simulation_constants(key="time_step")
-        self.position[0] += self.velocity[0] * dt + 1 / 2 * self.acceleration[0] * dt ** 2
-        self.position[1] += self.velocity[1] * dt + 1 / 2 * self.acceleration[1] * dt ** 2
-        self.position[2] += self.velocity[2] * dt + 1 / 2 * self.acceleration[2] * dt ** 2
+        self.position += self.velocity * dt + 1 / 2 * self.acceleration * dt ** 2
 
         local_rnd_1 = np.random.RandomState()
         local_rnd_2 = np.random.RandomState()
         local_rnd_3 = np.random.RandomState()
+
         self.position[0] = local_rnd_1.normal(loc=self.position[0], scale=0.5)
         self.position[1] = local_rnd_2.normal(loc=self.position[1], scale=0.5)
-        self.position[2] = local_rnd_3.normal(loc=self.position[2], scale=0.01)
+        self.position[2] = local_rnd_3.normal(loc=self.position[2], scale=0.5)
 
         if self.position[2] < self.length:
-            self.position[2] = self.width
             self.attached_to_surface = True
 
     def update_orientation(self):
-        """ update bacterium orientation """
+        """
+        update bacterium orientation,
+        add brownian movement
+         """
         # update angular velocity
         # 3D  instantaneous angular velocity vector w = r x v / |r|^2
+        # TODO: Transformation in spherical and cartesian coordinates and back!
         self.velocity_angular = np.cross(self.position, self.velocity) / np.linalg.norm(self.position) ** 2
-        # add random rotational velocity
-        local_rnd_1 = np.random.RandomState()
-        local_rnd_2 = np.random.RandomState()
-        local_rnd_3 = np.random.RandomState()
 
-        self.velocity_angular[0] += local_rnd_1.normal(loc=self.velocity_angular[0], scale=0.5)
-        self.velocity_angular[1] += local_rnd_2.normal(loc=self.velocity_angular[1], scale=0.5)
-        self.velocity_angular[2] += local_rnd_3.normal(loc=self.velocity_angular[2], scale=0.5)
+        dt = self.constants.get_simulation_constants(key="time_step")
+        self.angle[0] += self.velocity_angular[0] * dt
 
         local_rnd_1 = np.random.RandomState()
         local_rnd_2 = np.random.RandomState()
-        local_rnd_3 = np.random.RandomState()
 
         self.angle[0] = local_rnd_1.normal(loc=self.angle[0], scale=0.2) + self.velocity_angular[0]
         self.angle[1] = local_rnd_2.normal(loc=self.angle[1], scale=0.2) + self.velocity_angular[1]
-        self.angle[2] = local_rnd_3.normal(loc=self.angle[2], scale=0.2) + self.velocity_angular[2]
 
     def update_acting_force(self):
         """
@@ -155,8 +151,8 @@ class Bacterium:
         # offset
         # self.force = self.mass * self.acceleration * 1E6
         # Stokes drag force
-        self.force = 0
-        self.force = np.add(self.force, stokes_drag_force(radius=self.length, velocity=self.velocity,
+        self.force = np.asarray([0, 0, 0])
+        self.force = np.add(self.force, stokes_drag_force(radius=self.width / 2, velocity=self.velocity,
                                                           viscosity=self.constants.EFFECTIVE_VISCOSITY_EPS)
                             )
         # add gravitational force

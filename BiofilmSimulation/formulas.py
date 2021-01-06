@@ -18,7 +18,7 @@ def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity: float) -> 
 def gravitational_force(mass: float) -> np.ndarray:
     # calculates gravitational force on a mass
     # F = m * g * e_z
-    # [kg * um / s ** 2]
+    # [kg * m / s ** 2]
     # changed units to N
     return mass * 9.81 * np.asarray([0, 0, -1])
 
@@ -32,7 +32,7 @@ def lennard_jones_force(r, f_min, r_min):
     :param r_min: value at which the returned force is 0
     :return: force derived from the lennard- jones potential at value r
     """
-    epsilon = f_min * (-169 * (r_min / (2 ** (1 / 6))) / (252 * (7 / 13) ** (1 / 6) * 2 ** (5 / 6)))
+    epsilon = f_min * (169 * (r_min / (2 ** (1 / 6))) / (252 * (7 / 13) ** (1 / 6) * 2 ** (5 / 6)))
     sigma = r_min / (2 ** (1 / 6))
     return 48 * epsilon * np.power(sigma, 12) / np.power(r, 13) - 24 * epsilon * np.power(sigma, 6) / np.power(r, 7)
 

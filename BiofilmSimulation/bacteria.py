@@ -316,10 +316,10 @@ def bac_substrate_interaction_force(self: Bacterium):
     """
         returns force vector of bacterium substrate interaction
         """
-    if self.position[2] > 4:
+    if not self.attached_to_surface:
         force = lennard_jones_force(self.position[2], f_min=-self.constants.MAX_CELL_SUBSTRATE_ADHESION,
-                                    r_min=1) \
-                * np.asarray([0, 0, 1])
+                                    r_min= self.length / 2) \
+                * np.asarray([0, 0, -1])
     else:
         force = self.constants.MAX_CELL_SUBSTRATE_ADHESION * np.asarray([0, 0, -1])
     return force

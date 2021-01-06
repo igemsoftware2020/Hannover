@@ -11,12 +11,46 @@ import seaborn as sns
 # custom libraries
 from BiofilmSimulation.data_handling import get_data_to_parameter, get_z, constants_as_pandas
 from sklearn.linear_model import LinearRegression
+from scipy.spatial import ConvexHull, Delaunay
 
 
 # ********************************************************************************************
 # Functions for plotting data
 
+def plot_convex_hull(positions):
+    pts = positions.transpose()
+    hull = ConvexHull(pts)
 
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    # Plot defining corner points
+    ax.plot(pts.T[0], pts.T[1], pts.T[2], "ko")
+    # 12 = 2 * 6 faces are the simplices (2 simplices per square face)
+    for s in hull.simplices:
+        s = np.append(s, s[0])  # Here we cycle back to the first coordinate
+        ax.plot(pts[s, 0], pts[s, 1], pts[s, 2], "r-")
+    # Make axis label
+    for i in ["x", "y", "z"]:
+        eval("ax.set_{:s}label('{:s}')".format(i, i))
+    plt.show()
+
+
+def plot_delauny_triangulation(positions):
+    pts = positions.transpose()
+    hull = Delaunay(pts)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    # Plot defining corner points
+    ax.plot(pts.T[0], pts.T[1], pts.T[2], "ko")
+    # 12 = 2 * 6 faces are the simplices (2 simplices per square face)
+    for s in hull.simplices:
+        s = np.append(s, s[0])  # Here we cycle back to the first coordinate
+        ax.plot(pts[s, 0], pts[s, 1], pts[s, 2], "r-")
+    # Make axis label
+    for i in ["x", "y", "z"]:
+        eval("ax.set_{:s}label('{:s}')".format(i, i))
+    plt.show()
 
 def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """

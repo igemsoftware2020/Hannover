@@ -5,9 +5,8 @@
 # imports
 import time
 from typing import Dict
-
 # custom libraries
-import BiofilmSimulation.constants as constants
+from BiofilmSimulation.constants import Constants
 
 
 # ********************************************************************************************
@@ -27,11 +26,11 @@ def simulation_duration(func):
     return inner1
 
 
-def prompt_log_at_start(constant: constants):
+def prompt_log_at_start(constants: Constants):
     """ Log printed in terminal at start """
     print(f" ************ BIOFILM MODELING ************ \n"
           " A project of the iGEM Teams Hannover x Darmstadt\n")
-    print(constant)
+    print(constants)
 
 
 def print_dic(dic: Dict):

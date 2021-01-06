@@ -73,8 +73,10 @@ class Biofilm(object):
                                          -self.constants.MAX_CELL_SUBSTRATE_ADHESION
                                          ])
 
-            bac = Bacterium(index=len(self), position=rnd_position, velocity=velocity, angle=rnd_angle, force=adhesion_force,
-                            attached_to_surface=True, constants=self.constants, strain=self.constants.bac_type)
+            bac = Bacterium(index=len(self), position=rnd_position, velocity=velocity, angle=rnd_angle,
+                            force=adhesion_force,
+                            attached_to_surface=True,
+                            constants=self.constants, strain=self.constants.bac_type)
             self.bacteria.append(bac)
 
     def update_position_matrix(self):

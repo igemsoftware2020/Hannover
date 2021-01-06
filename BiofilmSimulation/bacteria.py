@@ -21,84 +21,67 @@ from BiofilmSimulation.formulas import stokes_drag_force, gravitational_force, a
 
 class Bacterium:
 
-    def __init__(self, constants: c, strain: str = None, position: np.ndarray = None,
-                 velocity: np.ndarray = np.asarray([np.random.normal(0, 0.5),
-                                                    np.random.normal(0, 0.5),
-                                                    np.random.normal(0, 0.5)]),
-                 angle: np.ndarray = None, force: np.ndarray = None,
-                 living: bool = True, moving: bool = False,
-                 attached_to_surface: bool = False, length: float = None, index: int = None):
+    def __init__(self, constants: c,
+                 strain: str = None,
+                 position: np.ndarray = None,
+                 velocity: np.ndarray = np.empty((3, 1)),
+                 angle: np.ndarray = np.empty((3, 1)),
+                 force: np.ndarray = np.empty((3, 1)),
+                 living: bool = True,
+                 attached_to_surface: bool = False,
+                 length: float = None,
+                 index: int = None):
         """
         initialize a instance of the Bacteria class
         :param constants: c used for the bacterium. Object of c class
         :param strain:  str can be set to "E.Coli" or "B.Sub.". Default uses Bacteria type selected in constants
         :param position: position of bacteria center [x_pox, y_pos, z_pos]
         :param velocity: velocity of bacteria [v_x, v_y, v_z] in m/s
-        :param angle: angle of bacteria  measured to x axis in degree
+        :param angle: angle of bacteria. Measured in xy plane and in zy-plane. Measured from x- axis in degree.
         :param force: acting force of bacteria in each direction in N
         :param living: True if bacteria is alive, false else
-        :param moving: True if bacteria is moving, false else
         :param attached_to_surface: True if bacteria is attached to surface, false else
         :param length:  length of ellipse in meter, default value 2 µm for B. sub
         """
-        self.index = index
-        self.constants = constants
+        self.index: int = index
+        self.constants: c = constants
         # initial position
-        self.position = position
+        self.position: np.ndarray = position
         # have to add this here, so it will be stored in the log file
-        self.height = self.position[2]
-        self.velocity: np.ndarray = np.asarray([velocity[0], velocity[1], velocity[2]], dtype=np.int64)
+        self.velocity: np.ndarray = velocity
 
         # initial orientation
-        if angle is None:
-            self.angle = [random.randint(0, 360), random.randint(0, 360)]
-        else:
-            self.angle = angle
-
-        # rotate velocity in direction of orientation
-        self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))
-        self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_y(self.angle[1]))
-
-        self.mass = self.constants.get_bsub_constants(key="MASS")
+        self.angle = angle
         self.length = length
+
+        # set remaining parameters according to selected bacteria strain
+        self.width = self.constants.get_bac_constants(key="WIDTH")
+        self.mass = self.constants.get_bac_constants(key="MASS")
+        self.growth_rate = self.constants.get_bac_constants(key="GROWTH_RATE")
+        self.mortality_rate = self.constants.get_bac_constants(key="MORTALITY_RATE")
+        self.critical_length = self.constants.get_bac_constants(key="CRITICAL_LENGTH")
+
+        if length is None:
+            self.length = self.constants.get_bac_constants(key="LENGTH")
 
         if strain is None:
             self.strain = constants.bac_type
         else:
             self.strain = strain
-        # set remaining parameters according to selected bacteria strain
-        if self.strain == "B.Sub.":
-            self.width = self.constants.get_bsub_constants(key="WIDTH")
-            if length is None:
-                self.length = self.constants.get_bsub_constants(key="LENGTH")
-
-            self.growth_rate = self.constants.get_bsub_constants(key="GROWTH_RATE")
-            self.mortality_rate = self.constants.get_bsub_constants(key="MORTALITY_RATE")
-            self.critical_length = self.constants.get_bsub_constants(key="CRITICAL_LENGTH")
-        elif self.strain == "E.Coli.":
-            self.width = self.constants.get_ecoli_constants(key="WIDTH")
-            if length is None:
-                self.length = self.constants.get_ecoli_constants(key="LENGTH")
-
-            self.growth_rate = self.constants.get_ecoli_constants(key="GROWTH_RATE")
-            self.mortality_rate = self.constants.get_ecoli_constants(key="MORTALITY_RATE")
-            self.critical_length = self.constants.get_ecoli_constants(key="CRITICAL_LENGTH")
 
         self.update_mass()
         self.living = living
-        self.moving = moving
         self.attached_to_surface = attached_to_surface
 
-        self.velocity_angular = [0, 0, 0]
+        self.velocity_angular = [0, 0, 0]   # [omega_x, omega_y, omega_z]
 
-        self.force: np.ndarray = force
-        self.total_force = np.linalg.norm(self.force)
-        self.acceleration = self.force / self.mass * 1E-6
+        self.force: np.ndarray = force                          # [N]
+        self.total_force = np.linalg.norm(self.force)           # [N]
+        self.acceleration = self.force / self.mass * 1E-6      # [um / s^2]
 
-        self.rotational_energy = 0
-        self.translation_energy = 0
-        self.update_rotational_energy()
-        self.update_translation_energy()
+        # Use this class parameters to check for energy conservation after splitting process
+        self.rotational_energy = 0          # E_rot = 1/2 * I * omega^2
+        self.translation_energy = 0         # E_kin = 1/2 * m * v^2
         self.total_energy = self.translation_energy + self.rotational_energy
 
     def __eq__(self, other):
@@ -234,7 +217,7 @@ class Bacterium:
 
         daughter_bac = Bacterium(constants=self.constants, strain=self.strain,
                                  angle=self.angle, force=daughter_bac_force,
-                                 living=True, moving=True,
+                                 living=True,
                                  attached_to_surface=self.attached_to_surface,
                                  velocity=daughter_bac_velocity,
                                  position=daughter_bac_position, length=daughter_bac_length)
@@ -273,7 +256,6 @@ class Bacterium:
         """ random cell dying """
         if random.random() > 1.0 - self.mortality_rate:
             self.living = False
-            self.moving = False
 
     def detach(self):
         if (self.attached_to_surface is True) & (np.random.random() > 0.9):
@@ -332,7 +314,6 @@ def get_bacteria_dict(bacterium: Bacterium) -> Dict:
         total_force=[bacterium.total_force],
         total_energy=[bacterium.total_energy],
         living=[bacterium.living],
-        moving=[bacterium.moving],
         length=[bacterium.length],
         width=[bacterium.width],
         mass=[bacterium.mass]

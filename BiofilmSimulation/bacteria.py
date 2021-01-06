@@ -73,15 +73,15 @@ class Bacterium:
         self.living = living
         self.attached_to_surface = attached_to_surface
 
-        self.velocity_angular = [0, 0, 0]   # [omega_x, omega_y, omega_z]
+        self.velocity_angular = [0, 0, 0]  # [omega_x, omega_y, omega_z]
 
-        self.force: np.ndarray = force                          # [N]
-        self.total_force = np.linalg.norm(self.force)           # [N]
-        self.acceleration = self.force / self.mass * 1E-6      # [um / s^2]
+        self.force: np.ndarray = force  # [N]
+        self.total_force = np.linalg.norm(self.force)  # [N]
+        self.acceleration = self.force / self.mass * 1E-6  # [um / s^2]
 
         # Use this class parameters to check for energy conservation after splitting process
-        self.rotational_energy = 0          # E_rot = 1/2 * I * omega^2
-        self.translation_energy = 0         # E_kin = 1/2 * m * v^2
+        self.rotational_energy = 0  # E_rot = 1/2 * I * omega^2
+        self.translation_energy = 0  # E_kin = 1/2 * m * v^2
         self.total_energy = self.translation_energy + self.rotational_energy
 
     def __eq__(self, other):
@@ -89,6 +89,9 @@ class Bacterium:
         if self.index == other.index:
             return True
         return False
+
+    def get_index(self):
+        return self.index
 
     def update_velocity(self):
         """
@@ -166,7 +169,8 @@ class Bacterium:
 
     def update_rotational_energy(self):
         """ updates the rotational energy """
-        moment_of_inertia = self.mass / 6 * (3 * self.width ** 2 + self.length) + self.mass / 2 * self.width ** 2
+        moment_of_inertia = self.mass / 6 * 3 * (self.width / 2) ** 2 + (self.length / 2) + self.mass / 2 * (
+                    self.width / 2) ** 2
         self.rotational_energy = 1 / 2 * moment_of_inertia * np.dot(self.velocity_angular, self.velocity_angular)
 
     def update_mass(self):
@@ -175,12 +179,12 @@ class Bacterium:
         ratio = self.constants.get_bac_constants(key="MASS") / (
                 np.pi * self.constants.get_bac_constants(key="WIDTH") ** 2
                 * self.constants.get_bac_constants(key="LENGTH"))
-        volume = np.pi * self.length * self.width ** 2
+        volume = np.pi * self.length * (self.width / 2) ** 2
         self.mass = ratio * volume
 
     def update_translation_energy(self):
         """ updates the translation energy """
-        self.translation_energy = 1 / 2 * self.mass * np.dot(self.velocity, self.velocity)
+        self.translation_energy = 1 / 2 * self.mass * np.dot(self.velocity, self.velocity) * 1E-12
 
     def split(self):
         """
@@ -203,13 +207,11 @@ class Bacterium:
         # Update parameters of daughter and mother bacterium
         # make splitting ration from normal distrbiturio
         daughter_bac_position = get_daughter_position(self)
-        daughter_bac_position[2] = self.position[2]
         daughter_bac_length = self.length * np.random.normal(0.5, 0.5 * 0.07)
         daughter_bac_velocity = np.asarray(self.velocity / 2)
-        daughter_bac_force = np.asarray(self.force / 2)
 
         daughter_bac = Bacterium(constants=self.constants, strain=self.strain,
-                                 angle=self.angle, force=daughter_bac_force,
+                                 angle=self.angle,
                                  living=True,
                                  attached_to_surface=self.attached_to_surface,
                                  velocity=daughter_bac_velocity,
@@ -219,14 +221,14 @@ class Bacterium:
         daughter_bac.update_mass()
         daughter_bac.update_acting_force()
         daughter_bac.update_acceleration()
-        daughter_bac.update_velocity()
-        daughter_bac.update_position()
 
         # update mother cell
-        self.length = self.length  - daughter_bac_length
+        self.length = self.length - daughter_bac_length
         self.velocity = self.velocity / 2
-        self.force = self.force / 2
         self.update_mass()
+        self.update_acting_force()
+        self.update_acceleration()
+
         return daughter_bac
 
     def get_volume(self):
@@ -240,7 +242,7 @@ class Bacterium:
         # Make the bacteria grow
         # using a constant growth rate
         if self.living is True:
-            self.length = self.length + self.growth_rate * self.constants.get_simulation_constants(key="time_step")
+            self.length += self.growth_rate * self.constants.get_simulation_constants(key="time_step")
         else:
             # if cell is dead, constant length
             pass
@@ -251,11 +253,13 @@ class Bacterium:
             self.living = False
 
     def detach(self):
+        """ detach bacteria from surface. Models bacteria diffusing from substrate into space."""
         if (self.attached_to_surface is True) & (np.random.random() > 0.9):
             self.attached_to_surface = False
             self.acceleration[2] = 0.01
 
     def get_position(self) -> np.ndarray:
+        """ discretize the bacteria position in space  """
         positions = []
         dx_length = self.length * math.sin(self.angle[0]) * math.cos(self.angle[1])
         dy_length = self.length * math.cos(self.angle[0]) * math.cos(self.angle[1])
@@ -269,9 +273,6 @@ class Bacterium:
         positions.append((self.position[0] + int(0.1 * dx_length), self.position[1] + int(0.1 * dy_length),
                           self.position[2] + int(0.1 * dz_length)))
         return np.asarray(positions)
-
-    def get_index(self):
-        return self.index
 
     def at_boundary(self):
         """ checks if bacteria is at the edge of the simulation plane"""
@@ -293,6 +294,9 @@ class Bacterium:
         """
         probability = scipy.stats.norm.cdf(self.length, loc=self.critical_length, scale=self.critical_length * 0.12)
         return np.random.choice([True, False], p=[probability, 1 - probability])
+
+
+# Functions, which depend on the Bacteria class
 
 
 def get_bacteria_dict(bacterium: Bacterium) -> Dict:
@@ -332,12 +336,12 @@ def bac_bac_interaction_force(self: Bacterium, other: Bacterium):
         Force value based on Lennard-Jones Potential / Soft-repulsive potential
         """
 
-    if np.linalg.norm(distance_vector(self, other)) > 1.9:
-        distance_abs = np.linalg.norm(distance_vector(self, other))
-        return distance_vector(self, other) / distance_abs * \
-               lennard_jones_force(distance_abs, f_min=-self.constants.MAX_CELL_CELL_ADHESION, r_min=2)
-    return self.constants.MAX_CELL_CELL_ADHESION * distance_vector(self, other) \
-           / np.linalg.norm(distance_vector(self, other))
+    distance_absolute = np.linalg.norm(distance_vector(self, other))
+
+    if distance_absolute > 1.9:
+        return distance_vector(self, other) / distance_absolute * \
+               lennard_jones_force(distance_absolute, f_min=-self.constants.MAX_CELL_CELL_ADHESION, r_min=2)
+    return self.constants.MAX_CELL_CELL_ADHESION * distance_vector(self, other) / distance_absolute
 
 
 def distance_vector(self: Bacterium, other: Bacterium):

@@ -198,14 +198,21 @@ class Biofilm(object):
                 if bacteria_name not in bacteria_dic.keys():
                     # Add bacteria to BACTERIUM keys, because it's not in there
                     bacteria_dic.update({'bacteria_%s' % str(bacteria.index): get_bacteria_dict(bacteria)})
+
                 else:
                     for entry in data['BACTERIA'][bacteria_name].keys():
                         # If entry already exists : Append info from next iteration step to corresponding entry
                         for attr in dir(bacteria):
                             if not callable(getattr(bacteria, attr)) and not attr.startswith("__") and entry == attr:
                                 attribute = getattr(bacteria, entry)
+                                # numpy data types are not JSON serializable, therefore cast datatypes
                                 if isinstance(attribute, np.ndarray):
                                     attribute = attribute.tolist()
+                                elif isinstance(attribute, np.integer):
+                                    attribute = int(attribute)
+                                elif isinstance(attribute, np.floating):
+                                    attribute = float(attribute)
+
                                 bacteria_dic[bacteria_name][entry].append(attribute)
 
             # Maybe for checking integrity : len(data['BACTERIA']) - sum(map(len, data['BACTERIA'].keys()))

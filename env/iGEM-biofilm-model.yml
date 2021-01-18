@@ -28,4 +28,5 @@ dependencies:
     - sklearn
     - ffmpeg-python
     - jupyter
+    - psutil
      

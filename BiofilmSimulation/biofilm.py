@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from itertools import repeat
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
+from psutil import cpu_count
 from pathlib import Path
 
 # ********************************************************************************************
@@ -125,7 +126,7 @@ class Biofilm(object):
         time_step = self.constants.get_simulation_constants(key="time_step")
         duration = self.constants.get_simulation_constants(key="duration")
         self.spawn()
-        num_threads = cpu_count()
+        num_threads = cpu_count(logical=False)
         print(f"\n ********* STARTING MODELLING  USING MULTIPROCESSING ********* \n "
               f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s.\n"
               f"Using {num_threads} cores."

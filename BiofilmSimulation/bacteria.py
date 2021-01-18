@@ -119,7 +119,7 @@ class Bacterium:
         """
         dt = self.constants.get_simulation_constants(key="time_step")
         # update velocities
-        self.velocity += self.acceleration * dt
+        self.velocity = self.velocity + self.acceleration * dt
 
         # rotate velocity in direction of orientation
         self.velocity: np.ndarray = apply_rotation(self.velocity, rotation_matrix_x(self.angle[0]))

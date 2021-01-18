@@ -25,8 +25,15 @@ def start_run(constant: Constants):
     # Save log file for
 
     info_file_path = biofilm.constants.get_paths(key="info")
+    biofilm.spawn()
+    print(biofilm)
+
+
+    #print("In Grid", sum(entry is not None for entry in biofilm.bacteria_grid[0]))
+    #check_neighbors(biofilm.bacteria_grid, biofilm.coordinates_grid, biofilm.bacteria[0])
+
     biofilm.simulate_multiprocessing()
-    plotting(info_file_path)
+    #plotting(info_file_path)
 
 
 def plotting(info_file_path):
@@ -64,15 +71,15 @@ def default_run():
     Keep in mind: Depending on the selected duration, the plot ranges may be not adequate.
     """
     
-    strain = input("Select bacteria strain (B.Sub. or E.Coli.) : ")
-    num_initial = int(input("Select number of initial bacteria : "))
-    duration = int(input("Specify simulation duration in minutes : "))
-    time_step = int(input("Set simulation time step in seconds : "))
-    constants = Constants(bac_type=strain)
+    # strain = input("Select bacteria strain (B.Sub. or E.Coli.) : ")
+    # num_initial = int(input("Select number of initial bacteria : "))
+    # duration = int(input("Specify simulation duration in minutes : "))
+    # time_step = int(input("Set simulation time step in seconds : "))
+    constants = Constants(bac_type="B.Sub.")
+    num_initial = 100
     constants.num_initial_bac = num_initial
-    constants.duration = duration
-    constants.time_step = time_step
-    constants.window_size = (2000, 2000)
+    #constants.duration = duration
+    #constants.time_step = time_step
     constants.set_bacteria_constants()
     constants.set_simulation_constants()
     constants.set_paths()

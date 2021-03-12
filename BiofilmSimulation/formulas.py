@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+from numba import jit
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
@@ -8,6 +8,7 @@ from scipy.spatial.transform import Rotation as R
 # ********************************************************************************************
 # In this script, the formulas for the forces and rotations are stored
 
+@jit(nopython=True)
 def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity: float) -> np.ndarray:
     # Calculates Stokes' drag for a sphere with Reynolds number < 1.
     # [um * Pa * s  * um / s] = [um * kg / (m * s ** 2) * s  * um / s]
@@ -15,6 +16,7 @@ def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity: float) -> 
     return - 6 * np.pi * radius * viscosity * 1E-12 * velocity
 
 
+@jit(nopython=True)
 def gravitational_force(mass: float, distance_over_surface: float) -> np.ndarray:
     # calculates gravitational force on a mass
     # F = m * g * e_z
@@ -23,6 +25,7 @@ def gravitational_force(mass: float, distance_over_surface: float) -> np.ndarray
     return mass * 9.81 * distance_over_surface * np.asarray([0, 0, -1])
 
 
+@jit(nopython=True)
 def lennard_jones_force(r, f_min, r_min):
     """
     Calculates the lennard-jones force at r. Formula is derived by calculating the gradient of the

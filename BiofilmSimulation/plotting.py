@@ -17,7 +17,9 @@ from scipy.spatial import ConvexHull, Delaunay
 # ********************************************************************************************
 # Functions for plotting data
 
-def plot_convex_hull(positions):
+def plot_convex_hull(data: pd.DataFrame):
+    x, y, z = last_pos(data)
+    positions = np.asarray([x, y, z])
     pts = positions.transpose()
     hull = ConvexHull(pts)
 
@@ -35,7 +37,9 @@ def plot_convex_hull(positions):
     plt.show()
 
 
-def plot_delauny_triangulation(positions):
+def plot_delauny_triangulation(data: pd.DataFrame):
+    x, y, z = last_pos(data)
+    positions = np.asarray([x, y, z])
     pts = positions.transpose()
     hull = Delaunay(pts)
 
@@ -51,6 +55,7 @@ def plot_delauny_triangulation(positions):
     for i in ["x", "y", "z"]:
         eval("ax.set_{:s}label('{:s}')".format(i, i))
     plt.show()
+
 
 def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """

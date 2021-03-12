@@ -32,7 +32,7 @@ class Bacterium:
         initialize a instance of the Bacteria class
         :param constants: c used for the bacterium. Object of c class
         :param strain:  str can be set to "E.Coli" or "B.Sub.". Default uses Bacteria type selected in constants
-        :param position: position of bacteria center [x_pox, y_pos, z_pos]
+        :param position: position of bacteria center [x_pox, y_pos, z_pos] in microns
         :param velocity: velocity of bacteria [v_x, v_y, v_z] in m/s
         :param angle: angle of bacteria  measured to x axis in degree
         :param force: acting force of bacteria in each direction in N
@@ -179,8 +179,12 @@ class Bacterium:
                                                           viscosity=self.constants.EFFECTIVE_VISCOSITY_EPS)
                             )
         # add gravitational force
-        self.force = np.add(self.force, gravitational_force(self.mass))
-        self.force = np.add(self.force, bac_substrate_interaction_force(self))
+        self.force = np.add(self.force, gravitational_force(self.mass, self.height))
+        if self.attached_to_surface:
+            self.force = np.add(self.force, bac_substrate_interaction_force(self))
+
+        random_force_vector = np.random.randn(3) * 1E-9
+        self.force = self.force + random_force_vector
         self.total_force = np.linalg.norm(self.force)
 
     def update_acceleration(self):
@@ -355,12 +359,17 @@ def bac_bac_interaction_force(self: Bacterium, other: Bacterium):
         Force value based on Lennard-Jones Potential / Soft-repulsive potential
         """
 
-    if np.linalg.norm(distance_vector(self, other)) > 1.9:
-        distance_abs = np.linalg.norm(distance_vector(self, other))
-        return distance_vector(self, other) / distance_abs * \
-               lennard_jones_force(distance_abs, f_min=-self.constants.MAX_CELL_CELL_ADHESION, r_min=2)
-    return self.constants.MAX_CELL_CELL_ADHESION * distance_vector(self, other) \
-           / np.linalg.norm(distance_vector(self, other))
+    distance_absolute = np.linalg.norm(distance_vector(self, other))
+    equilibrium_distance = 0.5
+    if distance_absolute < equilibrium_distance:
+        # weak repulsive force
+        return self.constants.MAX_CELL_CELL_ADHESION / 10  \
+               * distance_vector(self, other) / distance_absolute
+    # weak attractive force
+    return - distance_vector(self, other) / distance_absolute * \
+           lennard_jones_force(
+               distance_absolute, f_min=self.constants.MAX_CELL_CELL_ADHESION, r_min=equilibrium_distance
+           )
 
 
 def distance_vector(self: Bacterium, other: Bacterium):

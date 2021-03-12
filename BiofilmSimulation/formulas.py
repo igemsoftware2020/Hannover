@@ -20,7 +20,7 @@ def gravitational_force(mass: float, distance_over_surface: float) -> np.ndarray
     # F = m * g * e_z
     # [kg * um / s ** 2]
     # changed units to N
-    return mass * 9.81 * distance_over_surface * np.asarray([0, 0, -1]) * 10**6
+    return mass * 9.81 * distance_over_surface * np.asarray([0, 0, -1])
 
 
 def lennard_jones_force(r, f_min, r_min):

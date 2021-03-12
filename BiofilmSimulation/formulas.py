@@ -15,12 +15,12 @@ def stokes_drag_force(radius: float, velocity: np.ndarray, viscosity: float) -> 
     return - 6 * np.pi * radius * viscosity * 1E-12 * velocity
 
 
-def gravitational_force(mass: float) -> np.ndarray:
+def gravitational_force(mass: float, distance_over_surface: float) -> np.ndarray:
     # calculates gravitational force on a mass
     # F = m * g * e_z
     # [kg * um / s ** 2]
     # changed units to N
-    return mass * 9.81 * np.asarray([0, 0, -1])
+    return mass * 9.81 * distance_over_surface * np.asarray([0, 0, -1]) * 10**6
 
 
 def lennard_jones_force(r, f_min, r_min):

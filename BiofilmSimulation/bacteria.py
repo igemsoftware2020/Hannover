@@ -21,7 +21,7 @@ from BiofilmSimulation.formulas import stokes_drag_force, gravitational_force, a
 
 class Bacterium:
 
-    def __init__(self, constants: c, strain: str = None, position: np.ndarray = None,
+    def __init__(self, index: int,  constants: c, strain: str = None, position: np.ndarray = None,
                  velocity: np.ndarray = np.asarray([np.random.normal(0, 0.5),
                                                     np.random.normal(0, 0.5),
                                                     np.random.normal(0, 0.5)]),
@@ -42,6 +42,7 @@ class Bacterium:
         :param length:  length of ellipse in meter, default value 2 µm for B. sub
         """
         self.constants = constants
+        self.index = index
         # initial position
         self.position = position
         # have to add this here, so it will be stored in the log file
@@ -235,7 +236,7 @@ class Bacterium:
         daughter_bac_velocity = np.asarray(self.velocity / 2)
         daughter_bac_force = np.asarray(self.force / 2)
 
-        daughter_bac = Bacterium(constants=self.constants, strain=self.strain,
+        daughter_bac = Bacterium(constants=self.constants, index=0, strain=self.strain,
                                  angle=self.angle, force=daughter_bac_force,
                                  living=True, moving=True,
                                  attached_to_surface=self.attached_to_surface,

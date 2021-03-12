@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ********************************************************************************************
+import argparse
+
 # custom libraries
 from BiofilmSimulation.biofilm import Biofilm
 from BiofilmSimulation.constants import Constants
 from BiofilmSimulation.data_handling import bacteria_as_pandas, read_in_log, ask_for_log_dir
 from BiofilmSimulation.plotting import histo_length, histo_velocity, histo_force
 from BiofilmSimulation.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
-    plot_num, dens_map, animate_positions
+    plot_num, dens_map, animate_positions, animate_3d, lennard_jones_force_plot
 from BiofilmSimulation.utils import prompt_log_at_start
 
 
@@ -25,15 +27,8 @@ def start_run(constant: Constants):
     # Save log file for
 
     info_file_path = biofilm.constants.get_paths(key="info")
-    biofilm.spawn()
-    print(biofilm)
-
-
-    #print("In Grid", sum(entry is not None for entry in biofilm.bacteria_grid[0]))
-    #check_neighbors(biofilm.bacteria_grid, biofilm.coordinates_grid, biofilm.bacteria[0])
-
     biofilm.simulate_multiprocessing()
-    #plotting(info_file_path)
+    plotting(info_file_path)
 
 
 def plotting(info_file_path):
@@ -44,9 +39,9 @@ def plotting(info_file_path):
     time_step = constants['time_step']
 
     # Plot histograms
-    histo_length(data, info_file_path, save_fig=True)
-    histo_velocity(data, info_file_path, save_fig=True)
-    histo_force(data, info_file_path, save_fig=True)
+    #histo_length(data, info_file_path, save_fig=True)
+    #histo_velocity(data, info_file_path, save_fig=True)
+    #histo_force(data, info_file_path, save_fig=True)
 
     # Distribution of biofilm on surface
     dens_map(data, info_file_path, save_fig=True)
@@ -58,28 +53,24 @@ def plotting(info_file_path):
     plot_force(data, info_file_path, time_step=time_step, save_fig=True)
     plot_sizes(data, info_file_path, time_step=time_step, save_fig=True)
 
+    #lennard_jones_force_plot(1, 6E-9)
     # Animations
-    # data = bacteria_as_pandas(info_file_path)
-    # animate_positions(data, info_file_path, time_step=time_step, save_fig=True)
+    data = bacteria_as_pandas(info_file_path)
+    animate_positions(data, info_file_path, time_step=10, save_fig=True)
+    animate_3d(data, info_file_path, time_step=4, save_fig=True)
 
 
-def default_run():
+def default_run(strain:str = 'E.Coli.', number_inital_bacteria:int = 10, duration:int = 10, time_step:int = 1):
     """ 
     Use this function to start a simulation with default values. 
     Enter some simulation paramteres in the terminal, set a reasonable duration and time step
     and automatic plotting results. 
     Keep in mind: Depending on the selected duration, the plot ranges may be not adequate.
     """
-    
-    # strain = input("Select bacteria strain (B.Sub. or E.Coli.) : ")
-    # num_initial = int(input("Select number of initial bacteria : "))
-    # duration = int(input("Specify simulation duration in minutes : "))
-    # time_step = int(input("Set simulation time step in seconds : "))
-    constants = Constants(bac_type="B.Sub.")
-    num_initial = 100
-    constants.num_initial_bac = num_initial
-    #constants.duration = duration
-    #constants.time_step = time_step
+    constants = Constants(bac_type=strain)
+    constants.num_initial_bac = number_inital_bacteria
+    constants.duration = duration
+    constants.time_step = time_step
     constants.set_bacteria_constants()
     constants.set_simulation_constants()
     constants.set_paths()
@@ -92,9 +83,21 @@ def default_run():
 
 
 if __name__ == "__main__":
-    default_run()
+    parser = argparse.ArgumentParser(description='Start Biofilm simulation with custom parameters.')
+
+    parser.add_argument('--strain', type=str, help="Select between 'B.Sub.' or 'E.Coli'.")
+    parser.add_argument('-nI', '--numInitial', type=int, help="Specify number of initial Bacteria on the surface.")
+    parser.add_argument('-d', '--duration', type=int, help='Duration of simulated time in minutes.')
+    parser.add_argument('--step', type=int, help='Specify time steps of the simulation.')
+    parser.add_argument('--custom_plot', type=bool,
+                        help='If True ist passed, you will be asked for a log file for plotting')
+
+    args = parser.parse_args()
+
+    default_run(strain=args.strain, number_inital_bacteria=args.numInitial, duration=args.duration, time_step=args.step)
 
     # Use this two commands, if you want to plot data for a specific log
-    # path = ask_for_log_dir()
-    # plotting(path)
+    if args.custom_plot:
+        path = ask_for_log_dir()
+        plotting(path)
 

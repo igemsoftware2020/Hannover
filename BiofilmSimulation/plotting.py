@@ -5,6 +5,9 @@ from BiofilmSimulation.constants import Constants
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
+from matplotlib.pyplot import cm
+from scipy.interpolate import griddata
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -17,11 +20,54 @@ from scipy.spatial import ConvexHull, Delaunay
 # ********************************************************************************************
 # Functions for plotting data
 
+def plot_surface(data: pd.DataFrame):
+    """ DRAFT SURFACE PLOT"""
+    x, y, z = last_pos(data)
+
+    xyz = {'x': x, 'y': y, 'z': z}
+
+
+    # put the data into a pandas DataFrame (this is what my data looks like)
+    df = pd.DataFrame(xyz, index=range(len(xyz['x'])))
+
+    # re-create the 2D-arrays
+    x1 = np.linspace(df['x'].min(), df['x'].max(), len(df['x'].unique()))
+    y1 = np.linspace(df['y'].min(), df['y'].max(), len(df['y'].unique()))
+    x2, y2 = np.meshgrid(x1, y1)
+    z2 = griddata((df['x'], df['y']), df['z'], (x2, y2), method='cubic')
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    surf = ax.plot_surface(x2, y2, z2, rstride=1, cstride=1, cmap=cm.coolwarm,
+                       linewidth=0, antialiased=False)
+    #ax.set_zlim(-1.01, 1.01)
+
+    ax.zaxis.set_major_locator(LinearLocator(10))
+    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+
+    fig.colorbar(surf, shrink=0.5, aspect=5)
+    plt.title('Meshgrid Created from 3 1D Arrays')
+
+    plt.show()
+
+
+    # fig = plt.figure()
+
+    # ax = fig.gca(projection='3d')
+    # surf = ax.plot_trisurf(x, y, z, cmap=cm.jet, linewidth=0.1, antialiased=False,)
+    # fig.colorbar(surf, shrink=0.5, aspect=5)
+
+    # plt.show()
+
+
 def plot_convex_hull(data: pd.DataFrame):
     x, y, z = last_pos(data)
     positions = np.asarray([x, y, z])
     pts = positions.transpose()
     hull = ConvexHull(pts)
+
+    print("Volume in m^3: ", hull.volume * 10 ** (-18))
+    print("Surface area in m^2 : ", hull.area * 10 ** (-12))
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
@@ -31,6 +77,8 @@ def plot_convex_hull(data: pd.DataFrame):
     for s in hull.simplices:
         s = np.append(s, s[0])  # Here we cycle back to the first coordinate
         ax.plot(pts[s, 0], pts[s, 1], pts[s, 2], "r-")
+    hull.close()
+
     # Make axis label
     for i in ["x", "y", "z"]:
         eval("ax.set_{:s}label('{:s}')".format(i, i))
@@ -68,7 +116,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     fig, ax = plt.subplots()
     ax.set_xlabel("x / um")
     ax.set_ylabel("y / um")
-    ax.set_xlim(left = 0, right=600)
+    ax.set_xlim(left=0, right=600)
     ax.set_ylim(bottom=0, top=600)
 
     lines = []
@@ -120,7 +168,7 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
     ax.set_xlabel("x / um")
     ax.set_ylabel("y / um")
     ax.set_zlabel("z / um")
-    ax.set_xlim(left = 0, right=600)
+    ax.set_xlim(left=0, right=600)
     ax.set_ylim(bottom=0, top=600)
     ax.set_zlim(15)
     lines = []
@@ -139,7 +187,7 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
             # update data for line plot: dataLine[0] = x data, dataLine[1] y data
             line[0].set_data(dataLine[0][num - 5:num], dataLine[1][num - 5:num])
             line[0].set_3d_properties(dataLine[2][num - 5:num])
-            ax.set_title(f"Trajectory of bacteria\npassed time: {round(num * time_step/ 60, 2)} min\n"
+            ax.set_title(f"Trajectory of bacteria\npassed time: {round(num * time_step / 60, 2)} min\n"
                          )
         return lines,
 
@@ -317,7 +365,7 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
     ax4.set_title('Mean of bacteria lengths')
     ax4.set_xlabel('Time in s')
     ax4.set_ylabel('mean length in um')
-    
+
     fig.tight_layout()
     plt.ioff()
     if save_fig:
@@ -328,8 +376,7 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
         plt.show()
 
 
-def plot_num(data: pd.DataFrame, save_path: Path,  save_fig: bool = False, time_step: int = 1):
-
+def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     live = get_data_to_parameter(data, 'living')
     num = live[live == True].count(axis=1)
     if get_gent(data, time_step) is None:
@@ -367,7 +414,7 @@ def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=False, cmap='mako', levels=200, thresh=0)
     ax1.set_xlabel("µm")
     ax1.set_ylabel("µm")
-    
+
     ax2.set_xlabel("µm")
     ax2.set_ylabel("µm")
     fig.tight_layout()
@@ -391,7 +438,7 @@ def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool =
     ax.set_ylabel('y / um')
     ax.set_zlabel('z / um')
     ax.view_init(60)
-    
+
     fig.tight_layout()
     plt.ioff()
     if save_fig:
@@ -403,14 +450,14 @@ def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool =
 
 
 def get_gent(data: pd.DataFrame, time_step: int):
-
     live = get_data_to_parameter(data, 'living')  # get data
 
     y = live[live == True].count(axis=1).values  # transform data and return an array
     y = y[y != y[0]]  # cut out bacteria in lag phase
     y = [np.log(value) if value > 0 else value for value in y]  # transform data
     x = live.index[
-        live[live == True].count(axis=1) != live[live == True].count(axis=1)[0]].to_numpy() * time_step # get index array
+            live[live == True].count(axis=1) != live[live == True].count(axis=1)[
+                0]].to_numpy() * time_step  # get index array
     '''start linear regression'''
     model = LinearRegression(fit_intercept=True)
     try:
@@ -468,7 +515,7 @@ def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
                       **{'binwidth': 0.01, 'stat': 'density'})  # the histogram with a density function
     plt.xlabel('Bacteria velocity [µm / s]')
     plt.ylabel('Normalized proportion')
-    
+
     plt.tight_layout()
     plt.ioff()
     if save_fig:

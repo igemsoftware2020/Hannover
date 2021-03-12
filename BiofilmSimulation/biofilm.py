@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from itertools import repeat
-from multiprocessing import Pool
+from multiprocessing import Pool, set_start_method, get_context
 from psutil import cpu_count
 from pathlib import Path
 
@@ -55,7 +55,7 @@ class Biofilm(object):
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
             rnd_position = np.asarray([np.random.randint(10, x_limit - 10),
                                        np.random.randint(10, y_limit - 10),
-                                       np.random.normal(3, 0.5)
+                                       np.random.normal(6, 0.5)
                                        ])
             # set random initial velocity
             # velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),
@@ -131,7 +131,8 @@ class Biofilm(object):
               f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s.\n"
               f"Using {num_threads} cores."
               )
-        with Pool(processes=num_threads) as pool:
+        set_start_method("spawn")
+        with get_context("spawn").Pool(processes=num_threads) as pool:
             for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
                 try:
                     self.bacteria = pool.map(forces_on_bacterium, self.bacteria)

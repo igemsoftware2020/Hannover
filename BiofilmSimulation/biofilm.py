@@ -33,6 +33,7 @@ class Biofilm(object):
 
         self.position_matrix = np.asarray([])
         self.volume = 0
+        self.density = 0
 
     def __repr__(self):
         return f'Biofilm consisting of {len(self.bacteria)} bacteria'
@@ -55,7 +56,7 @@ class Biofilm(object):
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
             rnd_position = np.asarray([np.random.randint(10, x_limit - 10),
                                        np.random.randint(10, y_limit - 10),
-                                       np.random.normal(6, 0.5)
+                                       np.random.normal(4, 0.5)
                                        ])
             # set random initial velocity
             # velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),

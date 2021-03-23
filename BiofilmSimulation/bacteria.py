@@ -184,7 +184,7 @@ class Bacterium:
         if self.attached_to_surface:
             self.force = np.add(self.force, bac_substrate_interaction_force(self))
 
-        random_force_vector = np.random.randn(3) * 1E-9
+        random_force_vector = np.random.randn(3) * 1E-11
         self.force = self.force + random_force_vector
         self.total_force = np.linalg.norm(self.force)
 

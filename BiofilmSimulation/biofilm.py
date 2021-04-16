@@ -1,16 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from itertools import repeat
-from multiprocessing import Pool, set_start_method, get_context
+from itertools import repeat, starmap, chain
+from multiprocessing import set_start_method, get_context
+from multiprocessing.pool import Pool
 from psutil import cpu_count
 from pathlib import Path
+
 
 # ********************************************************************************************
 # imports
 import numpy as np
 import tqdm
 from scipy.spatial import ConvexHull, Delaunay
+from sklearn.cluster import OPTICS
+from copy import deepcopy
+
 # custom libraries
 from BiofilmSimulation.bacteria import Bacterium, get_bacteria_dict
 from BiofilmSimulation.bacteria import distance_vector, bac_bac_interaction_force
@@ -34,6 +39,10 @@ class Biofilm(object):
         self.position_matrix = np.asarray([])
         self.volume = 0
         self.density = 0
+        self.cluster = []
+
+    def __copy__(self):
+        return deepcopy(self)
 
     def __repr__(self):
         return f'Biofilm consisting of {len(self.bacteria)} bacteria'
@@ -51,20 +60,20 @@ class Biofilm(object):
          """
         num_initial_bacteria = self.constants.get_simulation_constants(key="num_initial")
         x_limit, y_limit, z_limit = self.constants.window_size
-
+        mean_speed = self.constants.get_bac_constants(key="FREE_MEAN_SPEED") / 100
         while len(self) < num_initial_bacteria:
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
-            rnd_position = np.asarray([np.random.randint(10, x_limit - 10),
-                                       np.random.randint(10, y_limit - 10),
+            rnd_position = np.asarray([np.random.randint(100, x_limit - 100),
+                                       np.random.randint(100, y_limit - 100),
                                        np.random.normal(4, 0.5)
                                        ])
             # set random initial velocity
-            # velocity = np.asarray([np.random.normal(mean_speed, mean_speed * 0.01),
-            #                       np.random.normal(mean_speed, mean_speed * 0.01),
-            #                       np.random.normal(0, 0.2)
-            #                       ])
+            velocity = np.asarray([np.random.normal(mean_speed / 3, mean_speed * 0.01),
+                                   np.random.normal(mean_speed / 3, mean_speed * 0.01),
+                                   np.random.normal(mean_speed / 3, mean_speed * 0.01)
+                                   ])
             # random orientation
-            velocity = np.asarray([0, 0, 0])
+
             rnd_angle = np.asarray([np.random.randint(0, 360),
                                     np.random.randint(0, 360),
                                     np.random.randint(0, 360)
@@ -74,11 +83,16 @@ class Biofilm(object):
                                          0,
                                          -self.constants.MAX_CELL_SUBSTRATE_ADHESION
                                          ])
-
-            bac = Bacterium(index=len(self), position=rnd_position, velocity=velocity, angle=rnd_angle,
-                            force=adhesion_force,
-                            attached_to_surface=True,
-                            constants=self.constants, strain=self.constants.bac_type)
+            if rnd_position[2] > 3:
+                bac = Bacterium(index=len(self), position=rnd_position, velocity=velocity, angle=rnd_angle,
+                                force=np.asarray([0, 0, 0]),
+                                attached_to_surface=False,
+                                constants=self.constants, strain=self.constants.bac_type)
+            else:
+                bac = Bacterium(index=len(self), position=rnd_position, velocity=velocity, angle=rnd_angle,
+                                force=adhesion_force,
+                                attached_to_surface=True,
+                                constants=self.constants, strain=self.constants.bac_type)
             self.bacteria.append(bac)
 
     def update_position_matrix(self):
@@ -126,18 +140,22 @@ class Biofilm(object):
 
         time_step = self.constants.get_simulation_constants(key="time_step")
         duration = self.constants.get_simulation_constants(key="duration")
-        self.spawn()
+
         num_threads = cpu_count(logical=False)
         print(f"\n ********* STARTING MODELLING  USING MULTIPROCESSING ********* \n "
               f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s.\n"
               f"Using {num_threads} cores."
               )
+        print("Spawning initial configuration of bacteria...")
+        self.spawn()
+
         set_start_method("spawn")
+
         with get_context("spawn").Pool(processes=num_threads) as pool:
             for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
                 try:
                     self.bacteria = pool.map(forces_on_bacterium, self.bacteria)
-                    cp_bacteria_list = self.bacteria
+                    cp_bacteria_list = deepcopy(self.bacteria)
                     self.bacteria = pool.starmap(bac_bac_interaction, zip(self.bacteria, repeat(cp_bacteria_list)))
                     self.bacteria = pool.map(update_movement, self.bacteria)
 
@@ -155,6 +173,35 @@ class Biofilm(object):
                     return self.constants.get_paths(key="info")
 
             self.write_to_log()
+            return self.constants.get_paths(key="info")
+
+    @simulation_duration
+    def simulate_using_clusters(self):
+        time_step = self.constants.get_simulation_constants(key="time_step")
+        duration = self.constants.get_simulation_constants(key="duration")
+        set_start_method("spawn")
+        num_threads = cpu_count(logical=True)
+        print(f"\n ********* STARTING MODELLING  USING MULTIPROCESSING ********* \n "
+              f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s.\n"
+              f"Using {num_threads} cores."
+              )
+
+        print("Spawning initial configuration of bacteria ...")
+        self.spawn()
+        self.write_to_log()
+        self.update_position_matrix()
+
+        print("Starting simulation ...")
+        with Pool(processes=num_threads) as pool:
+            for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
+
+                self.cluster = self.sort_bacteria_in_cluster()
+                self.cluster = [*pool.map(iterate_over_bacteria_list, self.cluster)]
+
+                self.bacteria = list(chain(*self.cluster))
+                self.update_position_matrix()
+                self.write_to_log()
+
             return self.constants.get_paths(key="info")
 
     def write_to_log(self):
@@ -223,6 +270,59 @@ class Biofilm(object):
         save_dict_as_json(data['CONSTANTS'], Path(str(info_file_path).replace(".json", "_Constants.json")))
         save_dict_as_json(data, info_file_path)
 
+    def sort_bacteria_in_cluster(self):
+        """:
+        Sorts the bacteria in the biofilm into bac_clusters. Clusters are calculated with the OPTICS algorithm.
+        Return value is a list of the bac_clusters containing the respective bacteria.
+
+        """
+        # sort data in the format of a 3xN matrix where N is the number of bacteria.
+        data = self.position_matrix.transpose()
+
+        model = OPTICS(min_samples=2, metric='euclidean')
+
+        model.fit_predict(data)
+
+        clusters = [[] for _ in range(0, len(np.unique(model.labels_)))]
+        for bacteria, index in zip(self.bacteria, model.labels_):
+            # sort bacteria in bac_clusters according to the assigned labels
+
+            clusters[index].append(bacteria)
+
+        # check if all bacteria where assigned
+        sum = 0
+        for cluster in clusters:
+            sum += len(cluster)
+        if sum != len(self.bacteria):
+            raise ValueError(f"{abs(sum - len(self.bacteria))} bacteria where not sorted in a cluster.")
+
+        return clusters
+
+    def sort_clusters_in_bacteria_list(self, bac_clusters: [Bacterium]):
+        bacteria_list = []
+        for bac_cluster in bac_clusters:
+            for bacteria in bac_cluster:
+                bacteria_list.append(bacteria)
+        return bacteria_list
+
+
+def iterate_over_bacteria_list(bac_list: [Bacterium]):
+
+    bac_list = [forces_on_bacterium(bacteria) for bacteria in bac_list]
+    cp_bacteria_list = deepcopy(bac_list)
+    bac_list = starmap(bac_bac_interaction, zip(bac_list, repeat(cp_bacteria_list)))
+    bac_list = [update_movement(bacteria) for bacteria in bac_list]
+    bac_list = [grow_bacterium(bacteria) for bacteria in bac_list]
+    bac_list = [*bac_list]
+    for mother in bac_list:
+        if mother.is_split_ready() and mother.living:
+            daughter, mother = mother.split()
+            daughter.index = len(bac_list) + 1
+            bac_list.append(daughter)
+            bac_list[bac_list.index(mother)] = mother
+
+    return bac_list
+
 
 # These functions are needed for the multithreading simulation
 def grow_bacterium(bacterium: Bacterium):
@@ -238,13 +338,11 @@ def forces_on_bacterium(bacterium: Bacterium):
 
 
 def update_movement(bacterium: Bacterium):
+
     bacterium.update_acceleration()
-    if np.linalg.norm(bacterium.acceleration) > 0.9:
-        bacterium.acceleration = bacterium.acceleration / np.linalg.norm(bacterium.acceleration) * np.random.normal(0,
-                                                                                                                    scale=0.02)
     bacterium.update_velocity()
-    if not np.linalg.norm(bacterium.velocity > 14):
-        bacterium.velocity = bacterium.velocity / 2
+
+    bacterium.update_orientation()
     bacterium.update_position()
 
     if bacterium.living is True:
@@ -259,7 +357,7 @@ def bac_bac_interaction(bacterium: Bacterium, bac_list):
         # this is the bacteria i want to update the interaction force on
         if bacterium != other_bacterium \
                 and (
-                np.linalg.norm(distance_vector(bacterium, other_bacterium)) < 2 * bacterium.length):
+                0 < np.linalg.norm(distance_vector(bacterium, other_bacterium)) < 2 * bacterium.length):
             # add interaction force
             force_vector = bac_bac_interaction_force(bacterium, other_bacterium)
             bacterium.force = np.add(bacterium.force, force_vector)

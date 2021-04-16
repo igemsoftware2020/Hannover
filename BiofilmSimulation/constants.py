@@ -37,7 +37,7 @@ class Constants:
         # SIMULATION PARAMETERS
         self.num_initial_bac = 3
         self.time_step = 1
-        self.window_size = (450, 900, 150)   # units in microns
+        self.window_size = (9000, 9000, 150)   # units in microns
         self.duration = 60  # simulation time in minutes
         self.sim_dict = {}
 
@@ -160,7 +160,7 @@ class Constants:
             "MASS": 10 ** (-12),  # [kg]
             "MORTALITY_RATE": 0.0,
             "CRITICAL_LENGTH": 4.7,  # [um]
-            "FREE_MEAN_SPEED": 8 / (60 * 60),  # [um / s]
+            "FREE_MEAN_SPEED": 8 / (60 * 60 * 60),  # [um / s]
             "DOUBLING_TIME": 4200, # [s] DOI:
             "GROWTH_RATE": 2.2 / 4200,  # [um / s]
             "MOTION_ACTIVATION_PROBABILITY": 0.00,
@@ -182,7 +182,7 @@ class Constants:
             # [um] https://en.wikipedia.org/wiki/Escherichia_coli
             "WIDTH": 0.5,  # [um] https://en.wikipedia.org/wiki/Escherichia_coli
             "MASS": 10 ** (-12),  # [kg]
-            "MORTALITY_RATE": 0.01,  # [% / 100]
+            "MORTALITY_RATE": 0.001,  # [% / 100]
             "CRITICAL_LENGTH": 3.5,  # [um]
             "FREE_MEAN_SPEED": 50,  # [um / s]
             "DOUBLING_TIME": 1200,  # [s] DOI: 10.1128/jb.167.1.219-230.1986

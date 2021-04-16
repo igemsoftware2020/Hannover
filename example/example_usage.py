@@ -9,7 +9,8 @@ from BiofilmSimulation.constants import Constants
 from BiofilmSimulation.data_handling import bacteria_as_pandas, read_in_log, ask_for_log_dir
 from BiofilmSimulation.plotting import histo_length, histo_velocity, histo_force
 from BiofilmSimulation.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
-    plot_num, dens_map, animate_positions, animate_3d, lennard_jones_force_plot
+    plot_num, dens_map, animate_positions, animate_3d, lennard_jones_force_plot, plot_convex_hull,\
+    scatter_last_positions, plot_delauny_triangulation, plot_surface
 from BiofilmSimulation.utils import prompt_log_at_start
 
 
@@ -27,7 +28,8 @@ def start_run(constant: Constants):
     # Save log file for
 
     info_file_path = biofilm.constants.get_paths(key="info")
-    biofilm.simulate_multiprocessing()
+    #biofilm.simulate_multiprocessing()
+    biofilm.simulate_using_clusters()
     plotting(info_file_path)
 
 
@@ -40,27 +42,32 @@ def plotting(info_file_path):
 
     # Plot histograms
     #histo_length(data, info_file_path, save_fig=True)
-    #histo_velocity(data, info_file_path, save_fig=True)
-    #histo_force(data, info_file_path, save_fig=True)
+    histo_velocity(data, info_file_path, save_fig=True)
+    histo_force(data, info_file_path, save_fig=True)
 
     # Distribution of biofilm on surface
     dens_map(data, info_file_path, save_fig=True)
 
     # Time series plots
     plot_num(data, info_file_path, time_step=time_step, save_fig=True)
-    plot_velocities(data, info_file_path, time_step=time_step, save_fig=True)
-    plot_positions(data, info_file_path, time_step=time_step, save_fig=True)
-    plot_force(data, info_file_path, time_step=time_step, save_fig=True)
+    #plot_velocities(data, info_file_path, time_step=time_step, save_fig=True)
+    #plot_positions(data, info_file_path, time_step=time_step, save_fig=True)
+    #plot_force(data, info_file_path, time_step=time_step, save_fig=True)
     plot_sizes(data, info_file_path, time_step=time_step, save_fig=True)
 
+    plot_surface(data)
+    #plot_convex_hull(data)
+    plot_delauny_triangulation(data)
+    scatter_last_positions(data, info_file_path, save_fig=True)
+    plot_surface(data)
     #lennard_jones_force_plot(1, 6E-9)
     # Animations
     data = bacteria_as_pandas(info_file_path)
-    animate_positions(data, info_file_path, time_step=10, save_fig=True)
+    animate_positions(data, info_file_path, time_step=5, save_fig=True)
     animate_3d(data, info_file_path, time_step=4, save_fig=True)
 
 
-def default_run(strain:str = 'E.Coli.', number_inital_bacteria:int = 10, duration:int = 10, time_step:int = 1):
+def default_run(strain: str = 'E.Coli.', number_initial_bacteria: int = 10, duration: int = 10, time_step: int = 1):
     """ 
     Use this function to start a simulation with default values. 
     Enter some simulation paramteres in the terminal, set a reasonable duration and time step
@@ -68,7 +75,7 @@ def default_run(strain:str = 'E.Coli.', number_inital_bacteria:int = 10, duratio
     Keep in mind: Depending on the selected duration, the plot ranges may be not adequate.
     """
     constants = Constants(bac_type=strain)
-    constants.num_initial_bac = number_inital_bacteria
+    constants.num_initial_bac = number_initial_bacteria
     constants.duration = duration
     constants.time_step = time_step
     constants.set_bacteria_constants()
@@ -94,10 +101,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    default_run(strain=args.strain, number_inital_bacteria=args.numInitial, duration=args.duration, time_step=args.step)
+    default_run(strain=args.strain, number_initial_bacteria=args.numInitial,
+                duration=args.duration, time_step=args.step)
 
     # Use this two commands, if you want to plot data for a specific log
     if args.custom_plot:
         path = ask_for_log_dir()
-        plotting(path)
+        if path:
+            plotting(path)
+        else:
+            print("No path selected.")
 

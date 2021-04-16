@@ -5,6 +5,8 @@ from BiofilmSimulation.constants import Constants
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
+from sklearn.cluster import OPTICS
+from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.pyplot import cm
 from scipy.interpolate import griddata
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
@@ -39,7 +41,7 @@ def plot_surface(data: pd.DataFrame):
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     surf = ax.plot_surface(x2, y2, z2, rstride=1, cstride=1, cmap=cm.coolwarm,
-                       linewidth=0, antialiased=False)
+                           linewidth=0, antialiased=False)
     #ax.set_zlim(-1.01, 1.01)
 
     ax.zaxis.set_major_locator(LinearLocator(10))
@@ -110,14 +112,15 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     Plots or saves (as mp4) an 2d animation of the biofilm.
     Animation is a top view of the biofilm and shows the trajectories of all bacteria in the simulation time.
     """
+    print("Animate positions in 2D over time ...")
     plot_data = get_data_to_parameter(data, 'position', exact=True)
     living_data = get_data_to_parameter(data, 'living')
 
     fig, ax = plt.subplots()
     ax.set_xlabel("x / um")
     ax.set_ylabel("y / um")
-    ax.set_xlim(left=0, right=600)
-    ax.set_ylim(bottom=0, top=600)
+    ax.set_xlim(left=-1000, right=1000)
+    ax.set_ylim(bottom=-1000, top=1000)
 
     lines = []
     data = []
@@ -135,7 +138,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     def update(num, line_plots, data_lines, data_living):
         for line, dataLine, alive in zip(line_plots, data_lines, data_living):
             # update data for line plot: dataLine[0] = x data, dataLine[1] y data
-            line[0].set_data(dataLine[0][num - 5:num], dataLine[1][num - 5:num])
+            line[0].set_data(dataLine[0][num - 2:num], dataLine[1][num - 2:num])
             if alive[0] is False:
                 line[0].set_color('black')
                 line[0].set_alpha(0.8)
@@ -204,11 +207,14 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
         plt.show()
 
 
+# Visualize Biofilm parameters
+
 def plot_velocities(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
     """
     Plots velocities of each bacteria and the mean velocity of all bacteria
     over the iteration step.
     """
+    print("Plotting velocities of bacteria over time...")
     plot_data = get_data_to_parameter(data, 'velocity')
     means = plot_data.mean(axis=1, skipna=True)
     fig, (ax1, ax2) = plt.subplots(1, 2)
@@ -241,6 +247,7 @@ def plot_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = False, 
     """
     Plots positions (as lengths of location vectors) of each bacteria and the distance over the surface.
     """
+    print("Plotting positions of bacteria over time ...")
     position_data = get_data_to_parameter(data, 'position')
     position_means = position_data.mean(axis=1, skipna=True)
     height_data = get_data_to_parameter(data, 'height')
@@ -288,7 +295,7 @@ def plot_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
     Plots force acting on each bacteria and the mean force acting on all bacteria
     over the iteration step. Also plots accelerations.
     """
-
+    print("Plotting acting force on bacteria over time ...")
     plot_data = get_data_to_parameter(data, 'total_force') * 1e9
     acc_data = get_data_to_parameter(data, 'acceleration')
     force_mean = plot_data.mean(axis=1, skipna=True)
@@ -332,6 +339,7 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
     Plots force acting on each bacteria and the mean force acting on all bacteria
     over the iteration step.
     """
+    print("Plotting sizes of bacteria over time ...")
     mass_data = get_data_to_parameter(data, 'mass')
     mass_mean = mass_data.mean(axis=1, skipna=True)
     length_data = get_data_to_parameter(data, 'length')
@@ -377,24 +385,28 @@ def plot_sizes(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
 
 
 def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_step: int = 1):
+    print("Plotting number of bacteria over time ...")
     live = get_data_to_parameter(data, 'living')
     num = live[live == True].count(axis=1)
-    if get_gent(data, time_step) is None:
-        return
-    else:
-        x, y_fit, slope, generation_time = get_gent(data, time_step)
+
+    fig, (ax1, ax2) = plt.subplots(2, 1)
 
     '''plot data'''
-    fig, (ax1, ax2) = plt.subplots(2, 1)
     ax1.plot(num.index * time_step, num.values, color='b')
     ax1.set(xlabel='Time in s', ylabel='Bacteria Number', title='Bacteria Growth')
     ax2.plot(num.index * time_step, num.values, label='log curve')
     ax2.set(xlabel='Time in s', ylabel='Bacteria Number [log]', title='Bacteria Growth')
-    ax2.plot(x, np.exp(y_fit), label='fit curve')
-    ax2.legend(loc='lower right')
-    ax2.text(0.1, 0.9, 'slope: ' + str(round(slope, 5)), transform=ax2.transAxes)
-    ax2.text(0.1, 0.8, 'generation time: ' + str(round(generation_time, 5)), transform=ax2.transAxes)
-    ax2.set_yscale('log')
+
+    if get_gent(data, time_step) is None:
+        return
+    else:
+        x, y_fit, slope, generation_time = get_gent(data, time_step)
+        # plot fit
+        ax2.plot(x, np.exp(y_fit), label='fit curve')
+        ax2.legend(loc='lower right')
+        ax2.text(0.1, 0.9, 'slope: ' + str(round(slope, 5)), transform=ax2.transAxes)
+        ax2.text(0.1, 0.8, 'generation time: ' + str(round(generation_time, 5)), transform=ax2.transAxes)
+        ax2.set_yscale('log')
 
     fig.tight_layout()
     plt.ioff()
@@ -408,9 +420,10 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_s
 
 def dens_map(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
     """Scatters the last positions of the bacteria and plots the density of bacteria. """
+    print("Plotting density of bacteria ...")
     x, y, z = last_pos(data)
     fig, (ax1, ax2) = plt.subplots(1, 2)
-    ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='x')
+    ax1.scatter(x, y, c='g', s=20, alpha=0.8, marker='.')
     sns.kdeplot(data=x, data2=y, ax=ax2, shade=True, cbar=False, cmap='mako', levels=200, thresh=0)
     ax1.set_xlabel("µm")
     ax1.set_ylabel("µm")
@@ -432,7 +445,7 @@ def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool =
     X, Y, Z = get_z(data)
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(x, y, z, c='g', s=50, alpha=0.8, marker='o')
+    ax.scatter(x, y, z, c='g', s=10, alpha=0.8, marker='o')
     ax.plot_trisurf(X, Y, Z, cmap='Greens', edgecolor='none')
     ax.set_xlabel('x / um')
     ax.set_ylabel('y / um')
@@ -449,14 +462,48 @@ def scatter_last_positions(data: pd.DataFrame, save_path: Path, save_fig: bool =
         plt.show()
 
 
+def plot_bacteria_as_clusters(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_point=None):
+    if time_point is None:
+        # set to last time step
+        time_point = -1
+    position_matrix = []
+    for bac in data['position'].index:
+        x, y, z = data['position'][bac][time_point][0], \
+                  data['position'][bac][time_point][1], \
+                  data['position'][bac][time_point][2]
+        position_matrix.append([x, y, z])
+
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    ax.scatter(data[:, 0], data[:, 1], data[:, 2], s=30)
+    ax.view_init(azim=200)
+    plt.show()
+
+    # model = DBSCAN(eps=2.5, min_samples=2)
+    model = OPTICS(min_samples=2, metric='euclidean')
+    model.fit_predict(data)
+
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    ax.scatter(data[:, 0], data[:, 1], data[:, 2], c=model.labels_, s=30)
+    ax.view_init(azim=200)
+    plt.show()
+    if save_fig:
+        path = Path(save_path).parent / 'cluster_plot.png'
+        plt.savefig(path)
+        plt.close(fig)
+    else:
+        plt.show()
+
+
 def get_gent(data: pd.DataFrame, time_step: int):
     live = get_data_to_parameter(data, 'living')  # get data
 
-    y = live[live == True].count(axis=1).values  # transform data and return an array
+    y = live[live == 'True'].count(axis=1).values  # transform data and return an array
     y = y[y != y[0]]  # cut out bacteria in lag phase
     y = [np.log(value) if value > 0 else value for value in y]  # transform data
     x = live.index[
-            live[live == True].count(axis=1) != live[live == True].count(axis=1)[
+            live[live == 'True'].count(axis=1) != live[live == 'True'].count(axis=1)[
                 0]].to_numpy() * time_step  # get index array
     '''start linear regression'''
     model = LinearRegression(fit_intercept=True)
@@ -485,6 +532,7 @@ def last_pos(data):
 
 # Histogram PLots
 def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    print("Plotting length distribution of bacteria ...")
     data = data['length']
     length = []
     for bac in data.index:
@@ -506,6 +554,7 @@ def histo_length(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
 
 def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    print("Plotting velocity distribution of bacteria ...")
     data = get_data_to_parameter(data, 'velocity')
     velocity = data.T.iloc[:, :].values.reshape(data.T.size)  # get the data as a one dimensional array
 
@@ -526,6 +575,7 @@ def histo_velocity(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
 
 
 def histo_force(data: pd.DataFrame, save_path: Path, save_fig: bool = False):
+    print("Plotting force distribution of bacteria ...")
     plot_data = get_data_to_parameter(data, 'total_force') * 1e9
 
     force = plot_data.T.iloc[:, :].values.reshape(plot_data.T.size)  # get the data as a one dimensional array

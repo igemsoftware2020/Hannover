@@ -184,12 +184,13 @@ class Bacterium:
                             )
         # add gravitational force
         self.force = np.add(self.force, gravitational_force(self.mass, self.height))
-        if self.attached_to_surface:
-            self.force = np.add(self.force, bac_substrate_interaction_force(self))
+        #if self.attached_to_surface:
+            #self.force = np.add(self.force, bac_substrate_interaction_force(self))
 
         local_rnd_1 = np.random.RandomState()
 
         random_force_vector = local_rnd_1.normal(loc=0, scale=0.5, size=3) * 10**(-9)
+        random_force_vector[2] = local_rnd_1.normal(loc=0, scale=0.2, size=1) * 10**(-11)
         self.force = self.force + random_force_vector
         self.total_force = np.linalg.norm(self.force)
 
@@ -246,13 +247,17 @@ class Bacterium:
         daughter_bac_velocity = np.asarray(self.velocity / 2)
         daughter_bac_force = np.asarray(self.force / 2)
 
-        daughter_bac = deepcopy(self)
+        daughter_bac = Bacterium(index=0, position=daughter_bac_position,
+                                 velocity=daughter_bac_velocity,
+                                 force=daughter_bac_force,
+                                 length=daughter_bac_length,
+                                 constants=self.constants)
 
-        daughter_bac.index = 0
-        daughter_bac.position = daughter_bac_position
-        daughter_bac.velocity = daughter_bac_velocity
-        daughter_bac.force = daughter_bac_force
-        daughter_bac.length = daughter_bac_length
+        #daughter_bac.index = 0
+        #daughter_bac.position = daughter_bac_position
+        #daughter_bac.velocity = daughter_bac_velocity
+        #daughter_bac.force = daughter_bac_force
+        #daughter_bac.length = daughter_bac_length
 
         # daughter_bac.update_acting_force()
         # daughter_bac.update_acceleration()
@@ -287,14 +292,14 @@ class Bacterium:
 
     def random_cell_death(self):
         """ random cell dying """
-        if random.random()  > (1.0 - self.mortality_rate):
+        if random.random() > (0.9 - self.mortality_rate):
             self.living = False
             self.moving = False
 
     def detach(self):
         if (self.attached_to_surface is True) & (np.random.random() > 0.8):
             self.attached_to_surface = False
-            self.acceleration[2] = 0.01
+            self.acceleration[2] = 0.0001
 
     def get_position(self) -> np.ndarray:
         positions = []
@@ -376,7 +381,7 @@ def bac_bac_interaction_force(self: Bacterium, other: Bacterium):
     equilibrium_distance = 2
     if distance_absolute < equilibrium_distance:
         # weak repulsive force
-        return -self.constants.MAX_CELL_CELL_ADHESION / 10 * distance_vector(self, other) / distance_absolute
+        return -self.constants.MAX_CELL_CELL_ADHESION * distance_vector(self, other) / distance_absolute
     # weak attractive force
     return - distance_vector(self, other) / distance_absolute * \
            lennard_jones_force(

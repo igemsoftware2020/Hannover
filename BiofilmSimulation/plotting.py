@@ -119,8 +119,8 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     fig, ax = plt.subplots()
     ax.set_xlabel("x / um")
     ax.set_ylabel("y / um")
-    ax.set_xlim(left=-1000, right=1000)
-    ax.set_ylim(bottom=-1000, top=1000)
+    ax.set_xlim(left=-0, right=3000)
+    ax.set_ylim(bottom=-0, top=3000)
 
     lines = []
     data = []
@@ -138,7 +138,7 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     def update(num, line_plots, data_lines, data_living):
         for line, dataLine, alive in zip(line_plots, data_lines, data_living):
             # update data for line plot: dataLine[0] = x data, dataLine[1] y data
-            line[0].set_data(dataLine[0][num - 2:num], dataLine[1][num - 2:num])
+            line[0].set_data(dataLine[0][num - 5:num], dataLine[1][num - 5:num])
             if alive[0] is False:
                 line[0].set_color('black')
                 line[0].set_alpha(0.8)
@@ -171,9 +171,9 @@ def animate_3d(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time
     ax.set_xlabel("x / um")
     ax.set_ylabel("y / um")
     ax.set_zlabel("z / um")
-    ax.set_xlim(left=0, right=600)
-    ax.set_ylim(bottom=0, top=600)
-    ax.set_zlim(15)
+    ax.set_xlim(left=0, right=2000)
+    ax.set_ylim(bottom=0, top=2000)
+    ax.set_zlim(100)
     lines = []
     data = []
     for bacteria in plot_data:

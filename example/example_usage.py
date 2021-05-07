@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ********************************************************************************************
 import argparse
+from pathlib import Path
 
 # custom libraries
 from BiofilmSimulation.biofilm import Biofilm
@@ -23,13 +24,13 @@ def start_run(constant: Constants):
     biofilm = Biofilm()
     # pass constant to biofilm object
     biofilm.constants = constant
+
     # Logging at begin
     prompt_log_at_start(biofilm.constants)
     # Save log file for
 
     info_file_path = biofilm.constants.get_paths(key="info")
-    #biofilm.simulate_multiprocessing()
-    biofilm.simulate_using_clusters()
+    biofilm.simulate_multiprocessing(center=[500, 500])
     plotting(info_file_path)
 
 
@@ -41,7 +42,7 @@ def plotting(info_file_path):
     time_step = constants['time_step']
 
     # Plot histograms
-    #histo_length(data, info_file_path, save_fig=True)
+    histo_length(data, info_file_path, save_fig=True)
     histo_velocity(data, info_file_path, save_fig=True)
     histo_force(data, info_file_path, save_fig=True)
 
@@ -50,21 +51,20 @@ def plotting(info_file_path):
 
     # Time series plots
     plot_num(data, info_file_path, time_step=time_step, save_fig=True)
-    #plot_velocities(data, info_file_path, time_step=time_step, save_fig=True)
-    #plot_positions(data, info_file_path, time_step=time_step, save_fig=True)
-    #plot_force(data, info_file_path, time_step=time_step, save_fig=True)
+    plot_velocities(data, info_file_path, time_step=time_step, save_fig=True)
+    plot_positions(data, info_file_path, time_step=time_step, save_fig=True)
+    plot_force(data, info_file_path, time_step=time_step, save_fig=True)
     plot_sizes(data, info_file_path, time_step=time_step, save_fig=True)
 
-    plot_surface(data)
+    #plot_surface(data)
     #plot_convex_hull(data)
-    plot_delauny_triangulation(data)
-    scatter_last_positions(data, info_file_path, save_fig=True)
-    plot_surface(data)
+    #plot_delauny_triangulation(data)
+    #scatter_last_positions(data, info_file_path, save_fig=True)
     #lennard_jones_force_plot(1, 6E-9)
     # Animations
     data = bacteria_as_pandas(info_file_path)
-    animate_positions(data, info_file_path, time_step=5, save_fig=True)
-    animate_3d(data, info_file_path, time_step=4, save_fig=True)
+    animate_positions(data, info_file_path, time_step=time_step, save_fig=True)
+    animate_3d(data, info_file_path, time_step=time_step, save_fig=False)
 
 
 def default_run(strain: str = 'E.Coli.', number_initial_bacteria: int = 10, duration: int = 10, time_step: int = 1):

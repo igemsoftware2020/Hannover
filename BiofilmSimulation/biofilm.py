@@ -7,7 +7,6 @@ from multiprocessing.pool import Pool
 from psutil import cpu_count
 from pathlib import Path
 
-
 # ********************************************************************************************
 # imports
 import numpy as np
@@ -41,6 +40,14 @@ class Biofilm(object):
         self.density = 0
         self.cluster = []
 
+    def __add__(self, other):
+        assert self.constants == other.constants
+        self.bacteria = self.bacteria.append(other.bacteria)
+        self.num_bacteria = len(self.bacteria)
+        for b, i in zip(self.bacteria, range(0, self.num_bacteria - 1)):
+            b.index = i
+        return self
+
     def __copy__(self):
         return deepcopy(self)
 
@@ -53,7 +60,10 @@ class Biofilm(object):
         else:
             return len(self.bacteria)
 
-    def spawn(self):
+    def build_from_info_file(self, bacteria_fp: Path, constants_fp):
+        pass
+
+    def spawn(self, center=(0 ,0)):
         """
         spawn an initial number of bacteria.
          Bacteria are randomly distributed on a plane with aspect ratios specified in the c class
@@ -63,8 +73,8 @@ class Biofilm(object):
         mean_speed = self.constants.get_bac_constants(key="FREE_MEAN_SPEED") / 100
         while len(self) < num_initial_bacteria:
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
-            rnd_position = np.asarray([np.random.randint(100, x_limit - 100),
-                                       np.random.randint(100, y_limit - 100),
+            rnd_position = np.asarray([np.random.randint(x_limit - center[0] - 200, x_limit - center[0] + 200),
+                                       np.random.randint(y_limit - center[1] - 200, y_limit - center[1] + 200),
                                        np.random.normal(4, 0.5)
                                        ])
             # set random initial velocity
@@ -136,7 +146,7 @@ class Biofilm(object):
         self.bacteria = sorted(self.bacteria, key=lambda b: b.index)
 
     @simulation_duration
-    def simulate_multiprocessing(self):
+    def simulate_multiprocessing(self, center=[0, 0]):
 
         time_step = self.constants.get_simulation_constants(key="time_step")
         duration = self.constants.get_simulation_constants(key="duration")
@@ -147,11 +157,9 @@ class Biofilm(object):
               f"Using {num_threads} cores."
               )
         print("Spawning initial configuration of bacteria...")
-        self.spawn()
+        self.spawn(center)
 
-        set_start_method("spawn")
-
-        with get_context("spawn").Pool(processes=num_threads) as pool:
+        with Pool(processes=num_threads) as pool:
             for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
                 try:
                     self.bacteria = pool.map(forces_on_bacterium, self.bacteria)
@@ -161,9 +169,10 @@ class Biofilm(object):
 
                     for mother in self.bacteria:
                         if mother.is_split_ready() and mother.living:
-                            daughter = mother.split()
+                            daughter, mother = mother.split()
                             daughter.index = len(self) + 1
                             self.bacteria.append(daughter)
+                            self.bacteria[mother.index] = mother
 
                     self.bacteria = pool.map(grow_bacterium, self.bacteria)
                     self.write_to_log()
@@ -194,7 +203,6 @@ class Biofilm(object):
         print("Starting simulation ...")
         with Pool(processes=num_threads) as pool:
             for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):
-
                 self.cluster = self.sort_bacteria_in_cluster()
                 self.cluster = [*pool.map(iterate_over_bacteria_list, self.cluster)]
 
@@ -307,7 +315,6 @@ class Biofilm(object):
 
 
 def iterate_over_bacteria_list(bac_list: [Bacterium]):
-
     bac_list = [forces_on_bacterium(bacteria) for bacteria in bac_list]
     cp_bacteria_list = deepcopy(bac_list)
     bac_list = starmap(bac_bac_interaction, zip(bac_list, repeat(cp_bacteria_list)))
@@ -338,7 +345,6 @@ def forces_on_bacterium(bacterium: Bacterium):
 
 
 def update_movement(bacterium: Bacterium):
-
     bacterium.update_acceleration()
     bacterium.update_velocity()
 
@@ -346,7 +352,7 @@ def update_movement(bacterium: Bacterium):
     bacterium.update_position()
 
     if bacterium.living is True:
-        bacterium.random_cell_death()
+        # bacterium.random_cell_death()
         bacterium.detach()
 
     return bacterium

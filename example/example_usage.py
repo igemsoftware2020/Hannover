@@ -3,6 +3,7 @@
 # ********************************************************************************************
 import argparse
 from pathlib import Path
+import numpy as np
 
 # custom libraries
 from BiofilmSimulation.biofilm import Biofilm
@@ -15,23 +16,35 @@ from BiofilmSimulation.plotting import plot_sizes, plot_force, plot_velocities, 
 from BiofilmSimulation.utils import prompt_log_at_start
 
 
-def start_run(constant: Constants):
+def start_run(constant: Constants, center):
     """
     Starts a simulation run with the constants specified in constant
     :return info_file_path: path of log file
     """
-    # Init a new Biofilm with above constant
-    biofilm = Biofilm()
+    counter = 0
+    b = Biofilm()
     # pass constant to biofilm object
-    biofilm.constants = constant
+    b.constants = constant
+    output_path = b.constants.output_path
+    info_path = b.constants.info_path
+    for c in center:
+        print("\n ****************************\n")
+        # Logging at begin
+        # Init a new Biofilm with above constant
+        biofilm = Biofilm()
+        # pass constant to biofilm object
+        biofilm.constants = constant
+        biofilm.constants.output_path = output_path
 
-    # Logging at begin
-    prompt_log_at_start(biofilm.constants)
-    # Save log file for
-
-    info_file_path = biofilm.constants.get_paths(key="info")
-    biofilm.simulate_multiprocessing(center=[500, 500])
-    plotting(info_file_path)
+        prompt_log_at_start(biofilm.constants)
+        # Save log file for
+        info_file_path = biofilm.constants.get_paths(key="info")
+        biofilm.constants.info_path = Path(str(info_path).replace('.json', f'_{counter}.json'))
+        biofilm.center = c
+        biofilm.spawn()
+        biofilm.simulate_multiprocessing()
+        counter += 1
+        #plotting(info_file_path)
 
 
 def plotting(info_file_path):
@@ -62,9 +75,9 @@ def plotting(info_file_path):
     #scatter_last_positions(data, info_file_path, save_fig=True)
     #lennard_jones_force_plot(1, 6E-9)
     # Animations
-    data = bacteria_as_pandas(info_file_path)
-    animate_positions(data, info_file_path, time_step=time_step, save_fig=True)
-    animate_3d(data, info_file_path, time_step=time_step, save_fig=False)
+    #data = bacteria_as_pandas(info_file_path)
+    #animate_positions(data, info_file_path, time_step=time_step, save_fig=True)
+    #animate_3d(data, info_file_path, time_step=time_step, save_fig=False)
 
 
 def default_run(strain: str = 'E.Coli.', number_initial_bacteria: int = 10, duration: int = 10, time_step: int = 1):
@@ -74,6 +87,7 @@ def default_run(strain: str = 'E.Coli.', number_initial_bacteria: int = 10, dura
     and automatic plotting results. 
     Keep in mind: Depending on the selected duration, the plot ranges may be not adequate.
     """
+
     constants = Constants(bac_type=strain)
     constants.num_initial_bac = number_initial_bacteria
     constants.duration = duration
@@ -81,7 +95,9 @@ def default_run(strain: str = 'E.Coli.', number_initial_bacteria: int = 10, dura
     constants.set_bacteria_constants()
     constants.set_simulation_constants()
     constants.set_paths()
-    start_run(constants)
+
+    center = [[np.random.randint(1000, 5000), np.random.randint(1000, 5000)] for _ in range(0, 100)]
+    start_run(constants, center)
 
 
 # ********************************************************************************************
@@ -105,10 +121,10 @@ if __name__ == "__main__":
                 duration=args.duration, time_step=args.step)
 
     # Use this two commands, if you want to plot data for a specific log
-    if args.custom_plot:
-        path = ask_for_log_dir()
-        if path:
-            plotting(path)
-        else:
-            print("No path selected.")
+    #if args.custom_plot:
+    #    path = ask_for_log_dir()
+    #    if path:
+    #        plotting(path)
+    #    else:
+    #        print("No path selected.")
 

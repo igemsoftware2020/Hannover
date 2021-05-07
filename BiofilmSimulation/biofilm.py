@@ -34,6 +34,7 @@ class Biofilm(object):
         self.bacteria = []
         self.num_bacteria = len(self.bacteria)
         self.constants = Constants(bac_type="B.Sub.")
+        self.center = []
 
         self.position_matrix = np.asarray([])
         self.volume = 0
@@ -63,20 +64,24 @@ class Biofilm(object):
     def build_from_info_file(self, bacteria_fp: Path, constants_fp):
         pass
 
-    def spawn(self, center=(0 ,0)):
+    def spawn(self):
         """
         spawn an initial number of bacteria.
          Bacteria are randomly distributed on a plane with aspect ratios specified in the c class
          """
+        print("Spawning initial configuration of bacteria...")
+
         num_initial_bacteria = self.constants.get_simulation_constants(key="num_initial")
         x_limit, y_limit, z_limit = self.constants.window_size
         mean_speed = self.constants.get_bac_constants(key="FREE_MEAN_SPEED") / 100
+
         while len(self) < num_initial_bacteria:
             # place bacteria randomly on plate with dimensions C.WINDOW_SIZE[0] um x C.WINDOW_SIZE[1]
-            rnd_position = np.asarray([np.random.randint(x_limit - center[0] - 200, x_limit - center[0] + 200),
-                                       np.random.randint(y_limit - center[1] - 200, y_limit - center[1] + 200),
-                                       np.random.normal(4, 0.5)
-                                       ])
+            rnd_position = np.asarray(
+                [np.random.randint(x_limit - self.center[0] - 200, x_limit - self.center[0] + 200),
+                 np.random.randint(y_limit - self.center[1] - 200, y_limit - self.center[1] + 200),
+                 np.random.normal(4, 0.5)
+                 ])
             # set random initial velocity
             velocity = np.asarray([np.random.normal(mean_speed / 3, mean_speed * 0.01),
                                    np.random.normal(mean_speed / 3, mean_speed * 0.01),
@@ -146,7 +151,7 @@ class Biofilm(object):
         self.bacteria = sorted(self.bacteria, key=lambda b: b.index)
 
     @simulation_duration
-    def simulate_multiprocessing(self, center=[0, 0]):
+    def simulate_multiprocessing(self):
 
         time_step = self.constants.get_simulation_constants(key="time_step")
         duration = self.constants.get_simulation_constants(key="duration")
@@ -156,8 +161,8 @@ class Biofilm(object):
               f"SIMULATION TIME INTERVAL {duration} min in steps of {time_step} s.\n"
               f"Using {num_threads} cores."
               )
-        print("Spawning initial configuration of bacteria...")
-        self.spawn(center)
+
+        self.spawn()
 
         with Pool(processes=num_threads) as pool:
             for _ in tqdm.tqdm(range(0, round(duration * 60 / time_step))):

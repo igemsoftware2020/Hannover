@@ -3,6 +3,7 @@
 # ********************************************************************************************
 import argparse
 import json
+import numpy as np
 from pathlib import Path
 # custom libraries
 from BiofilmSimulation.constants import Constants
@@ -117,9 +118,13 @@ if __name__ == "__main__":
     constants.set_bacteria_constants()
     constants.set_simulation_constants()
     constants.set_paths()
+    x_extend, y_extend, _ = constants.window_size
 
-    sources = simulate_n_cluster(constants, centers=[(200, 200), (1000, 200), (200, 1000), (1000, 1000), (400, 400), (600, 750),
-                                                     (500, 350), (330, 620), (800, 450)])
+    x_centers = np.linspace(500, x_extend - 100, 8)
+    y_centers = np.linspace(500, y_extend - 100, 8)
+    centers = [(xc, yc) for xc in x_centers for yc in y_centers]
+    print(centers)
+    sources = simulate_n_cluster(constants, centers=centers)
 
     save_fp = (sources[0]).parent
     data = combine_info_files(save_fp=save_fp, source_fp=sources)

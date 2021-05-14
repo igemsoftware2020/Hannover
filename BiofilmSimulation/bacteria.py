@@ -132,15 +132,15 @@ class Bacterium:
         self.position[1] += self.velocity[1] * dt + 1 / 2 * self.acceleration[1] * dt ** 2
         self.position[2] += self.velocity[2] * dt + 1 / 2 * self.acceleration[2] * dt ** 2
 
-        #local_rnd_1 = np.random.RandomState()
-        #local_rnd_2 = np.random.RandomState()
-        #local_rnd_3 = np.random.RandomState()
-        #self.position[0] = local_rnd_1.normal(loc=self.position[0], scale=0.5)
-        #self.position[1] = local_rnd_2.normal(loc=self.position[1], scale=0.5)
-        #self.position[2] = local_rnd_3.normal(loc=self.position[2], scale=0.01)
+        local_rnd_1 = np.random.RandomState()
+        local_rnd_2 = np.random.RandomState()
+        local_rnd_3 = np.random.RandomState()
+        self.position[0] = local_rnd_1.normal(loc=self.position[0], scale=0.5)
+        self.position[1] = local_rnd_2.normal(loc=self.position[1], scale=0.5)
+        self.position[2] = local_rnd_3.normal(loc=self.position[2], scale=0.01)
 
         if self.position[2] < self.length:
-            self.position[2] = self.width
+            self.position[2] = np.abs(np.random.normal(self.width, 0.5))
             self.attached_to_surface = True
 
     def update_orientation(self):
@@ -189,8 +189,8 @@ class Bacterium:
 
         local_rnd_1 = np.random.RandomState()
 
-        random_force_vector = local_rnd_1.normal(loc=0, scale=0.5, size=3) * 10**(-9)
-        random_force_vector[2] = local_rnd_1.normal(loc=0, scale=0.2, size=1) * 10**(-11)
+        random_force_vector = local_rnd_1.normal(loc=0, scale=1, size=3) * 10**(-8)
+        random_force_vector[2] = local_rnd_1.normal(loc=0, scale=0.2, size=1) * 10**(-12)
         self.force = self.force + random_force_vector
         self.total_force = np.linalg.norm(self.force)
 

@@ -119,8 +119,8 @@ def animate_positions(data: pd.DataFrame, save_path: Path, save_fig: bool = Fals
     fig, ax = plt.subplots()
     ax.set_xlabel("x / um")
     ax.set_ylabel("y / um")
-    ax.set_xlim(left=-0, right=3000)
-    ax.set_ylim(bottom=-0, top=3000)
+    ax.set_xlim(left=4000, right=7000)
+    ax.set_ylim(bottom=4000, top=7000)
 
     lines = []
     data = []
@@ -398,7 +398,7 @@ def plot_num(data: pd.DataFrame, save_path: Path, save_fig: bool = False, time_s
     ax2.set(xlabel='Time in s', ylabel='Bacteria Number [log]', title='Bacteria Growth')
 
     if get_gent(data, time_step) is None:
-        return
+        ax2.set_yscale('log')
     else:
         x, y_fit, slope, generation_time = get_gent(data, time_step)
         # plot fit

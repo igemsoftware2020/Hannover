@@ -1,0 +1,17 @@
+setuptools
+typing
+numpy
+tqdm
+pathlib
+scipy
+matplotlib
+pandas
+seaborn
+sklearn
+scikit-learn
+future
+argparse
+psutil
+numba
+open3d
+trimesh

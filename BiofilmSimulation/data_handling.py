@@ -18,6 +18,51 @@ from BiofilmSimulation.formulas import get_euclid_norm
 # ********************************************************************************************
 # Data handling functions for storing the data as json and reading from the json file
 
+def combine_info_files(save_fp: Path, source_fp: [Path]):
+    data_unmerged = []
+    constants_unmerged = []
+
+    if source_fp is None:
+        root = tk.Tk()
+        root.title("Select info files to combine")
+        source_fp = filedialog.askopenfilenames(initialdir=Path(os.getcwd()))
+        source_fp = [Path(fp) for fp in source_fp]
+    for fp in source_fp:
+        data = read_in_log(fp)
+        data_unmerged.append(data['BACTERIA'])
+        constants_unmerged.append(data['CONSTANTS'])
+
+    # assert all(constants_unmerged[i]['time_step'] == constants_unmerged[0]['time_step']
+    #           & constants_unmerged[i]['duration'] == constants_unmerged[0]['duration']
+    #           & constants_unmerged[i]['bacteria_strain'] == constants_unmerged[0]['bacteria_strain']
+    #           for i in range(0, len(constants_unmerged)))
+    merged = {}
+    total_count = 0
+    for data in data_unmerged:
+        count = len(data)
+        total_count += count
+        if (total_count - count) == 0:
+            merged.update(data)
+        else:
+            for i in range(0, count):
+                try:
+                    data[f'bacteria_{total_count + i}'] = data.pop(f'bacteria_{i}')
+                except KeyError:
+                    total_count -= 1
+            merged.update(data)
+
+    #assert len(merged) == total_count
+
+    constants_sp = save_fp / 'merged_bacteria_Constants.json'
+    bacteria_sp = save_fp / 'merged_bacteria.json'
+    with open(constants_sp, 'w+') as fp:
+        json.dump(constants_unmerged[0], fp)
+
+    with open(bacteria_sp, 'w+') as fp:
+        json.dump({'BACTERIA': merged}, fp)
+
+    return bacteria_as_pandas(bacteria_sp)
+
 
 def write_log_template(info_file_path, constants: Constants):
     """ saves a json template for saving bacteria parameters"""

@@ -8,10 +8,8 @@ from pathlib import Path
 # custom libraries
 from BiofilmSimulation.constants import Constants
 from BiofilmSimulation.biofilm import Biofilm
-from BiofilmSimulation.data_handling import read_in_log, bacteria_as_pandas, ask_for_log_dir
+from BiofilmSimulation.data_handling import read_in_log, bacteria_as_pandas, ask_for_log_dir, combine_info_files
 from BiofilmSimulation.utils import prompt_log_at_start
-from BiofilmSimulation.plotting import plot_sizes, plot_force, plot_velocities, plot_positions, \
-    plot_num, dens_map, animate_positions, histo_length, histo_velocity, histo_force
 
 
 def simulate_n_cluster(constant, centers: [(), (), ()]):
@@ -26,80 +24,11 @@ def simulate_n_cluster(constant, centers: [(), (), ()]):
     return save_paths
 
 
-def combine_info_files(save_fp: Path, source_fp: [Path]):
-    data_unmerged = []
-    constants_unmerged = []
-
-    for fp in source_fp:
-        data = read_in_log(fp)
-        data_unmerged.append(data['BACTERIA'])
-        constants_unmerged.append(data['CONSTANTS'])
-
-    # assert all(constants_unmerged[i]['time_step'] == constants_unmerged[0]['time_step']
-    #           & constants_unmerged[i]['duration'] == constants_unmerged[0]['duration']
-    #           & constants_unmerged[i]['bacteria_strain'] == constants_unmerged[0]['bacteria_strain']
-    #           for i in range(0, len(constants_unmerged)))
-    merged = {}
-    total_count = 0
-    for data in data_unmerged:
-        count = len(data)
-        total_count += count
-        if (total_count - count) == 0:
-            merged.update(data)
-        else:
-            for i in range(0, count):
-                try:
-                    data[f'bacteria_{total_count + i}'] = data.pop(f'bacteria_{i}')
-                except KeyError:
-                    total_count -= 1
-            merged.update(data)
-
-    #assert len(merged) == total_count
-
-    constants_sp = save_fp / 'merged_bacteria_Constants.json'
-    bacteria_sp = save_fp / 'merged_bacteria.json'
-    with open(constants_sp, 'w+') as fp:
-        json.dump(constants_unmerged[0], fp)
-
-    with open(bacteria_sp, 'w+') as fp:
-        json.dump({'BACTERIA': merged}, fp)
-
-    return bacteria_as_pandas(bacteria_sp)
-
-
-def plotting(info_file_path):
-    """ reads in data from info_file_path and plots data """
-    data = bacteria_as_pandas(info_file_path)
-    constants_log_path = (str(info_file_path).replace(".json", "_Constants.json"))
-    constants = read_in_log(constants_log_path)
-    time_step = constants['time_step']
-
-    # Plot histograms
-    histo_length(data, info_file_path, save_fig=True)
-    histo_velocity(data, info_file_path, save_fig=True)
-    histo_force(data, info_file_path, save_fig=True)
-
-    # Distribution of biofilm on surface
-    dens_map(data, info_file_path, save_fig=True)
-
-    # Time series plots
-    plot_num(data, info_file_path, time_step=time_step, save_fig=True)
-    plot_velocities(data, info_file_path, time_step=time_step, save_fig=True)
-    plot_positions(data, info_file_path, time_step=time_step, save_fig=True)
-    plot_force(data, info_file_path, time_step=time_step, save_fig=True)
-    plot_sizes(data, info_file_path, time_step=time_step, save_fig=True)
-
-    # Animations
-    data = bacteria_as_pandas(info_file_path)
-    animate_positions(data, info_file_path, time_step=time_step, save_fig=True)
-
-
-# ********************************************************************************************
-# main-method to start the program
-# ********************************************************************************************
-
-
 if __name__ == "__main__":
+    # ********************************************************************************************
+    # main-method to start the program
+    # ********************************************************************************************
+
     parser = argparse.ArgumentParser(description='Start Biofilm simulation with custom parameters.')
 
     parser.add_argument('--strain', type=str, help="Select between 'B.Sub.' or 'E.Coli'.")
@@ -125,14 +54,5 @@ if __name__ == "__main__":
     centers = [(xc, yc) for xc in x_centers for yc in y_centers]
     print(centers)
     sources = simulate_n_cluster(constants, centers=centers)
-
     save_fp = (sources[0]).parent
     data = combine_info_files(save_fp=save_fp, source_fp=sources)
-
-    if args.custom_plot:
-        path = ask_for_log_dir()
-    if path:
-        plotting(path)
-    else:
-        print("No path selected.")
-
